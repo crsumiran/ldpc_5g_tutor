@@ -26,7 +26,7 @@ AI guide calls are optional. The app can use the configured OpenCode/OpenRouter 
 
 ## Learner data and portability
 
-The repository contains course source and public tests, not learner progress. Runtime state is created locally in `data/` (SQLite database, workspaces, and run reports) and is excluded from Git. To move progress to another machine, stop the app and transfer the relevant `data/` directory separately; the browser's saved session ID may also need to be restored. Never copy `.env` as a way to transfer credentials. See [RECOVERY_PROMPT.md](RECOVERY_PROMPT.md) for a cross-machine handoff.
+The public repository contains the full course source, including the cache reference RTL and testbenches marked hidden in the app. Those files are therefore public and must not be treated as confidential grading material. Runtime learner state is created locally in `data/` (SQLite database, workspaces, and run reports) and is excluded from Git. To move progress to another machine, stop the app and transfer the relevant `data/` directory separately; the browser's saved session ID may also need to be restored. Never copy `.env` as a way to transfer credentials. See [RECOVERY_PROMPT.md](RECOVERY_PROMPT.md) for a cross-machine handoff.
 
 ## Development and verification
 
