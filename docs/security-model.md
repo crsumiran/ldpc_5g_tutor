@@ -1,5 +1,7 @@
 # Security Model
 
+This file describes runtime separation inside the tutor. The GitHub repository is public and includes the cache reference RTL and testbenches marked hidden by the runtime. Anyone with repository access can read them, so they are not confidential grading assets. Do not rely on these files as secret tests.
+
 1. Local import roots: only paths under `ALLOWED_IMPORT_ROOTS` (env, default `/home/ranga/opencode`).
 2. ZIP: reject absolute paths, `..`, overwrites outside dest, files > 5 MiB, total uncompressed > 50 MiB.
 3. Git: `git clone --depth 1 --single-branch --recurse-submodules=no`. Do not copy `.git` hooks into the snapshot. Strip `.git` after clone.
