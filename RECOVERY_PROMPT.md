@@ -3,7 +3,7 @@
 Use this prompt with a coding agent after cloning this repository on another Linux machine or in WSL. It describes the current multi-course tutor, not the older cache-only version.
 
 ```text
-You are taking over the LDPC 5G Hardware Accelerator Tutor repository. First read README.md, HANDOFF.md, the newest entries in EXPERIMENT_LOG.md, docker-compose.yml, docs/LDPC_GUIDE.md, and docs/security-model.md. Preserve all existing learner work and credentials. Never print or commit secrets, learner databases/workspaces, private reference implementations, or hidden tests.
+You are taking over the LDPC 5G Hardware Accelerator Tutor repository. First read README.md, HANDOFF.md, the newest entries in EXPERIMENT_LOG.md, docker-compose.yml, docs/LDPC_GUIDE.md, and docs/security-model.md. Preserve all existing learner work and credentials. Never print or commit secrets or learner databases/workspaces. This public repository already includes the cache reference RTL and testbenches marked hidden by the runtime; those files are publicly visible and are not confidential grading material. Keep any genuinely private future grading assets outside this repository.
 
 Purpose and current course routes:
 - LDPC theory and 18 Python checkpoints: /?course=ldpc-5g
