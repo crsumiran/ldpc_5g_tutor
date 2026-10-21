@@ -1,0 +1,50 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Learner — Data Engineering Tutor</title>
+  <link rel="stylesheet" href="/styles.css" />
+</head>
+<body>
+  <h1>Learner View</h1>
+  <p><a href="/">Home</a></p>
+
+  <div class="card">
+    <h2>Assignment</h2>
+    <label>Assignment ID</label>
+    <input type="text" id="assignmentId" placeholder="DE-001" />
+    <button onclick="loadLearnerAssignment()">Load</button>
+  </div>
+
+  <div class="card" id="specCard" style="display:none">
+    <h2 id="title"></h2>
+    <h3>Business Context</h3>
+    <pre id="context"></pre>
+    <h3>Task</h3>
+    <pre id="task"></pre>
+    <h3>Approach</h3>
+    <pre id="approach"></pre>
+  </div>
+
+  <div class="card" id="codeCard" style="display:none">
+    <h3>Your Code</h3>
+    <textarea id="code" rows="16"></textarea>
+    <h3>Message to tutor</h3>
+    <textarea id="msg" rows="3">Please check my code.</textarea>
+    <button onclick="submit()">Submit</button>
+    <button onclick="hint()">Ask for a hint</button>
+  </div>
+
+  <div class="card" id="resultCard" style="display:none">
+    <h3>Result</h3>
+    <div class="status" id="status"></div>
+    <h3>Tutor Reply</h3>
+    <pre id="reply"></pre>
+    <h3>Executor Output</h3>
+    <pre id="execOut"></pre>
+  </div>
+
+  <script src="/app.js"></script>
+</body>
+</html>

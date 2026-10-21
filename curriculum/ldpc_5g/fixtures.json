@@ -1,0 +1,2585 @@
+{
+  "gf2-mask": {
+    "id": "gf2-mask",
+    "label": "Toy: one selected parity rule",
+    "views": [
+      {
+        "title": "Pairwise AND, then XOR",
+        "columns": [
+          "Bit",
+          "Value",
+          "Mask",
+          "Selected contribution"
+        ],
+        "rows": [
+          [
+            0,
+            1,
+            1,
+            1
+          ],
+          [
+            1,
+            1,
+            0,
+            0
+          ],
+          [
+            2,
+            1,
+            1,
+            1
+          ]
+        ],
+        "caption": "Two selected ones → even parity 0. Mask 0 ignores a bit."
+      },
+      {
+        "title": "XOR truth table",
+        "columns": [
+          "a",
+          "b",
+          "a XOR b"
+        ],
+        "rows": [
+          [
+            0,
+            0,
+            0
+          ],
+          [
+            0,
+            1,
+            1
+          ],
+          [
+            1,
+            0,
+            1
+          ],
+          [
+            1,
+            1,
+            0
+          ]
+        ],
+        "caption": "XOR asks odd/even, not the ordinary count."
+      }
+    ],
+    "variants": [
+      {
+        "label": "Flip selected b0",
+        "views": [
+          {
+            "title": "One selected flip",
+            "columns": [
+              "Selected contributions",
+              "Count",
+              "Parity"
+            ],
+            "rows": [
+              [
+                "[0,0,1]",
+                1,
+                1
+              ]
+            ],
+            "caption": "One selected bit flip toggles parity."
+          }
+        ]
+      },
+      {
+        "label": "Flip ignored b1",
+        "views": [
+          {
+            "title": "Ignored flip",
+            "columns": [
+              "Bits",
+              "Mask",
+              "Selected contributions",
+              "Parity"
+            ],
+            "rows": [
+              [
+                "[1,0,1]",
+                "[1,0,1]",
+                "[1,0,1]",
+                0
+              ]
+            ],
+            "caption": "An ignored bit has no effect on this rule."
+          }
+        ]
+      }
+    ],
+    "visual_spec": {
+      "labels": [
+        "Bit",
+        "Value",
+        "Mask",
+        "Selected contribution"
+      ],
+      "view_type": "indexed tables and selectable static trace",
+      "selected_element": "one view or row",
+      "step_sequence": [
+        "Pairwise AND, then XOR",
+        "XOR truth table"
+      ],
+      "expected_observation": "Two selected ones → even parity 0. Mask 0 ignores a bit.",
+      "caption": "Toy: one selected parity rule",
+      "text_fallback": "Pairwise AND, then XOR\nBit | Value | Mask | Selected contribution\n0 | 1 | 1 | 1\n1 | 1 | 0 | 0\n2 | 1 | 1 | 1\n\nXOR truth table\na | b | a XOR b\n0 | 0 | 0\n0 | 1 | 1\n1 | 0 | 1\n1 | 1 | 0",
+      "data_origin": "supplied teaching fixture; not learner output"
+    }
+  },
+  "toy-encode": {
+    "id": "toy-encode",
+    "label": "Toy systematic layout: payload positions 0–2",
+    "views": [
+      {
+        "title": "Encode payload [1,0,1]",
+        "columns": [
+          "Step",
+          "Calculation",
+          "Result"
+        ],
+        "rows": [
+          [
+            "Payload",
+            "b0,b1,b2",
+            "[1,0,1]"
+          ],
+          [
+            "b3",
+            "b0 XOR b1",
+            1
+          ],
+          [
+            "b4",
+            "b1 XOR b2",
+            1
+          ],
+          [
+            "b5",
+            "b0 XOR b2",
+            0
+          ],
+          [
+            "Codeword",
+            "payload followed by parity",
+            "[1,0,1,1,1,0]"
+          ]
+        ],
+        "caption": "Parity bits were chosen to satisfy THIS matrix, not guessed by a decoder."
+      },
+      {
+        "title": "All checks on the transmitted codeword",
+        "columns": [
+          "Check",
+          "Selected bit values",
+          "XOR",
+          "Syndrome entry"
+        ],
+        "rows": [
+          [
+            "c0",
+            "1,0,1",
+            "1 XOR 0 XOR 1",
+            0
+          ],
+          [
+            "c1",
+            "0,1,1",
+            "0 XOR 1 XOR 1",
+            0
+          ],
+          [
+            "c2",
+            "1,1,0",
+            "1 XOR 1 XOR 0",
+            0
+          ]
+        ],
+        "caption": "Syndrome shape (3,), not payload shape by coincidence."
+      },
+      {
+        "title": "Flip b1",
+        "columns": [
+          "Candidate",
+          "Syndrome",
+          "Weight"
+        ],
+        "rows": [
+          [
+            "[1,1,1,1,1,0]",
+            "[1,1,0]",
+            2
+          ]
+        ],
+        "caption": "Weight counts broken checks, not necessarily bit errors."
+      },
+      {
+        "title": "A different valid word",
+        "columns": [
+          "Codeword",
+          "Payload",
+          "Syndrome"
+        ],
+        "rows": [
+          [
+            "[1,0,1,1,1,0]",
+            "[1,0,1]",
+            "[0,0,0]"
+          ],
+          [
+            "[0,0,1,0,1,1]",
+            "[0,0,1]",
+            "[0,0,0]"
+          ]
+        ],
+        "caption": "Valid codewords can carry different data."
+      }
+    ],
+    "variants": [],
+    "visual_spec": {
+      "labels": [
+        "Step",
+        "Calculation",
+        "Result"
+      ],
+      "view_type": "indexed tables and selectable static trace",
+      "selected_element": "one view or row",
+      "step_sequence": [
+        "Encode payload [1,0,1]",
+        "All checks on the transmitted codeword",
+        "Flip b1",
+        "A different valid word"
+      ],
+      "expected_observation": "Parity bits were chosen to satisfy THIS matrix, not guessed by a decoder.",
+      "caption": "Toy systematic layout: payload positions 0–2",
+      "text_fallback": "Encode payload [1,0,1]\nStep | Calculation | Result\nPayload | b0,b1,b2 | [1,0,1]\nb3 | b0 XOR b1 | 1\nb4 | b1 XOR b2 | 1\nb5 | b0 XOR b2 | 0\nCodeword | payload followed by parity | [1,0,1,1,1,0]\n\nAll checks on the transmitted codeword\nCheck | Selected bit values | XOR | Syndrome entry\nc0 | 1,0,1 | 1 XOR 0 XOR 1 | 0\nc1 | 0,1,1 | 0 XOR 1 XOR 1 | 0\nc2 | 1,1,0 | 1 XOR 1 XOR 0 | 0\n\nFlip b1\nCandidate | Syndrome | Weight\n[1,1,1,1,1,0] | [1,1,0] | 2\n\nA different valid word\nCodeword | Payload | Syndrome\n[1,0,1,1,1,0] | [1,0,1] | [0,0,0]\n[0,0,1,0,1,1] | [0,0,1] | [0,0,0]",
+      "data_origin": "supplied teaching fixture; not learner output"
+    }
+  },
+  "toy-edges": {
+    "id": "toy-edges",
+    "label": "Toy 3×6 matrix; row-major GLOBAL edge IDs",
+    "views": [
+      {
+        "title": "Global edge table",
+        "columns": [
+          "Edge",
+          "Check",
+          "Bit",
+          "Message addresses"
+        ],
+        "rows": [
+          [
+            "e0",
+            "c0",
+            "b0",
+            "q[e0], r[e0]"
+          ],
+          [
+            "e1",
+            "c0",
+            "b1",
+            "q[e1], r[e1]"
+          ],
+          [
+            "e2",
+            "c0",
+            "b3",
+            "q[e2], r[e2]"
+          ],
+          [
+            "e3",
+            "c1",
+            "b1",
+            "q[e3], r[e3]"
+          ],
+          [
+            "e4",
+            "c1",
+            "b2",
+            "q[e4], r[e4]"
+          ],
+          [
+            "e5",
+            "c1",
+            "b4",
+            "q[e5], r[e5]"
+          ],
+          [
+            "e6",
+            "c2",
+            "b0",
+            "q[e6], r[e6]"
+          ],
+          [
+            "e7",
+            "c2",
+            "b2",
+            "q[e7], r[e7]"
+          ],
+          [
+            "e8",
+            "c2",
+            "b5",
+            "q[e8], r[e8]"
+          ]
+        ],
+        "caption": "An edge has two endpoints and two directed messages, not a transmitted bit."
+      },
+      {
+        "title": "Bit-to-check view",
+        "columns": [
+          "Bit",
+          "Connected checks",
+          "Global edges"
+        ],
+        "rows": [
+          [
+            "b0",
+            "c0, c2",
+            "e0, e6"
+          ],
+          [
+            "b1",
+            "c0, c1",
+            "e1, e3"
+          ],
+          [
+            "b2",
+            "c1, c2",
+            "e4, e7"
+          ],
+          [
+            "b3",
+            "c0",
+            "e2"
+          ],
+          [
+            "b4",
+            "c1",
+            "e5"
+          ],
+          [
+            "b5",
+            "c2",
+            "e8"
+          ]
+        ],
+        "caption": "b1 has distinct outgoing messages on e1 and e3."
+      }
+    ],
+    "variants": [],
+    "visual_spec": {
+      "labels": [
+        "Edge",
+        "Check",
+        "Bit",
+        "Message addresses"
+      ],
+      "view_type": "indexed tables and selectable static trace",
+      "selected_element": "one view or row",
+      "step_sequence": [
+        "Global edge table",
+        "Bit-to-check view"
+      ],
+      "expected_observation": "An edge has two endpoints and two directed messages, not a transmitted bit.",
+      "caption": "Toy 3×6 matrix; row-major GLOBAL edge IDs",
+      "text_fallback": "Global edge table\nEdge | Check | Bit | Message addresses\ne0 | c0 | b0 | q[e0], r[e0]\ne1 | c0 | b1 | q[e1], r[e1]\ne2 | c0 | b3 | q[e2], r[e2]\ne3 | c1 | b1 | q[e3], r[e3]\ne4 | c1 | b2 | q[e4], r[e4]\ne5 | c1 | b4 | q[e5], r[e5]\ne6 | c2 | b0 | q[e6], r[e6]\ne7 | c2 | b2 | q[e7], r[e7]\ne8 | c2 | b5 | q[e8], r[e8]\n\nBit-to-check view\nBit | Connected checks | Global edges\nb0 | c0, c2 | e0, e6\nb1 | c0, c1 | e1, e3\nb2 | c1, c2 | e4, e7\nb3 | c0 | e2\nb4 | c1 | e5\nb5 | c2 | e8",
+      "data_origin": "supplied teaching fixture; not learner output"
+    },
+    "kind": "edges",
+    "matrix": [
+      [
+        1,
+        1,
+        0,
+        1,
+        0,
+        0
+      ],
+      [
+        0,
+        1,
+        1,
+        0,
+        1,
+        0
+      ],
+      [
+        1,
+        0,
+        1,
+        0,
+        0,
+        1
+      ]
+    ],
+    "edges": [
+      {
+        "id": "e0",
+        "check": 0,
+        "bit": 0
+      },
+      {
+        "id": "e1",
+        "check": 0,
+        "bit": 1
+      },
+      {
+        "id": "e2",
+        "check": 0,
+        "bit": 3
+      },
+      {
+        "id": "e3",
+        "check": 1,
+        "bit": 1
+      },
+      {
+        "id": "e4",
+        "check": 1,
+        "bit": 2
+      },
+      {
+        "id": "e5",
+        "check": 1,
+        "bit": 4
+      },
+      {
+        "id": "e6",
+        "check": 2,
+        "bit": 0
+      },
+      {
+        "id": "e7",
+        "check": 2,
+        "bit": 2
+      },
+      {
+        "id": "e8",
+        "check": 2,
+        "bit": 5
+      }
+    ]
+  },
+  "awgn-llr": {
+    "id": "awgn-llr",
+    "label": "Teaching BPSK channel: 0→+1, 1→−1, equal priors",
+    "views": [
+      {
+        "title": "Observation → score → decision (variance 1)",
+        "columns": [
+          "Observation y",
+          "Noise variance",
+          "L=2y/variance",
+          "Hard bit"
+        ],
+        "rows": [
+          [
+            1.3,
+            1,
+            2.6,
+            0
+          ],
+          [
+            0.15,
+            1,
+            0.3,
+            0
+          ],
+          [
+            -0.1,
+            1,
+            -0.2,
+            1
+          ],
+          [
+            -2.1,
+            1,
+            -4.2,
+            1
+          ],
+          [
+            0,
+            1,
+            0,
+            0
+          ]
+        ],
+        "caption": "The hard-decision function receives LLRs, not y or the transmitted truth."
+      }
+    ],
+    "variants": [
+      {
+        "label": "Same observations, noise variance 4",
+        "views": [
+          {
+            "title": "More assumed noise",
+            "columns": [
+              "y",
+              "Variance",
+              "LLR",
+              "Hard bit"
+            ],
+            "rows": [
+              [
+                1.3,
+                4,
+                0.65,
+                0
+              ],
+              [
+                0.15,
+                4,
+                0.075,
+                0
+              ],
+              [
+                -0.1,
+                4,
+                -0.05,
+                1
+              ],
+              [
+                -2.1,
+                4,
+                -1.05,
+                1
+              ],
+              [
+                0,
+                4,
+                0,
+                0
+              ]
+            ],
+            "caption": "Signs stay the same here; confidence magnitude falls by four. This is not an error-rate benchmark."
+          }
+        ]
+      }
+    ],
+    "visual_spec": {
+      "labels": [
+        "Observation y",
+        "Noise variance",
+        "L=2y/variance",
+        "Hard bit"
+      ],
+      "view_type": "indexed tables and selectable static trace",
+      "selected_element": "one view or row",
+      "step_sequence": [
+        "Observation → score → decision (variance 1)"
+      ],
+      "expected_observation": "The hard-decision function receives LLRs, not y or the transmitted truth.",
+      "caption": "Teaching BPSK channel: 0→+1, 1→−1, equal priors",
+      "text_fallback": "Observation → score → decision (variance 1)\nObservation y | Noise variance | L=2y/variance | Hard bit\n1.3 | 1 | 2.6 | 0\n0.15 | 1 | 0.3 | 0\n-0.1 | 1 | -0.2 | 1\n-2.1 | 1 | -4.2 | 1\n0 | 1 | 0 | 0",
+      "data_origin": "supplied teaching fixture; not learner output"
+    }
+  },
+  "check-exclusion": {
+    "id": "check-exclusion",
+    "label": "New star fixture: local edges e0–e3 are not the 3×6 graph IDs",
+    "views": [
+      {
+        "title": "Predict outputs to e1 and e2 before revealing",
+        "columns": [
+          "Destination",
+          "Excluded input",
+          "Other inputs used",
+          "Outgoing r"
+        ],
+        "rows": [
+          [
+            "local e0",
+            7,
+            "[-3,5,-9]",
+            3
+          ],
+          [
+            "local e1",
+            -3,
+            "[7,5,-9]",
+            -5
+          ],
+          [
+            "local e2",
+            5,
+            "[7,-3,-9]",
+            3
+          ],
+          [
+            "local e3",
+            -9,
+            "[7,-3,5]",
+            -3
+          ]
+        ],
+        "caption": "Sign asks what bit parity requires; minimum is an approximate confidence, not an exact probability."
+      },
+      {
+        "title": "One check advises all three bits (chapter 5 fixture)",
+        "columns": [
+          "Destination",
+          "Excluded q",
+          "Inputs used",
+          "Advice r",
+          "L+r"
+        ],
+        "rows": [
+          [
+            "b0",
+            4,
+            "[-0.2,3]",
+            -0.2,
+            3.8
+          ],
+          [
+            "b1",
+            -0.2,
+            "[4,3]",
+            3,
+            2.8
+          ],
+          [
+            "b2",
+            3,
+            "[4,-0.2]",
+            -0.2,
+            2.8
+          ]
+        ],
+        "caption": "All neighbors receive advice, not just the least-confident bit."
+      }
+    ],
+    "variants": [
+      {
+        "label": "Repeated minima [3,3,5,9]",
+        "views": [
+          {
+            "title": "Multiplicity matters",
+            "columns": [
+              "Destination",
+              "Excluded",
+              "Others",
+              "Outgoing"
+            ],
+            "rows": [
+              [
+                "local e0",
+                3,
+                "[3,5,9]",
+                3
+              ],
+              [
+                "local e1",
+                3,
+                "[3,5,9]",
+                3
+              ],
+              [
+                "local e2",
+                5,
+                "[3,3,9]",
+                3
+              ],
+              [
+                "local e3",
+                9,
+                "[3,3,5]",
+                3
+              ]
+            ],
+            "caption": "Excluding one minimum leaves the other minimum."
+          }
+        ]
+      },
+      {
+        "label": "Single zero [0,4,6]",
+        "views": [
+          {
+            "title": "Excluding the only zero",
+            "columns": [
+              "Destination",
+              "Excluded",
+              "Others",
+              "Outgoing"
+            ],
+            "rows": [
+              [
+                "local e0",
+                0,
+                "[4,6]",
+                4
+              ],
+              [
+                "local e1",
+                4,
+                "[0,6]",
+                0
+              ],
+              [
+                "local e2",
+                6,
+                "[0,4]",
+                0
+              ]
+            ],
+            "caption": "Only the destination at the zero can receive nonzero advice."
+          }
+        ]
+      },
+      {
+        "label": "Signed tied minima [-2,2,8]",
+        "views": [
+          {
+            "title": "Sign exclusion and ties",
+            "columns": [
+              "Destination",
+              "Excluded",
+              "Others",
+              "Outgoing"
+            ],
+            "rows": [
+              [
+                "local e0",
+                -2,
+                "[2,8]",
+                2
+              ],
+              [
+                "local e1",
+                2,
+                "[-2,8]",
+                -2
+              ],
+              [
+                "local e2",
+                8,
+                "[-2,2]",
+                -2
+              ]
+            ],
+            "caption": "Sign of zero is positive; do not divide by a message to remove its sign."
+          }
+        ]
+      }
+    ],
+    "visual_spec": {
+      "labels": [
+        "Destination",
+        "Excluded input",
+        "Other inputs used",
+        "Outgoing r"
+      ],
+      "view_type": "indexed tables and selectable static trace",
+      "selected_element": "one view or row",
+      "step_sequence": [
+        "Predict outputs to e1 and e2 before revealing",
+        "One check advises all three bits (chapter 5 fixture)"
+      ],
+      "expected_observation": "Sign asks what bit parity requires; minimum is an approximate confidence, not an exact probability.",
+      "caption": "New star fixture: local edges e0–e3 are not the 3×6 graph IDs",
+      "text_fallback": "Predict outputs to e1 and e2 before revealing\nDestination | Excluded input | Other inputs used | Outgoing r\nlocal e0 | 7 | [-3,5,-9] | 3\nlocal e1 | -3 | [7,5,-9] | -5\nlocal e2 | 5 | [7,-3,-9] | 3\nlocal e3 | -9 | [7,-3,5] | -3\n\nOne check advises all three bits (chapter 5 fixture)\nDestination | Excluded q | Inputs used | Advice r | L+r\nb0 | 4 | [-0.2,3] | -0.2 | 3.8\nb1 | -0.2 | [4,3] | 3 | 2.8\nb2 | 3 | [4,-0.2] | -0.2 | 2.8",
+      "data_origin": "supplied teaching fixture; not learner output"
+    }
+  },
+  "variable-contributions": {
+    "id": "variable-contributions",
+    "label": "One bit, two incoming check messages",
+    "views": [
+      {
+        "title": "Combine and exclude",
+        "columns": [
+          "Quantity",
+          "Available evidence",
+          "Value"
+        ],
+        "rows": [
+          [
+            "Channel L",
+            "Fixed radio evidence",
+            2
+          ],
+          [
+            "r0",
+            "Advice from check 0",
+            3
+          ],
+          [
+            "r1",
+            "Advice from check 1",
+            -1
+          ],
+          [
+            "Posterior A",
+            "L+r0+r1",
+            4
+          ],
+          [
+            "q to check 0",
+            "A−r0 = L+r1",
+            1
+          ],
+          [
+            "q to check 1",
+            "A−r1 = L+r0",
+            5
+          ]
+        ],
+        "caption": "Posterior includes both checks; each outgoing message excludes its own destination."
+      }
+    ],
+    "variants": [
+      {
+        "label": "Change only r0 from 3 to 7",
+        "views": [
+          {
+            "title": "One contribution changes",
+            "columns": [
+              "Quantity",
+              "Original",
+              "After change"
+            ],
+            "rows": [
+              [
+                "Posterior",
+                4,
+                8
+              ],
+              [
+                "q to check 0",
+                1,
+                1
+              ],
+              [
+                "q to check 1",
+                5,
+                9
+              ]
+            ],
+            "caption": "The outgoing message TO c0 does not echo the changed c0 evidence."
+          }
+        ]
+      }
+    ],
+    "visual_spec": {
+      "labels": [
+        "Quantity",
+        "Available evidence",
+        "Value"
+      ],
+      "view_type": "indexed tables and selectable static trace",
+      "selected_element": "one view or row",
+      "step_sequence": [
+        "Combine and exclude"
+      ],
+      "expected_observation": "Posterior includes both checks; each outgoing message excludes its own destination.",
+      "caption": "One bit, two incoming check messages",
+      "text_fallback": "Combine and exclude\nQuantity | Available evidence | Value\nChannel L | Fixed radio evidence | 2\nr0 | Advice from check 0 | 3\nr1 | Advice from check 1 | -1\nPosterior A | L+r0+r1 | 4\nq to check 0 | A−r0 = L+r1 | 1\nq to check 1 | A−r1 = L+r0 | 5",
+      "data_origin": "supplied teaching fixture; not learner output"
+    }
+  },
+  "flooding-chain": {
+    "id": "flooding-chain",
+    "label": "NEW fixture H=[[1,1,0],[0,1,1]], L=[3,-1,-1]",
+    "views": [
+      {
+        "title": "Four kinds of state",
+        "columns": [
+          "Quantity",
+          "Meaning",
+          "Shape",
+          "Initialization / lifetime"
+        ],
+        "rows": [
+          [
+            "L",
+            "Original received evidence",
+            "(n,)",
+            "supplied; fixed during decoding"
+          ],
+          [
+            "q (V→C)",
+            "Bit evidence excluding destination",
+            "(m,n), edges only nonzero",
+            "H*L; old/new buffers"
+          ],
+          [
+            "r (C→V)",
+            "Check advice from other neighbors",
+            "(m,n), nonedges 0",
+            "zero before update"
+          ],
+          [
+            "A",
+            "Channel plus all current incoming advice",
+            "(n,)",
+            "L initially; changes each round"
+          ]
+        ],
+        "caption": "Dense nonedge zeros are padding, never graph connections. Edge-only arrays use one element per listed edge."
+      },
+      {
+        "title": "New equality-chain fixture: stable local edge IDs",
+        "columns": [
+          "Edge",
+          "Endpoints",
+          "Initial q",
+          "Round 1 r",
+          "Round 1 new q",
+          "Round 2 r"
+        ],
+        "rows": [
+          [
+            "e0",
+            "c0,b0",
+            3,
+            -1,
+            3,
+            -2
+          ],
+          [
+            "e1",
+            "c0,b1",
+            -1,
+            3,
+            -2,
+            3
+          ],
+          [
+            "e2",
+            "c1,b1",
+            -1,
+            -1,
+            2,
+            -1
+          ],
+          [
+            "e3",
+            "c1,b2",
+            -1,
+            -1,
+            -1,
+            2
+          ]
+        ],
+        "caption": "Round 2 checks consume round 1 NEW q; no partially updated q is read in the check phase."
+      },
+      {
+        "title": "Two iterations are genuinely needed",
+        "columns": [
+          "Stage",
+          "Posterior A",
+          "Hard bits",
+          "Syndrome",
+          "Weight"
+        ],
+        "rows": [
+          [
+            "Initial",
+            "[3,-1,-1]",
+            "[0,1,1]",
+            "[1,0]",
+            1
+          ],
+          [
+            "Round 1",
+            "[2,1,-2]",
+            "[0,0,1]",
+            "[0,1]",
+            1
+          ],
+          [
+            "Round 2",
+            "[1,1,1]",
+            "[0,0,0]",
+            "[0,0]",
+            0
+          ]
+        ],
+        "caption": "A failed check changes identity while syndrome weight stays 1. Progress need not be monotonic."
+      },
+      {
+        "title": "Dense arrays corresponding to the edge table",
+        "columns": [
+          "Quantity",
+          "Round 1",
+          "Round 2"
+        ],
+        "rows": [
+          [
+            "Old q",
+            "[[3,-1,0],[0,-1,-1]]",
+            "[[3,-2,0],[0,2,-1]]"
+          ],
+          [
+            "New r",
+            "[[-1,3,0],[0,-1,-1]]",
+            "[[-2,3,0],[0,-1,2]]"
+          ],
+          [
+            "New q",
+            "[[3,-2,0],[0,2,-1]]",
+            "[[3,-2,0],[0,2,-1]]"
+          ]
+        ],
+        "caption": "(m,n)=(2,3). Matrix zeros remain zero in q/r. All checks update, including passing checks."
+      }
+    ],
+    "variants": [],
+    "visual_spec": {
+      "labels": [
+        "Quantity",
+        "Meaning",
+        "Shape",
+        "Initialization / lifetime"
+      ],
+      "view_type": "indexed tables and selectable static trace",
+      "selected_element": "one view or row",
+      "step_sequence": [
+        "Four kinds of state",
+        "New equality-chain fixture: stable local edge IDs",
+        "Two iterations are genuinely needed",
+        "Dense arrays corresponding to the edge table"
+      ],
+      "expected_observation": "Dense nonedge zeros are padding, never graph connections. Edge-only arrays use one element per listed edge.",
+      "caption": "NEW fixture H=[[1,1,0],[0,1,1]], L=[3,-1,-1]",
+      "text_fallback": "Four kinds of state\nQuantity | Meaning | Shape | Initialization / lifetime\nL | Original received evidence | (n,) | supplied; fixed during decoding\nq (V→C) | Bit evidence excluding destination | (m,n), edges only nonzero | H*L; old/new buffers\nr (C→V) | Check advice from other neighbors | (m,n), nonedges 0 | zero before update\nA | Channel plus all current incoming advice | (n,) | L initially; changes each round\n\nNew equality-chain fixture: stable local edge IDs\nEdge | Endpoints | Initial q | Round 1 r | Round 1 new q | Round 2 r\ne0 | c0,b0 | 3 | -1 | 3 | -2\ne1 | c0,b1 | -1 | 3 | -2 | 3\ne2 | c1,b1 | -1 | -1 | 2 | -1\ne3 | c1,b2 | -1 | -1 | -1 | 2\n\nTwo iterations are genuinely needed\nStage | Posterior A | Hard bits | Syndrome | Weight\nInitial | [3,-1,-1] | [0,1,1] | [1,0] | 1\nRound 1 | [2,1,-2] | [0,0,1] | [0,1] | 1\nRound 2 | [1,1,1] | [0,0,0] | [0,0] | 0\n\nDense arrays corresponding to the edge table\nQuantity | Round 1 | Round 2\nOld q | [[3,-1,0],[0,-1,-1]] | [[3,-2,0],[0,2,-1]]\nNew r | [[-1,3,0],[0,-1,-1]] | [[-2,3,0],[0,-1,2]]\nNew q | [[3,-2,0],[0,2,-1]] | [[3,-2,0],[0,2,-1]]",
+      "data_origin": "supplied teaching fixture; not learner output"
+    }
+  },
+  "decoder-outcomes": {
+    "id": "decoder-outcomes",
+    "label": "Toy outcomes: truth belongs to the experimenter, not decoder",
+    "views": [
+      {
+        "title": "Two iterations are genuinely needed",
+        "columns": [
+          "Stage",
+          "Posterior A",
+          "Hard bits",
+          "Syndrome",
+          "Weight"
+        ],
+        "rows": [
+          [
+            "Initial",
+            "[3,-1,-1]",
+            "[0,1,1]",
+            "[1,0]",
+            1
+          ],
+          [
+            "Round 1",
+            "[2,1,-2]",
+            "[0,0,1]",
+            "[0,1]",
+            1
+          ],
+          [
+            "Round 2",
+            "[1,1,1]",
+            "[0,0,0]",
+            "[0,0]",
+            0
+          ]
+        ],
+        "caption": "A failed check changes identity while syndrome weight stays 1. Progress need not be monotonic."
+      },
+      {
+        "title": "Three different outcomes",
+        "columns": [
+          "Setup",
+          "Final bits",
+          "Updates used",
+          "History",
+          "Interpretation"
+        ],
+        "rows": [
+          [
+            "L=[3,-1,-1], cap=2; sent 000",
+            "[0,0,0]",
+            2,
+            "[1,1,0]",
+            "Valid and truth-correct in this experiment"
+          ],
+          [
+            "L=[-3,-3,-3]; sent 000",
+            "[1,1,1]",
+            0,
+            "[0]",
+            "Valid but wrong: early stop cannot detect truth"
+          ],
+          [
+            "L=[3,-1,-1], cap=1",
+            "[0,0,1]",
+            1,
+            "[1,1]",
+            "Cap reached with a failed check"
+          ]
+        ],
+        "caption": "The decoder returns bits, iterations and syndrome_weights, not a truth-correct flag. Derive parity-valid from the final syndrome."
+      }
+    ],
+    "variants": [
+      {
+        "label": "One-round cap instead of two",
+        "views": [
+          {
+            "title": "Limit reached",
+            "columns": [
+              "Bits",
+              "Iterations",
+              "History",
+              "Parity valid?"
+            ],
+            "rows": [
+              [
+                "[0,0,1]",
+                1,
+                "[1,1]",
+                "No"
+              ]
+            ],
+            "caption": "A cap can stop before a fixture converges; this is not a claim it never converges."
+          }
+        ]
+      }
+    ],
+    "visual_spec": {
+      "labels": [
+        "Stage",
+        "Posterior A",
+        "Hard bits",
+        "Syndrome",
+        "Weight"
+      ],
+      "view_type": "indexed tables and selectable static trace",
+      "selected_element": "one view or row",
+      "step_sequence": [
+        "Two iterations are genuinely needed",
+        "Three different outcomes"
+      ],
+      "expected_observation": "A failed check changes identity while syndrome weight stays 1. Progress need not be monotonic.",
+      "caption": "Toy outcomes: truth belongs to the experimenter, not decoder",
+      "text_fallback": "Two iterations are genuinely needed\nStage | Posterior A | Hard bits | Syndrome | Weight\nInitial | [3,-1,-1] | [0,1,1] | [1,0] | 1\nRound 1 | [2,1,-2] | [0,0,1] | [0,1] | 1\nRound 2 | [1,1,1] | [0,0,0] | [0,0] | 0\n\nThree different outcomes\nSetup | Final bits | Updates used | History | Interpretation\nL=[3,-1,-1], cap=2; sent 000 | [0,0,0] | 2 | [1,1,0] | Valid and truth-correct in this experiment\nL=[-3,-3,-3]; sent 000 | [1,1,1] | 0 | [0] | Valid but wrong: early stop cannot detect truth\nL=[3,-1,-1], cap=1 | [0,0,1] | 1 | [1,1] | Cap reached with a failed check",
+      "data_origin": "supplied teaching fixture; not learner output"
+    }
+  },
+  "correction-modes": {
+    "id": "correction-modes",
+    "label": "Same star fixture q=[7,-3,5,-9]",
+    "views": [
+      {
+        "title": "Isolate algorithm changes",
+        "columns": [
+          "Mode",
+          "Parameters",
+          "Outputs"
+        ],
+        "rows": [
+          [
+            "Min-Sum",
+            "alpha=1, beta=0",
+            "[3,-5,3,-3]"
+          ],
+          [
+            "OMS",
+            "alpha=1, beta=1",
+            "[2,-4,2,-2]"
+          ],
+          [
+            "NMS",
+            "alpha=0.5, beta=0",
+            "[1.5,-2.5,1.5,-1.5]"
+          ]
+        ],
+        "caption": "Compare one parameter at a time, not a universal best setting."
+      }
+    ],
+    "variants": [
+      {
+        "label": "Combined experimental correction (not pure OMS/NMS)",
+        "views": [
+          {
+            "title": "Combined rule",
+            "columns": [
+              "alpha",
+              "beta",
+              "Outputs"
+            ],
+            "rows": [
+              [
+                0.5,
+                1,
+                "[1,-2,1,-1]"
+              ]
+            ],
+            "caption": "This supported primitive uses alpha*max(magnitude−beta,0)."
+          }
+        ]
+      },
+      {
+        "label": "Large offset beta=5",
+        "views": [
+          {
+            "title": "Evidence can disappear",
+            "columns": [
+              "Mode",
+              "Outputs"
+            ],
+            "rows": [
+              [
+                "OMS",
+                "[0,0,0,0]"
+              ]
+            ],
+            "caption": "Offset clips magnitude at zero; it must not reverse the sign."
+          }
+        ]
+      }
+    ],
+    "visual_spec": {
+      "labels": [
+        "Mode",
+        "Parameters",
+        "Outputs"
+      ],
+      "view_type": "indexed tables and selectable static trace",
+      "selected_element": "one view or row",
+      "step_sequence": [
+        "Isolate algorithm changes"
+      ],
+      "expected_observation": "Compare one parameter at a time, not a universal best setting.",
+      "caption": "Same star fixture q=[7,-3,5,-9]",
+      "text_fallback": "Isolate algorithm changes\nMode | Parameters | Outputs\nMin-Sum | alpha=1, beta=0 | [3,-5,3,-3]\nOMS | alpha=1, beta=1 | [2,-4,2,-2]\nNMS | alpha=0.5, beta=0 | [1.5,-2.5,1.5,-1.5]",
+      "data_origin": "supplied teaching fixture; not learner output"
+    }
+  },
+  "layered-chain": {
+    "id": "layered-chain",
+    "label": "Same equality chain as flooding; layer order c0 then c1",
+    "views": [
+      {
+        "title": "Posterior timeline",
+        "columns": [
+          "Stage",
+          "Indices",
+          "Extrinsic q",
+          "New r",
+          "Posterior A"
+        ],
+        "rows": [
+          [
+            "Initial",
+            "—",
+            "—",
+            "all zero",
+            "[3,-1,-1]"
+          ],
+          [
+            "c0",
+            "[0,1]",
+            "[3,-1]",
+            "[-1,3]",
+            "[2,2,-1]"
+          ],
+          [
+            "c1",
+            "[1,2]",
+            "[2,-1]",
+            "[-1,2]",
+            "[2,1,1]"
+          ]
+        ],
+        "caption": "c1 consumes UPDATED b1=2; flooding would still use the previous q. Faster here is not universally faster."
+      },
+      {
+        "title": "Nonzero stored contribution replacement",
+        "columns": [
+          "Operation",
+          "Values"
+        ],
+        "rows": [
+          [
+            "Old A",
+            "[5,1,4]"
+          ],
+          [
+            "Selected indices",
+            "[0,1]"
+          ],
+          [
+            "Old r",
+            "[2,-1]"
+          ],
+          [
+            "q=A[selected]−old r",
+            "[3,2]"
+          ],
+          [
+            "New r",
+            "[2,3]"
+          ],
+          [
+            "Replace A=q+new r",
+            "[5,5,4]"
+          ]
+        ],
+        "caption": "Do not add the new r to A without removing the old r."
+      }
+    ],
+    "variants": [],
+    "visual_spec": {
+      "labels": [
+        "Stage",
+        "Indices",
+        "Extrinsic q",
+        "New r",
+        "Posterior A"
+      ],
+      "view_type": "indexed tables and selectable static trace",
+      "selected_element": "one view or row",
+      "step_sequence": [
+        "Posterior timeline",
+        "Nonzero stored contribution replacement"
+      ],
+      "expected_observation": "c1 consumes UPDATED b1=2; flooding would still use the previous q. Faster here is not universally faster.",
+      "caption": "Same equality chain as flooding; layer order c0 then c1",
+      "text_fallback": "Posterior timeline\nStage | Indices | Extrinsic q | New r | Posterior A\nInitial | — | — | all zero | [3,-1,-1]\nc0 | [0,1] | [3,-1] | [-1,3] | [2,2,-1]\nc1 | [1,2] | [2,-1] | [-1,2] | [2,1,1]\n\nNonzero stored contribution replacement\nOperation | Values\nOld A | [5,1,4]\nSelected indices | [0,1]\nOld r | [2,-1]\nq=A[selected]−old r | [3,2]\nNew r | [2,3]\nReplace A=q+new r | [5,5,4]",
+      "data_origin": "supplied teaching fixture; not learner output"
+    }
+  },
+  "rotation-directions": {
+    "id": "rotation-directions",
+    "label": "Columns of identity shift right; vector helper rotates right",
+    "views": [
+      {
+        "title": "Z=4, shift=1: different operations",
+        "columns": [
+          "Operation",
+          "Index rule",
+          "Actual output"
+        ],
+        "rows": [
+          [
+            "P @ [a,b,c,d]",
+            "gather[i]=x[(i+1)%4]",
+            "[b,c,d,a]"
+          ],
+          [
+            "right_rotate(x,1)",
+            "out[i]=x[(i−1)%4]",
+            "[d,a,b,c]"
+          ],
+          [
+            "Scatter check message back",
+            "bit[(i+1)%4] += message[i]",
+            "inverse address association"
+          ]
+        ],
+        "caption": "Name the operation AND indexing; a right-shifted matrix does not right-rotate a column vector."
+      },
+      {
+        "title": "Z=8, shift=3",
+        "columns": [
+          "Input",
+          "Right-rotated output"
+        ],
+        "rows": [
+          [
+            "[0,1,2,3,4,5,6,7]",
+            "[5,6,7,0,1,2,3,4]"
+          ]
+        ],
+        "caption": "Shift 11 gives the same output because 11 mod 8=3."
+      }
+    ],
+    "variants": [],
+    "visual_spec": {
+      "labels": [
+        "Operation",
+        "Index rule",
+        "Actual output"
+      ],
+      "view_type": "indexed tables and selectable static trace",
+      "selected_element": "one view or row",
+      "step_sequence": [
+        "Z=4, shift=1: different operations",
+        "Z=8, shift=3"
+      ],
+      "expected_observation": "Name the operation AND indexing; a right-shifted matrix does not right-rotate a column vector.",
+      "caption": "Columns of identity shift right; vector helper rotates right",
+      "text_fallback": "Z=4, shift=1: different operations\nOperation | Index rule | Actual output\nP @ [a,b,c,d] | gather[i]=x[(i+1)%4] | [b,c,d,a]\nright_rotate(x,1) | out[i]=x[(i−1)%4] | [d,a,b,c]\nScatter check message back | bit[(i+1)%4] += message[i] | inverse address association\n\nZ=8, shift=3\nInput | Right-rotated output\n[0,1,2,3,4,5,6,7] | [5,6,7,0,1,2,3,4]",
+      "data_origin": "supplied teaching fixture; not learner output"
+    }
+  },
+  "qc-full": {
+    "id": "qc-full",
+    "label": "Toy B=[[0,1,-1],[2,-1,0]], Z=4",
+    "views": [
+      {
+        "title": "Complete 8×12 H: block boundaries after bits 3 and 7",
+        "columns": [
+          "Check",
+          "b0..b3 | block 0",
+          "b4..b7 | block 1",
+          "b8..b11 | block 2"
+        ],
+        "rows": [
+          [
+            "c0",
+            "1 0 0 0",
+            "0 1 0 0",
+            "0 0 0 0"
+          ],
+          [
+            "c1",
+            "0 1 0 0",
+            "0 0 1 0",
+            "0 0 0 0"
+          ],
+          [
+            "c2",
+            "0 0 1 0",
+            "0 0 0 1",
+            "0 0 0 0"
+          ],
+          [
+            "c3",
+            "0 0 0 1",
+            "1 0 0 0",
+            "0 0 0 0"
+          ],
+          [
+            "c4",
+            "0 0 1 0",
+            "0 0 0 0",
+            "1 0 0 0"
+          ],
+          [
+            "c5",
+            "0 0 0 1",
+            "0 0 0 0",
+            "0 1 0 0"
+          ],
+          [
+            "c6",
+            "1 0 0 0",
+            "0 0 0 0",
+            "0 0 1 0"
+          ],
+          [
+            "c7",
+            "0 1 0 0",
+            "0 0 0 0",
+            "0 0 0 1"
+          ]
+        ],
+        "caption": "Each nonempty base entry contributes four edges; −1 contributes none. H has 16 ones."
+      },
+      {
+        "title": "Select base entry B[0,1]=1",
+        "columns": [
+          "Lifted position i",
+          "Expanded check 0*4+i",
+          "Expanded bit 1*4+(i+1)%4"
+        ],
+        "rows": [
+          [
+            0,
+            0,
+            5
+          ],
+          [
+            1,
+            1,
+            6
+          ],
+          [
+            2,
+            2,
+            7
+          ],
+          [
+            3,
+            3,
+            4
+          ]
+        ],
+        "caption": "Base-row index, base-column index and lifted position select different things."
+      }
+    ],
+    "variants": [],
+    "visual_spec": {
+      "labels": [
+        "Check",
+        "b0..b3 | block 0",
+        "b4..b7 | block 1",
+        "b8..b11 | block 2"
+      ],
+      "view_type": "indexed tables and selectable static trace",
+      "selected_element": "one view or row",
+      "step_sequence": [
+        "Complete 8×12 H: block boundaries after bits 3 and 7",
+        "Select base entry B[0,1]=1"
+      ],
+      "expected_observation": "Each nonempty base entry contributes four edges; −1 contributes none. H has 16 ones.",
+      "caption": "Toy B=[[0,1,-1],[2,-1,0]], Z=4",
+      "text_fallback": "Complete 8×12 H: block boundaries after bits 3 and 7\nCheck | b0..b3 | block 0 | b4..b7 | block 1 | b8..b11 | block 2\nc0 | 1 0 0 0 | 0 1 0 0 | 0 0 0 0\nc1 | 0 1 0 0 | 0 0 1 0 | 0 0 0 0\nc2 | 0 0 1 0 | 0 0 0 1 | 0 0 0 0\nc3 | 0 0 0 1 | 1 0 0 0 | 0 0 0 0\nc4 | 0 0 1 0 | 0 0 0 0 | 1 0 0 0\nc5 | 0 0 0 1 | 0 0 0 0 | 0 1 0 0\nc6 | 1 0 0 0 | 0 0 0 0 | 0 0 1 0\nc7 | 0 1 0 0 | 0 0 0 0 | 0 0 0 1\n\nSelect base entry B[0,1]=1\nLifted position i | Expanded check 0*4+i | Expanded bit 1*4+(i+1)%4\n0 | 0 | 5\n1 | 1 | 6\n2 | 2 | 7\n3 | 3 | 4",
+      "data_origin": "supplied teaching fixture; not learner output"
+    },
+    "expanded": [
+      [
+        1,
+        0,
+        0,
+        0,
+        0,
+        1,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0
+      ],
+      [
+        0,
+        1,
+        0,
+        0,
+        0,
+        0,
+        1,
+        0,
+        0,
+        0,
+        0,
+        0
+      ],
+      [
+        0,
+        0,
+        1,
+        0,
+        0,
+        0,
+        0,
+        1,
+        0,
+        0,
+        0,
+        0
+      ],
+      [
+        0,
+        0,
+        0,
+        1,
+        1,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0
+      ],
+      [
+        0,
+        0,
+        1,
+        0,
+        0,
+        0,
+        0,
+        0,
+        1,
+        0,
+        0,
+        0
+      ],
+      [
+        0,
+        0,
+        0,
+        1,
+        0,
+        0,
+        0,
+        0,
+        0,
+        1,
+        0,
+        0
+      ],
+      [
+        1,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        1,
+        0
+      ],
+      [
+        0,
+        1,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        1
+      ]
+    ]
+  },
+  "lifting-set": {
+    "id": "lifting-set",
+    "label": "Standard-derived lifting-set lookup only",
+    "views": [
+      {
+        "title": "Legal lifting sizes and group counts",
+        "columns": [
+          "Z",
+          "Set index",
+          "Effective shifts",
+          "Groups at P=32",
+          "Last valid lanes"
+        ],
+        "rows": [
+          [
+            2,
+            0,
+            "0..1",
+            1,
+            2
+          ],
+          [
+            8,
+            0,
+            "0..7",
+            1,
+            8
+          ],
+          [
+            32,
+            0,
+            "0..31",
+            1,
+            32
+          ],
+          [
+            96,
+            1,
+            "0..95",
+            3,
+            32
+          ],
+          [
+            104,
+            6,
+            "0..103",
+            4,
+            8
+          ],
+          [
+            192,
+            1,
+            "0..191",
+            6,
+            32
+          ],
+          [
+            384,
+            1,
+            "0..383",
+            12,
+            32
+          ]
+        ],
+        "caption": "A legal Z alone is not a configured NR decoder. Z=97 is illegal."
+      }
+    ],
+    "variants": [],
+    "visual_spec": {
+      "labels": [
+        "Z",
+        "Set index",
+        "Effective shifts",
+        "Groups at P=32",
+        "Last valid lanes"
+      ],
+      "view_type": "indexed tables and selectable static trace",
+      "selected_element": "one view or row",
+      "step_sequence": [
+        "Legal lifting sizes and group counts"
+      ],
+      "expected_observation": "A legal Z alone is not a configured NR decoder. Z=97 is illegal.",
+      "caption": "Standard-derived lifting-set lookup only",
+      "text_fallback": "Legal lifting sizes and group counts\nZ | Set index | Effective shifts | Groups at P=32 | Last valid lanes\n2 | 0 | 0..1 | 1 | 2\n8 | 0 | 0..7 | 1 | 8\n32 | 0 | 0..31 | 1 | 32\n96 | 1 | 0..95 | 3 | 32\n104 | 6 | 0..103 | 4 | 8\n192 | 1 | 0..191 | 6 | 32\n384 | 1 | 0..383 | 12 | 32",
+      "data_origin": "supplied teaching fixture; not learner output"
+    }
+  },
+  "saturation-boundaries": {
+    "id": "saturation-boundaries",
+    "label": "Implementation choice: signed 4-bit storage",
+    "views": [
+      {
+        "title": "Clamp, do not wrap",
+        "columns": [
+          "Integer",
+          "Lower bound",
+          "Upper bound",
+          "Stored"
+        ],
+        "rows": [
+          [
+            -12,
+            -8,
+            7,
+            -8
+          ],
+          [
+            -8,
+            -8,
+            7,
+            -8
+          ],
+          [
+            -1,
+            -8,
+            7,
+            -1
+          ],
+          [
+            0,
+            -8,
+            7,
+            0
+          ],
+          [
+            7,
+            -8,
+            7,
+            7
+          ],
+          [
+            11,
+            -8,
+            7,
+            7
+          ]
+        ],
+        "caption": "Limit wider values before narrowing to the storage type."
+      },
+      {
+        "title": "Magnitude and replacement hazards",
+        "columns": [
+          "Operation",
+          "Result",
+          "Consequence"
+        ],
+        "rows": [
+          [
+            "abs(-8) in widened arithmetic",
+            8,
+            "Does not fit positive signed 4-bit range"
+          ],
+          [
+            "True A=10, old r=3: subtract",
+            7,
+            "Before clipping"
+          ],
+          [
+            "Store clip(A)=7, then subtract old r=3",
+            4,
+            "Lost information: not algebraically equivalent"
+          ]
+        ],
+        "caption": "Choose widened magnitude arithmetic. Posterior and accumulator widths need separate policies."
+      }
+    ],
+    "variants": [],
+    "visual_spec": {
+      "labels": [
+        "Integer",
+        "Lower bound",
+        "Upper bound",
+        "Stored"
+      ],
+      "view_type": "indexed tables and selectable static trace",
+      "selected_element": "one view or row",
+      "step_sequence": [
+        "Clamp, do not wrap",
+        "Magnitude and replacement hazards"
+      ],
+      "expected_observation": "Limit wider values before narrowing to the storage type.",
+      "caption": "Implementation choice: signed 4-bit storage",
+      "text_fallback": "Clamp, do not wrap\nInteger | Lower bound | Upper bound | Stored\n-12 | -8 | 7 | -8\n-8 | -8 | 7 | -8\n-1 | -8 | 7 | -1\n0 | -8 | 7 | 0\n7 | -8 | 7 | 7\n11 | -8 | 7 | 7\n\nMagnitude and replacement hazards\nOperation | Result | Consequence\nabs(-8) in widened arithmetic | 8 | Does not fit positive signed 4-bit range\nTrue A=10, old r=3: subtract | 7 | Before clipping\nStore clip(A)=7, then subtract old r=3 | 4 | Lost information: not algebraically equivalent",
+      "data_origin": "supplied teaching fixture; not learner output"
+    }
+  },
+  "quantize-pipeline": {
+    "id": "quantize-pipeline",
+    "label": "width=4, fraction_bits=1, ties-to-even",
+    "views": [
+      {
+        "title": "Scale → round → clip → reconstruct",
+        "columns": [
+          "Real input",
+          "Scaled ×2",
+          "Rounded",
+          "Stored code",
+          "Reconstructed"
+        ],
+        "rows": [
+          [
+            1.25,
+            2.5,
+            2,
+            2,
+            1
+          ],
+          [
+            1.75,
+            3.5,
+            4,
+            4,
+            2
+          ],
+          [
+            -1.25,
+            -2.5,
+            -2,
+            -2,
+            -1
+          ],
+          [
+            10,
+            20,
+            20,
+            7,
+            3.5
+          ]
+        ],
+        "caption": "Code range −8..7 means reconstructed range −4..3.5 with step 0.5."
+      },
+      {
+        "title": "First decision divergence at quantization",
+        "columns": [
+          "Float score",
+          "Stored code",
+          "Reconstructed",
+          "Float bit",
+          "Fixed bit"
+        ],
+        "rows": [
+          [
+            -0.1,
+            0,
+            0,
+            1,
+            0
+          ],
+          [
+            1.25,
+            2,
+            1,
+            0,
+            0
+          ]
+        ],
+        "caption": "Quantization changes the first decision; another value changes magnitude but not its bit. This is not a complete fixed decoder."
+      }
+    ],
+    "variants": [
+      {
+        "label": "Change fractional bits to 2, keep width 4",
+        "views": [
+          {
+            "title": "More precision, less range",
+            "columns": [
+              "Real",
+              "Scaled ×4",
+              "Rounded",
+              "Stored",
+              "Reconstructed"
+            ],
+            "rows": [
+              [
+                1.25,
+                5,
+                5,
+                5,
+                1.25
+              ],
+              [
+                1.75,
+                7,
+                7,
+                7,
+                1.75
+              ],
+              [
+                -1.25,
+                -5,
+                -5,
+                -5,
+                -1.25
+              ],
+              [
+                10,
+                40,
+                40,
+                7,
+                1.75
+              ]
+            ],
+            "caption": "Reconstructed range is −2..1.75, step 0.25. More fractional bits can clip sooner."
+          }
+        ]
+      }
+    ],
+    "visual_spec": {
+      "labels": [
+        "Real input",
+        "Scaled ×2",
+        "Rounded",
+        "Stored code",
+        "Reconstructed"
+      ],
+      "view_type": "indexed tables and selectable static trace",
+      "selected_element": "one view or row",
+      "step_sequence": [
+        "Scale → round → clip → reconstruct",
+        "First decision divergence at quantization"
+      ],
+      "expected_observation": "Code range −8..7 means reconstructed range −4..3.5 with step 0.5.",
+      "caption": "width=4, fraction_bits=1, ties-to-even",
+      "text_fallback": "Scale → round → clip → reconstruct\nReal input | Scaled ×2 | Rounded | Stored code | Reconstructed\n1.25 | 2.5 | 2 | 2 | 1\n1.75 | 3.5 | 4 | 4 | 2\n-1.25 | -2.5 | -2 | -2 | -1\n10 | 20 | 20 | 7 | 3.5\n\nFirst decision divergence at quantization\nFloat score | Stored code | Reconstructed | Float bit | Fixed bit\n-0.1 | 0 | 0 | 1 | 0\n1.25 | 2 | 1 | 0 | 0",
+      "data_origin": "supplied teaching fixture; not learner output"
+    }
+  },
+  "lane-schedule": {
+    "id": "lane-schedule",
+    "label": "Teaching P=32; positions are parallel, neighbors are reduced",
+    "views": [
+      {
+        "title": "Grouping is not latency",
+        "columns": [
+          "Z",
+          "Groups",
+          "Valid lanes",
+          "Utilization"
+        ],
+        "rows": [
+          [
+            32,
+            1,
+            "[32]",
+            1
+          ],
+          [
+            96,
+            3,
+            "[32,32,32]",
+            1
+          ],
+          [
+            104,
+            4,
+            "[32,32,32,8]",
+            0.8125
+          ],
+          [
+            192,
+            6,
+            "6×32",
+            1
+          ],
+          [
+            384,
+            12,
+            "12×32",
+            1
+          ]
+        ],
+        "caption": "One lane processes one lifted position for one edge in an issue cycle."
+      },
+      {
+        "title": "Two axes of a check layer",
+        "columns": [
+          "Lifted position (parallel axis)",
+          "Neighbor edge 0",
+          "Neighbor edge 1",
+          "Neighbor edge 2",
+          "Minimum over NEIGHBORS"
+        ],
+        "rows": [
+          [
+            0,
+            7,
+            3,
+            5,
+            3
+          ],
+          [
+            1,
+            1,
+            9,
+            8,
+            1
+          ]
+        ],
+        "caption": "Never reduce different positions together. Each active lane retains its own reduction state."
+      },
+      {
+        "title": "Declared nonoverlapped schedule: degree=3, Z=104",
+        "columns": [
+          "Issue cycle",
+          "Pass",
+          "Base edge",
+          "Group",
+          "Valid lanes",
+          "Read",
+          "Compute / write",
+          "Dependency"
+        ],
+        "rows": [
+          [
+            1,
+            "reduce",
+            0,
+            0,
+            32,
+            "q edge 0 group 0",
+            "accumulate per-position sign/min1/min2",
+            "previous reductions complete before emit"
+          ],
+          [
+            2,
+            "reduce",
+            0,
+            1,
+            32,
+            "q edge 0 group 1",
+            "accumulate per-position sign/min1/min2",
+            "previous reductions complete before emit"
+          ],
+          [
+            3,
+            "reduce",
+            0,
+            2,
+            32,
+            "q edge 0 group 2",
+            "accumulate per-position sign/min1/min2",
+            "previous reductions complete before emit"
+          ],
+          [
+            4,
+            "reduce",
+            0,
+            3,
+            8,
+            "q edge 0 group 3",
+            "accumulate per-position sign/min1/min2",
+            "previous reductions complete before emit"
+          ],
+          [
+            5,
+            "reduce",
+            1,
+            0,
+            32,
+            "q edge 1 group 0",
+            "accumulate per-position sign/min1/min2",
+            "previous reductions complete before emit"
+          ],
+          [
+            6,
+            "reduce",
+            1,
+            1,
+            32,
+            "q edge 1 group 1",
+            "accumulate per-position sign/min1/min2",
+            "previous reductions complete before emit"
+          ],
+          [
+            7,
+            "reduce",
+            1,
+            2,
+            32,
+            "q edge 1 group 2",
+            "accumulate per-position sign/min1/min2",
+            "previous reductions complete before emit"
+          ],
+          [
+            8,
+            "reduce",
+            1,
+            3,
+            8,
+            "q edge 1 group 3",
+            "accumulate per-position sign/min1/min2",
+            "previous reductions complete before emit"
+          ],
+          [
+            9,
+            "reduce",
+            2,
+            0,
+            32,
+            "q edge 2 group 0",
+            "accumulate per-position sign/min1/min2",
+            "previous reductions complete before emit"
+          ],
+          [
+            10,
+            "reduce",
+            2,
+            1,
+            32,
+            "q edge 2 group 1",
+            "accumulate per-position sign/min1/min2",
+            "previous reductions complete before emit"
+          ],
+          [
+            11,
+            "reduce",
+            2,
+            2,
+            32,
+            "q edge 2 group 2",
+            "accumulate per-position sign/min1/min2",
+            "previous reductions complete before emit"
+          ],
+          [
+            12,
+            "reduce",
+            2,
+            3,
+            8,
+            "q edge 2 group 3",
+            "accumulate per-position sign/min1/min2",
+            "previous reductions complete before emit"
+          ],
+          [
+            13,
+            "emit",
+            0,
+            0,
+            32,
+            "q edge 0 group 0",
+            "select sign/minimum; r write",
+            "previous reductions complete before emit"
+          ],
+          [
+            14,
+            "emit",
+            0,
+            1,
+            32,
+            "q edge 0 group 1",
+            "select sign/minimum; r write",
+            "previous reductions complete before emit"
+          ],
+          [
+            15,
+            "emit",
+            0,
+            2,
+            32,
+            "q edge 0 group 2",
+            "select sign/minimum; r write",
+            "previous reductions complete before emit"
+          ],
+          [
+            16,
+            "emit",
+            0,
+            3,
+            8,
+            "q edge 0 group 3",
+            "select sign/minimum; r write",
+            "previous reductions complete before emit"
+          ],
+          [
+            17,
+            "emit",
+            1,
+            0,
+            32,
+            "q edge 1 group 0",
+            "select sign/minimum; r write",
+            "previous reductions complete before emit"
+          ],
+          [
+            18,
+            "emit",
+            1,
+            1,
+            32,
+            "q edge 1 group 1",
+            "select sign/minimum; r write",
+            "previous reductions complete before emit"
+          ],
+          [
+            19,
+            "emit",
+            1,
+            2,
+            32,
+            "q edge 1 group 2",
+            "select sign/minimum; r write",
+            "previous reductions complete before emit"
+          ],
+          [
+            20,
+            "emit",
+            1,
+            3,
+            8,
+            "q edge 1 group 3",
+            "select sign/minimum; r write",
+            "previous reductions complete before emit"
+          ],
+          [
+            21,
+            "emit",
+            2,
+            0,
+            32,
+            "q edge 2 group 0",
+            "select sign/minimum; r write",
+            "previous reductions complete before emit"
+          ],
+          [
+            22,
+            "emit",
+            2,
+            1,
+            32,
+            "q edge 2 group 1",
+            "select sign/minimum; r write",
+            "previous reductions complete before emit"
+          ],
+          [
+            23,
+            "emit",
+            2,
+            2,
+            32,
+            "q edge 2 group 2",
+            "select sign/minimum; r write",
+            "previous reductions complete before emit"
+          ],
+          [
+            24,
+            "emit",
+            2,
+            3,
+            8,
+            "q edge 2 group 3",
+            "select sign/minimum; r write",
+            "previous reductions complete before emit"
+          ]
+        ],
+        "caption": "Assume enough independent read/write bandwidth, zero added pipeline delay and buffered/re-readable q. 24 ISSUE cycles before overhead; not measured physical latency."
+      }
+    ],
+    "variants": [],
+    "visual_spec": {
+      "labels": [
+        "Z",
+        "Groups",
+        "Valid lanes",
+        "Utilization"
+      ],
+      "view_type": "indexed tables and selectable static trace",
+      "selected_element": "one view or row",
+      "step_sequence": [
+        "Grouping is not latency",
+        "Two axes of a check layer",
+        "Declared nonoverlapped schedule: degree=3, Z=104"
+      ],
+      "expected_observation": "One lane processes one lifted position for one edge in an issue cycle.",
+      "caption": "Teaching P=32; positions are parallel, neighbors are reduced",
+      "text_fallback": "Grouping is not latency\nZ | Groups | Valid lanes | Utilization\n32 | 1 | [32] | 1\n96 | 3 | [32,32,32] | 1\n104 | 4 | [32,32,32,8] | 0.8125\n192 | 6 | 6×32 | 1\n384 | 12 | 12×32 | 1\n\nTwo axes of a check layer\nLifted position (parallel axis) | Neighbor edge 0 | Neighbor edge 1 | Neighbor edge 2 | Minimum over NEIGHBORS\n0 | 7 | 3 | 5 | 3\n1 | 1 | 9 | 8 | 1\n\nDeclared nonoverlapped schedule: degree=3, Z=104\nIssue cycle | Pass | Base edge | Group | Valid lanes | Read | Compute / write | Dependency\n1 | reduce | 0 | 0 | 32 | q edge 0 group 0 | accumulate per-position sign/min1/min2 | previous reductions complete before emit\n2 | reduce | 0 | 1 | 32 | q edge 0 group 1 | accumulate per-position sign/min1/min2 | previous reductions complete before emit\n3 | reduce | 0 | 2 | 32 | q edge 0 group 2 | accumulate per-position sign/min1/min2 | previous reductions complete before emit\n4 | reduce | 0 | 3 | 8 | q edge 0 group 3 | accumulate per-position sign/min1/min2 | previous reductions complete before emit\n5 | reduce | 1 | 0 | 32 | q edge 1 group 0 | accumulate per-position sign/min1/min2 | previous reductions complete before emit\n6 | reduce | 1 | 1 | 32 | q edge 1 group 1 | accumulate per-position sign/min1/min2 | previous reductions complete before emit\n7 | reduce | 1 | 2 | 32 | q edge 1 group 2 | accumulate per-position sign/min1/min2 | previous reductions complete before emit\n8 | reduce | 1 | 3 | 8 | q edge 1 group 3 | accumulate per-position sign/min1/min2 | previous reductions complete before emit\n9 | reduce | 2 | 0 | 32 | q edge 2 group 0 | accumulate per-position sign/min1/min2 | previous reductions complete before emit\n10 | reduce | 2 | 1 | 32 | q edge 2 group 1 | accumulate per-position sign/min1/min2 | previous reductions complete before emit\n11 | reduce | 2 | 2 | 32 | q edge 2 group 2 | accumulate per-position sign/min1/min2 | previous reductions complete before emit\n12 | reduce | 2 | 3 | 8 | q edge 2 group 3 | accumulate per-position sign/min1/min2 | previous reductions complete before emit\n13 | emit | 0 | 0 | 32 | q edge 0 group 0 | select sign/minimum; r write | previous reductions complete before emit\n14 | emit | 0 | 1 | 32 | q edge 0 group 1 | select sign/minimum; r write | previous reductions complete before emit\n15 | emit | 0 | 2 | 32 | q edge 0 group 2 | select sign/minimum; r write | previous reductions complete before emit\n16 | emit | 0 | 3 | 8 | q edge 0 group 3 | select sign/minimum; r write | previous reductions complete before emit\n17 | emit | 1 | 0 | 32 | q edge 1 group 0 | select sign/minimum; r write | previous reductions complete before emit\n18 | emit | 1 | 1 | 32 | q edge 1 group 1 | select sign/minimum; r write | previous reductions complete before emit\n19 | emit | 1 | 2 | 32 | q edge 1 group 2 | select sign/minimum; r write | previous reductions complete before emit\n20 | emit | 1 | 3 | 8 | q edge 1 group 3 | select sign/minimum; r write | previous reductions complete before emit\n21 | emit | 2 | 0 | 32 | q edge 2 group 0 | select sign/minimum; r write | previous reductions complete before emit\n22 | emit | 2 | 1 | 32 | q edge 2 group 1 | select sign/minimum; r write | previous reductions complete before emit\n23 | emit | 2 | 2 | 32 | q edge 2 group 2 | select sign/minimum; r write | previous reductions complete before emit\n24 | emit | 2 | 3 | 8 | q edge 2 group 3 | select sign/minimum; r write | previous reductions complete before emit",
+      "data_origin": "supplied teaching fixture; not learner output"
+    }
+  },
+  "bank-service": {
+    "id": "bank-service",
+    "label": "Four single-read-port banks, modulo mapping, no broadcast",
+    "views": [
+      {
+        "title": "Requests and addresses",
+        "columns": [
+          "Logical address",
+          "Bank = address%4",
+          "Within-bank = floor(address/4)"
+        ],
+        "rows": [
+          [
+            0,
+            0,
+            0
+          ],
+          [
+            4,
+            0,
+            1
+          ],
+          [
+            1,
+            1,
+            0
+          ]
+        ],
+        "caption": "Bank 0 has two requests; a single read port serves one per cycle."
+      },
+      {
+        "title": "Possible service schedule",
+        "columns": [
+          "Cycle",
+          "Bank 0",
+          "Bank 1",
+          "Bank 2",
+          "Bank 3"
+        ],
+        "rows": [
+          [
+            1,
+            "address 0",
+            "address 1",
+            "idle",
+            "idle"
+          ],
+          [
+            2,
+            "address 4",
+            "idle",
+            "idle",
+            "idle"
+          ]
+        ],
+        "caption": "One conflicting BANK, two requests on that bank, two service cycles."
+      },
+      {
+        "title": "QC-derived issue group: B row0, Z=4, positions i=0,1",
+        "columns": [
+          "Base edge",
+          "i",
+          "Logical bit address",
+          "Bank",
+          "Within-bank"
+        ],
+        "rows": [
+          [
+            "B[0,0]=0",
+            0,
+            0,
+            0,
+            0
+          ],
+          [
+            "B[0,0]=0",
+            1,
+            1,
+            1,
+            0
+          ],
+          [
+            "B[0,1]=1",
+            0,
+            5,
+            1,
+            1
+          ],
+          [
+            "B[0,1]=1",
+            1,
+            6,
+            2,
+            1
+          ]
+        ],
+        "caption": "Addresses come from c*Z+((i+k)%Z); addresses 1 and 5 collide in bank 1."
+      },
+      {
+        "title": "QC-derived service schedule",
+        "columns": [
+          "Cycle",
+          "Bank 0",
+          "Bank 1",
+          "Bank 2",
+          "Bank 3"
+        ],
+        "rows": [
+          [
+            1,
+            "address 0",
+            "address 1",
+            "address 6",
+            "idle"
+          ],
+          [
+            2,
+            "idle",
+            "address 5",
+            "idle",
+            "idle"
+          ]
+        ],
+        "caption": "Port bandwidth, not arithmetic lane count, limits this group."
+      }
+    ],
+    "variants": [
+      {
+        "label": "Conflict-free group [0,1,2,3]",
+        "views": [
+          {
+            "title": "Each bank reads once",
+            "columns": [
+              "Address",
+              "Bank",
+              "Within-bank"
+            ],
+            "rows": [
+              [
+                0,
+                0,
+                0
+              ],
+              [
+                1,
+                1,
+                0
+              ],
+              [
+                2,
+                2,
+                0
+              ],
+              [
+                3,
+                3,
+                0
+              ]
+            ],
+            "caption": "All four reads can be issued together under the stated model."
+          }
+        ]
+      }
+    ],
+    "visual_spec": {
+      "labels": [
+        "Logical address",
+        "Bank = address%4",
+        "Within-bank = floor(address/4)"
+      ],
+      "view_type": "indexed tables and selectable static trace",
+      "selected_element": "one view or row",
+      "step_sequence": [
+        "Requests and addresses",
+        "Possible service schedule",
+        "QC-derived issue group: B row0, Z=4, positions i=0,1",
+        "QC-derived service schedule"
+      ],
+      "expected_observation": "Bank 0 has two requests; a single read port serves one per cycle.",
+      "caption": "Four single-read-port banks, modulo mapping, no broadcast",
+      "text_fallback": "Requests and addresses\nLogical address | Bank = address%4 | Within-bank = floor(address/4)\n0 | 0 | 0\n4 | 0 | 1\n1 | 1 | 0\n\nPossible service schedule\nCycle | Bank 0 | Bank 1 | Bank 2 | Bank 3\n1 | address 0 | address 1 | idle | idle\n2 | address 4 | idle | idle | idle\n\nQC-derived issue group: B row0, Z=4, positions i=0,1\nBase edge | i | Logical bit address | Bank | Within-bank\nB[0,0]=0 | 0 | 0 | 0 | 0\nB[0,0]=0 | 1 | 1 | 1 | 0\nB[0,1]=1 | 0 | 5 | 1 | 1\nB[0,1]=1 | 1 | 6 | 2 | 1\n\nQC-derived service schedule\nCycle | Bank 0 | Bank 1 | Bank 2 | Bank 3\n1 | address 0 | address 1 | address 6 | idle\n2 | idle | address 5 | idle | idle",
+      "data_origin": "supplied teaching fixture; not learner output"
+    }
+  },
+  "minima-summary": {
+    "id": "minima-summary",
+    "label": "Min1/min2 extension: first minimum index wins ties",
+    "views": [
+      {
+        "title": "Signed fixture summary",
+        "columns": [
+          "q",
+          "min1",
+          "min2 (with multiplicity)",
+          "argmin",
+          "negative parity",
+          "outgoing"
+        ],
+        "rows": [
+          [
+            "[7,-3,5,-9]",
+            3,
+            5,
+            1,
+            0,
+            "[3,-5,3,-3]"
+          ],
+          [
+            "[3,3,5,9]",
+            3,
+            3,
+            0,
+            0,
+            "[3,3,3,3]"
+          ],
+          [
+            "[0,4,6]",
+            0,
+            4,
+            0,
+            0,
+            "[4,0,0]"
+          ],
+          [
+            "[-2,2,8]",
+            2,
+            2,
+            0,
+            1,
+            "[2,-2,-2]"
+          ]
+        ],
+        "caption": "Use min2 only when excluding the selected argmin. Zero has positive sign and zero magnitude."
+      }
+    ],
+    "variants": [],
+    "visual_spec": {
+      "labels": [
+        "q",
+        "min1",
+        "min2 (with multiplicity)",
+        "argmin",
+        "negative parity",
+        "outgoing"
+      ],
+      "view_type": "indexed tables and selectable static trace",
+      "selected_element": "one view or row",
+      "step_sequence": [
+        "Signed fixture summary"
+      ],
+      "expected_observation": "Use min2 only when excluding the selected argmin. Zero has positive sign and zero magnitude.",
+      "caption": "Min1/min2 extension: first minimum index wins ties",
+      "text_fallback": "Signed fixture summary\nq | min1 | min2 (with multiplicity) | argmin | negative parity | outgoing\n[7,-3,5,-9] | 3 | 5 | 1 | 0 | [3,-5,3,-3]\n[3,3,5,9] | 3 | 3 | 0 | 0 | [3,3,3,3]\n[0,4,6] | 0 | 4 | 0 | 0 | [4,0,0]\n[-2,2,8] | 2 | 2 | 0 | 1 | [2,-2,-2]",
+      "data_origin": "supplied teaching fixture; not learner output"
+    }
+  }
+}
+

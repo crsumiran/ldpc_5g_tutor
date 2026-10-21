@@ -1,0 +1,1214 @@
+{
+  "schema_version": 1,
+  "id": "optical-flow",
+  "title": "Optical Flow: From Gradients to Motion",
+  "subtitle": "12 NumPy assignments · Lucas–Kanade · warping · pyramids · honest evaluation",
+  "toolchain": "python",
+  "overview_file": "overview.md",
+  "architecture_file": "architecture.md",
+  "provided_files": [
+    "python/provided/scene.py"
+  ],
+  "checkpoints": [
+    {
+      "id": "FLOW-01",
+      "title": "Image change becomes a motion equation",
+      "goal": "Measure intensity changes before estimating displacement",
+      "description": "Return Ix, Iy, It as float arrays of shape (H,W). Frames are finite 2-D arrays of identical shape, H,W>=2. Cast before subtraction. Ix,Iy use frame0: centered differences inside, one-sided first differences at borders. It=frame1-frame0.",
+      "requirements": [
+        "Return Ix, Iy, It as float arrays of shape (H,W). Frames are finite 2-D arrays of identical shape, H,W>=2. Cast before subtraction. Ix,Iy use frame0: centered differences inside, one-sided first differences at borders. It=frame1-frame0.",
+        "Use NumPy, not an optical-flow library. Do not mutate inputs. Public tests run in an offline fresh process."
+      ],
+      "module": "gradients",
+      "source_files": [
+        "python/gradients.py"
+      ],
+      "editable_files": [
+        "python/gradients.py"
+      ],
+      "public_testbench": "tests/public/test_gradients.py",
+      "top": "pytest",
+      "prerequisites": [],
+      "estimated_minutes": 20,
+      "difficulty": "easy",
+      "concepts": [
+        "Image change becomes a motion equation",
+        "array conventions and evidence"
+      ],
+      "hints": [
+        "Relate a horizontal or vertical intensity ramp to its known derivative.",
+        "Handle interior samples separately from first and last rows/columns.",
+        "Use one-sided differences at endpoints; use half the difference of the two neighbors inside."
+      ],
+      "lesson": "Two photographs give you intensities, not vectors. The first step is to measure how brightness changes across space and between frames. Both are arrays with H rows and W columns. A spatial gradient says how many intensity units a one-pixel lookup shift adds; the temporal difference says what changed at a fixed position. Call the horizontal gradient Ix, the vertical gradient Iy and the temporal difference It. Let u be displacement to the right and v displacement downward, measured in pixels. Their common intensity units make Ix·u+Iy·v=−It meaningful.\n\nTake frame0 with two identical rows [0,1,4] and frame1=frame0−0.5. The interior horizontal derivative is (4−0)/2=2. At the left border only a forward difference is available, 1−0=1; at the right use 4−1=3. Thus Ix has two rows [1,2,3], Iy is all zero because the rows match, and It is all −0.5. This curved row tests the stencil more clearly than a linear ramp. On the simpler ramp x+2y, the same procedure gives Ix=1 and Iy=2, connecting these measurements to the theory’s motion equation.\n\nConvert both inputs to floating arithmetic before subtracting. Then compute horizontal differences along columns and vertical differences along rows, using centered differences only where both neighbors exist. Finally subtract frame0 from frame1. Return three arrays without changing either input. These reference-frame gradients will be reused by dense fitting and refinement.\n\n## What the public checks reveal\nThe ramp check expects (1,2,−0.5); swapped axes or reversed time subtraction fail it. The unsigned-and-shape check subtracts uint8 values 0−2 and expects floating −2, exposing wraparound. The preserve-and-stencil check uses the [0,1,4] example, distinguishing first-order border differences from other stencils and checking that frame0 stays intact.",
+      "visual": "",
+      "fixture": {
+        "id": "flow-01-worked",
+        "label": "Worked example: Image change becomes a motion equation",
+        "views": [
+          {
+            "title": "Follow the worked values",
+            "columns": [
+              "Pixel",
+              "Ix",
+              "Iy",
+              "It"
+            ],
+            "rows": [
+              [
+                0,
+                1,
+                2,
+                -0.5
+              ]
+            ],
+            "caption": "For a ramp x+2y, the constraint is u+2v=0.5; one equation leaves a family of motions."
+          }
+        ],
+        "visual_spec": {
+          "labels": [
+            "Pixel",
+            "Ix",
+            "Iy",
+            "It"
+          ],
+          "view_type": "operation-specific worked table",
+          "selected_element": "current worked example",
+          "step_sequence": [
+            "Read inputs",
+            "Predict",
+            "Reveal and compare"
+          ],
+          "expected_observation": "For a ramp x+2y, the constraint is u+2v=0.5; one equation leaves a family of motions.",
+          "caption": "Supplied teaching fixture, not learner execution.",
+          "text_fallback": "[[0,1,2,-0.5]]",
+          "data_origin": "Authored numeric example"
+        }
+      },
+      "prediction": "For a right-moving positive ramp, should It be positive or negative?",
+      "reflection": "Why does a temporal difference alone not specify a two-dimensional displacement?",
+      "expected_public_checks": 3,
+      "experiment": "Swap the two frames. Which derivative changes sign exactly, and which derivatives are recomputed from a different image?",
+      "optional_math": "",
+      "optional_hardware": "",
+      "misconception": "For a ramp x+2y, the constraint is u+2v=0.5; one equation leaves a family of motions.",
+      "completion": "Run the public checks and submit. All named checks must pass; zero collected checks is not success. Explain the reflection in your own words. These small contracts do not establish general optical-flow accuracy.",
+      "takeaway": "Image change becomes a motion equation is one part of the motion-estimation pipeline, with explicit validity rather than hidden assumptions.",
+      "input_reference": "Edit python/gradients.py. NumPy is imported as np in these examples.\n\n~~~\ngradients(frame0, frame1)\n~~~\n\nframe0 and frame1 are finite real numeric arrays of equal shape (H,W), with H,W≥2. Integer inputs are permitted. Return the tuple (Ix,Iy,It), three floating arrays of the same shape. No normalization of intensity is requested.\n\nConcrete invocation (inputs are constructed here, not assumed):\n~~~\nframe0=np.array([[0.,1.,4.],[0.,1.,4.]])\nix, iy, it = gradients(frame0, frame0-0.5)\n~~~\n\nUse NumPy and the earlier course functions; preserve every input. Public checks run in a fresh offline process."
+    },
+    {
+      "id": "FLOW-02",
+      "title": "One patch, many equations",
+      "goal": "Turn a neighborhood into rows of evidence",
+      "description": "Inputs ix,iy,it: finite float arrays (H,W), same shape. Integer center (x,y), radius>=0; complete square patch must fit. Return A shape (N,2), b shape (N,), N=(2*radius+1)^2, row-major pixel order. Each row is [Ix,Iy]; b=-It. Raise ValueError if patch crosses border.",
+      "requirements": [
+        "Inputs ix,iy,it: finite float arrays (H,W), same shape. Integer center (x,y), radius>=0; complete square patch must fit. Return A shape (N,2), b shape (N,), N=(2*radius+1)^2, row-major pixel order. Each row is [Ix,Iy]; b=-It. Raise ValueError if patch crosses border.",
+        "Use NumPy, not an optical-flow library. Do not mutate inputs. Public tests run in an offline fresh process."
+      ],
+      "module": "windows",
+      "source_files": [
+        "python/gradients.py",
+        "python/windows.py"
+      ],
+      "editable_files": [
+        "python/windows.py"
+      ],
+      "public_testbench": "tests/public/test_windows.py",
+      "top": "pytest",
+      "prerequisites": [
+        "FLOW-01"
+      ],
+      "estimated_minutes": 20,
+      "difficulty": "easy",
+      "concepts": [
+        "One patch, many equations",
+        "array conventions and evidence"
+      ],
+      "hints": [
+        "One equation belongs to each pixel, not each image row.",
+        "Select the same square from all three derivative images.",
+        "Flatten each derivative in the same order, stack Ix/Iy as columns, and negate It."
+      ],
+      "lesson": "The solver needs one row per brightness observation. A patch shares two unknowns, horizontal u and vertical v. Expanding the window adds equations, not unknown vectors. This function gathers those equations in a predictable order so the gradients and temporal values still refer to the same pixels.\n\nAs a compact check, fill ix with 2, iy with −1 and it with −3 on a 3×4 image. Select center (x=2,y=1), radius=0. The sole equation is 2u−v=3, so A=[[2,−1]] with shape (1,2) and b=[3] with shape (1,). Radius zero still produces a matrix, not a flattened pair.\n\nFor the full textured patch I0=x·y, select x,y=1,2,3 around center (2,2). With ix=y, iy=x and it=−0.5y+0.25x, the row-major output is:\n~~~\nA = [[1,1],[1,2],[1,3],\n     [2,1],[2,2],[2,3],\n     [3,1],[3,2],[3,3]]\nb = [0.25,0,−0.25,0.75,0.5,0.25,1.25,1,0.75]\n~~~\nFirst check that the whole square fits. Slice all three arrays at exactly the same row and column bounds, including both ends of the radius. Read each slice across rows, then downward. Pair the flattened spatial gradients into two columns and negate the flattened temporal difference. Reuse this gathering function in dense_lk. Do not clip a window or let negative indices wrap around: a partial patch raises ValueError.\n\n## What the public checks reveal\nThe one-pixel check catches squeezed shapes and a missing minus sign. The row-order check uses distinct values at every position, so a transpose or x/y indexing swap changes the expected sequence [6,7,8,11,12,13,16,17,18]. The border-rejection check requires ValueError for a window centered at the corner with radius=1 and verifies input preservation.",
+      "visual": "",
+      "fixture": {
+        "id": "flow-02-worked",
+        "label": "Worked example: One patch, many equations",
+        "views": [
+          {
+            "title": "Follow the worked values",
+            "columns": [
+              "Selected pixel",
+              "A row",
+              "b"
+            ],
+            "rows": [
+              [
+                "radius=0",
+                "[2,-1]",
+                3
+              ],
+              [
+                "radius=1",
+                "9 rows, 2 columns",
+                "9 values"
+              ]
+            ],
+            "caption": "Each pixel supplies an equation; it does not supply two independent motion estimates."
+          }
+        ],
+        "visual_spec": {
+          "labels": [
+            "Selected pixel",
+            "A row",
+            "b"
+          ],
+          "view_type": "operation-specific worked table",
+          "selected_element": "current worked example",
+          "step_sequence": [
+            "Read inputs",
+            "Predict",
+            "Reveal and compare"
+          ],
+          "expected_observation": "Each pixel supplies an equation; it does not supply two independent motion estimates.",
+          "caption": "Supplied teaching fixture, not learner execution.",
+          "text_fallback": "[[\"radius=0\",\"[2,-1]\",3],[\"radius=1\",\"9 rows, 2 columns\",\"9 values\"]]",
+          "data_origin": "Authored numeric example"
+        }
+      },
+      "prediction": "How many equations does a radius-two patch produce?",
+      "reflection": "Why do more pixels not necessarily provide two independent directions of evidence?",
+      "expected_public_checks": 3,
+      "experiment": "Change radius from 0 to 1. Predict both output shapes before looking at the values.",
+      "optional_math": "",
+      "optional_hardware": "",
+      "misconception": "Each pixel supplies an equation; it does not supply two independent motion estimates.",
+      "completion": "Run the public checks and submit. All named checks must pass; zero collected checks is not success. Explain the reflection in your own words. These small contracts do not establish general optical-flow accuracy.",
+      "takeaway": "One patch, many equations is one part of the motion-estimation pipeline, with explicit validity rather than hidden assumptions.",
+      "input_reference": "Edit python/windows.py. NumPy is imported as np in these examples.\n\n~~~\npatch_system(ix, iy, it, x, y, radius)\n~~~\n\nix, iy and it are finite floating (H,W) arrays of equal shape. x is an integer column, y an integer row; radius is a nonnegative integer. N=(2·radius+1)² is the number of observations. Return floating A of shape (N,2) and b of shape (N,).\n\nConcrete invocation (inputs are constructed here, not assumed):\n~~~\nix=np.full((3,4),2.); iy=np.full((3,4),-1.)\nit=np.full((3,4),-3.)\na, b = patch_system(ix, iy, it, x=2, y=1, radius=0)\n~~~\n\nUse NumPy and the earlier course functions; preserve every input. Public checks run in a fresh offline process."
+    },
+    {
+      "id": "FLOW-03",
+      "title": "An edge is not enough: solve and check confidence",
+      "goal": "Fit motion only when both directions are supported",
+      "description": "a: finite float (N,2), b: finite float (N,), N>=1; threshold>0. Return dict uv float (2,), valid Python bool, min_eigenvalue float. Compute smallest eigenvalue of (A.T@A)/N. If below threshold, return uv=[0,0], valid=False; otherwise least-squares solution, valid=True. Do not add regularization to manufacture validity.",
+      "requirements": [
+        "a: finite float (N,2), b: finite float (N,), N>=1; threshold>0. Return dict uv float (2,), valid Python bool, min_eigenvalue float. Compute smallest eigenvalue of (A.T@A)/N. If below threshold, return uv=[0,0], valid=False; otherwise least-squares solution, valid=True. Do not add regularization to manufacture validity.",
+        "Use NumPy, not an optical-flow library. Do not mutate inputs. Public tests run in an offline fresh process."
+      ],
+      "module": "solve",
+      "source_files": [
+        "python/gradients.py",
+        "python/windows.py",
+        "python/solve.py"
+      ],
+      "editable_files": [
+        "python/solve.py"
+      ],
+      "public_testbench": "tests/public/test_solve.py",
+      "top": "pytest",
+      "prerequisites": [
+        "FLOW-02"
+      ],
+      "estimated_minutes": 30,
+      "difficulty": "medium",
+      "concepts": [
+        "An edge is not enough: solve and check confidence",
+        "array conventions and evidence"
+      ],
+      "hints": [
+        "Ask whether both columns carry independent information.",
+        "Use the symmetric 2×2 normal matrix to assess conditioning.",
+        "Check its minimum eigenvalue before solving least squares; keep invalid separate from zero displacement."
+      ],
+      "lesson": "A window may contain many equations but still hide a direction of motion. Least squares chooses the vector whose predicted brightness changes have the smallest total squared discrepancy. Before accepting that vector, examine whether the observations constrain both components.\n\nA contains one [horizontal gradient, vertical gradient] row per observation; b contains the negative temporal differences. Write a candidate displacement as q=[u,v]. Use A=[[1,0],[0,1],[1,1]] and b=[2,−1,1]. The equations ask for u=2, v=−1 and u+v=1. With q=[0,0] the squared error is 2²+(−1)²+1²=6; q=[2,−1] makes it zero. Multiplying out gives A.T@A=[[2,1],[1,2]] and A.T@b=[3,0]. Here N=3. The normalized matrix G=(A.T@A)/3 scales [1,1] by 1 and [1,−1] by 1/3. Those scale factors are its eigenvalues; the smaller is 1/3. At threshold 1e−6, return {uv: array([2.,−1.]), valid: True, min_eigenvalue: 1/3}.\n\nNow replace A with [[1,0],[2,0]]. Both rows ignore v. The smaller eigenvalue is zero, so return uv=[0,0], valid=False and min_eigenvalue=0 regardless of b. That placeholder does not mean stationary motion.\n\nForm the normalized two-by-two symmetric matrix and obtain its eigenvalues (np.linalg.eigvalsh is suitable). Reject when the smallest is below the positive threshold. Otherwise solve the original least-squares problem (np.linalg.lstsq is suitable). Report the actual smallest eigenvalue in both cases and convert the validity flag to a Python bool. Do not regularize a rank-deficient patch into apparent validity.\n\n## What the public checks reveal\nThe constrained check exercises the three-row calculation above. The aperture-and-flat check rejects both an edge and zero gradients; blindly taking a pseudoinverse would manufacture an answer. The normalization-and-stationary check repeats the same rows and expects unchanged confidence, while a well-constrained zero right-hand side must produce a valid zero vector. It also checks that A is preserved.",
+      "visual": "",
+      "fixture": {
+        "id": "flow-03-worked",
+        "label": "Worked example: An edge is not enough: solve and check confidence",
+        "views": [
+          {
+            "title": "Follow the worked values",
+            "columns": [
+              "Patch",
+              "A",
+              "b",
+              "uv",
+              "Valid"
+            ],
+            "rows": [
+              [
+                "Corner",
+                "[[1,0],[0,1],[1,1]]",
+                "[2,-1,1]",
+                "[2,-1]",
+                true
+              ],
+              [
+                "Edge",
+                "[[1,0],[2,0]]",
+                "[1,2]",
+                "[0,0] placeholder",
+                false
+              ]
+            ],
+            "caption": "The invalid edge placeholder is not a measurement of zero motion."
+          }
+        ],
+        "visual_spec": {
+          "labels": [
+            "Patch",
+            "A",
+            "b",
+            "uv",
+            "Valid"
+          ],
+          "view_type": "operation-specific worked table",
+          "selected_element": "current worked example",
+          "step_sequence": [
+            "Read inputs",
+            "Predict",
+            "Reveal and compare"
+          ],
+          "expected_observation": "The invalid edge placeholder is not a measurement of zero motion.",
+          "caption": "Supplied teaching fixture, not learner execution.",
+          "text_fallback": "[[\"Corner\",\"[[1,0],[0,1],[1,1]]\",\"[2,-1,1]\",\"[2,-1]\",true],[\"Edge\",\"[[1,0],[2,0]]\",\"[1,2]\",\"[0,0] placeholder\",false]]",
+          "data_origin": "Authored numeric example"
+        }
+      },
+      "prediction": "Can an invalid zero vector and a valid zero vector mean the same thing?",
+      "reflection": "What is the difference between zero motion and motion that the image cannot determine?",
+      "expected_public_checks": 3,
+      "experiment": "Replace the second gradient column with zeros. Compare validity, not just the returned vector.",
+      "optional_math": "",
+      "optional_hardware": "",
+      "misconception": "The invalid edge placeholder is not a measurement of zero motion.",
+      "completion": "Run the public checks and submit. All named checks must pass; zero collected checks is not success. Explain the reflection in your own words. These small contracts do not establish general optical-flow accuracy.",
+      "takeaway": "An edge is not enough: solve and check confidence is one part of the motion-estimation pipeline, with explicit validity rather than hidden assumptions.",
+      "input_reference": "Edit python/solve.py. NumPy is imported as np in these examples.\n\n~~~\nsolve_window(a, b, min_eigenvalue=1e-6)\n~~~\n\na is finite floating (N,2), b is finite floating (N,), N≥1. min_eigenvalue is a strictly positive scalar threshold on (A.T@A)/N. Return a dict with uv: floating (2,), valid: Python bool, and min_eigenvalue: float. Equality with the threshold is accepted.\n\nConcrete invocation (inputs are constructed here, not assumed):\n~~~\na=np.array([[1.,0.],[0.,1.],[1.,1.]])\nb=np.array([2.,-1.,1.])\nresult = solve_window(a, b, min_eigenvalue=1e-6)\n~~~\n\nUse NumPy and the earlier course functions; preserve every input. Public checks run in a fresh offline process."
+    },
+    {
+      "id": "FLOW-04",
+      "title": "Put a small-motion estimate at every usable pixel",
+      "goal": "Repeat a checked local fit across the image",
+      "description": "Frames: finite same-shape (H,W), H,W>=2. radius>=0. Return (flow float (H,W,2), valid bool (H,W)). At every full patch, use gradients, patch_system and solve_window; copy uv into flow[y,x]. Invalid or incomplete patches have flow=[0,0], valid=False. u is component 0, v component 1.",
+      "requirements": [
+        "Frames: finite same-shape (H,W), H,W>=2. radius>=0. Return (flow float (H,W,2), valid bool (H,W)). At every full patch, use gradients, patch_system and solve_window; copy uv into flow[y,x]. Invalid or incomplete patches have flow=[0,0], valid=False. u is component 0, v component 1.",
+        "Use NumPy, not an optical-flow library. Do not mutate inputs. Public tests run in an offline fresh process."
+      ],
+      "module": "dense",
+      "source_files": [
+        "python/gradients.py",
+        "python/windows.py",
+        "python/solve.py",
+        "python/dense.py"
+      ],
+      "editable_files": [
+        "python/dense.py"
+      ],
+      "public_testbench": "tests/public/test_dense.py",
+      "top": "pytest",
+      "prerequisites": [
+        "FLOW-03"
+      ],
+      "estimated_minutes": 35,
+      "difficulty": "medium",
+      "concepts": [
+        "Put a small-motion estimate at every usable pixel",
+        "array conventions and evidence"
+      ],
+      "hints": [
+        "Make derivative arrays once, not once per patch.",
+        "Visit only centers whose complete windows fit.",
+        "Store each two-component solution at [y,x] and its checked validity in a separate image."
+      ],
+      "lesson": "One patch produces one shared displacement. A dense field repeats that fit around each image location and stores the estimate at the patch center. “Dense” describes the storage grid; it does not imply every vector is supported. Keep a separate mask to distinguish no evidence from a supported stationary estimate.\n\nConstruct a 5×5 reference image I0=x·y and manufactured later values I1=I0−0.1y+0.2x, for coordinates 0 through 4. Then Ix=y, Iy=x and −It=0.1y−0.2x. Every complete 3×3 patch supports the exact linear fit [0.1,−0.2]. At center (2,2), A.T@A=[[42,36],[36,42]], A.T@b=[−3,−4.8], and multiplication by [0.1,−0.2] reproduces that right-hand side. Return that vector at the nine interior centers. The 16 border centers have incomplete patches, so keep [0,0] with False. The valid mask has rows 00000, 01110, 01110, 01110, 00000.\n\nCompute gradients once using gradients. Allocate a zero flow field and a False mask. Visit only complete centers, use patch_system to gather observations, and solve_window to check and fit them. Copy each returned vector and flag into the matching center; component zero is u. The manufactured example checks this assembly exactly; a real translated image is only approximately described by one linear step.\n\n## What the public checks reveal\nThe manufactured-motion check expects [0.1,−0.2] across supported interiors, detecting inconsistent signs and axes. The invalid-border-and-flat check catches unintended padding and missing conditioning checks. The stationary-and-preservation check requires valid zero motion on supported stationary texture while leaving the input unchanged.",
+      "visual": "",
+      "fixture": {
+        "id": "flow-04-worked",
+        "label": "Worked example: Put a small-motion estimate at every usable pixel",
+        "views": [
+          {
+            "title": "Follow the worked values",
+            "columns": [
+              "Array",
+              "Shape",
+              "Meaning"
+            ],
+            "rows": [
+              [
+                "frames",
+                "(7,9)",
+                "one gray value per pixel"
+              ],
+              [
+                "flow",
+                "(7,9,2)",
+                "u right, v down"
+              ],
+              [
+                "valid",
+                "(7,9)",
+                "conditioning and patch support"
+              ]
+            ],
+            "caption": "A radius-one patch cannot fit at the outermost rows or columns."
+          }
+        ],
+        "visual_spec": {
+          "labels": [
+            "Array",
+            "Shape",
+            "Meaning"
+          ],
+          "view_type": "operation-specific worked table",
+          "selected_element": "current worked example",
+          "step_sequence": [
+            "Read inputs",
+            "Predict",
+            "Reveal and compare"
+          ],
+          "expected_observation": "A radius-one patch cannot fit at the outermost rows or columns.",
+          "caption": "Supplied teaching fixture, not learner execution.",
+          "text_fallback": "[[\"frames\",\"(7,9)\",\"one gray value per pixel\"],[\"flow\",\"(7,9,2)\",\"u right, v down\"],[\"valid\",\"(7,9)\",\"conditioning and patch support\"]]",
+          "data_origin": "Authored numeric example"
+        }
+      },
+      "prediction": "What shape holds one 2-D motion vector per image pixel?",
+      "reflection": "Why can a larger window help an edge-like patch yet hurt near a moving-object boundary?",
+      "expected_public_checks": 3,
+      "experiment": "Run the same stationary pair with a flat image and with a textured image. Compare the masks.",
+      "optional_math": "",
+      "optional_hardware": "",
+      "misconception": "A radius-one patch cannot fit at the outermost rows or columns.",
+      "completion": "Run the public checks and submit. All named checks must pass; zero collected checks is not success. Explain the reflection in your own words. These small contracts do not establish general optical-flow accuracy.",
+      "takeaway": "Put a small-motion estimate at every usable pixel is one part of the motion-estimation pipeline, with explicit validity rather than hidden assumptions.",
+      "input_reference": "Edit python/dense.py. NumPy is imported as np in these examples.\n\n~~~\ndense_lk(frame0, frame1, radius=1, min_eigenvalue=1e-6)\n~~~\n\nframe0 and frame1 are finite real numeric (H,W) arrays of equal shape, H,W≥2. radius is a nonnegative integer defining a square window; min_eigenvalue is the positive threshold used by solve_window. Return (flow,valid), with floating flow (H,W,2) and boolean valid (H,W). Incomplete or rejected patches have zero flow and False.\n\nConcrete invocation (inputs are constructed here, not assumed):\n~~~\ny,x=np.mgrid[:5,:5].astype(float)\nframe0=x*y; frame1=frame0-0.1*y+0.2*x\nflow, valid = dense_lk(frame0, frame1, radius=1)\n~~~\n\nUse NumPy and the earlier course functions; preserve every input. Public checks run in a fresh offline process."
+    },
+    {
+      "id": "FLOW-05",
+      "title": "Look between pixels with bilinear interpolation",
+      "goal": "Read between stored pixel centers",
+      "description": "image: finite float (H,W), H,W>=1. x,y: same-shape finite float arrays of any shape. Return (values float, valid bool), same shape as x. Closed valid domain 0<=x<=W-1, 0<=y<=H-1. Interpolate four neighbors; collapse neighbor at last row/column. Invalid samples return 0 with valid=False. No wraparound or extrapolation.",
+      "requirements": [
+        "image: finite float (H,W), H,W>=1. x,y: same-shape finite float arrays of any shape. Return (values float, valid bool), same shape as x. Closed valid domain 0<=x<=W-1, 0<=y<=H-1. Interpolate four neighbors; collapse neighbor at last row/column. Invalid samples return 0 with valid=False. No wraparound or extrapolation.",
+        "Use NumPy, not an optical-flow library. Do not mutate inputs. Public tests run in an offline fresh process."
+      ],
+      "module": "sampling",
+      "source_files": [
+        "python/gradients.py",
+        "python/windows.py",
+        "python/solve.py",
+        "python/dense.py",
+        "python/sampling.py"
+      ],
+      "editable_files": [
+        "python/sampling.py"
+      ],
+      "public_testbench": "tests/public/test_sampling.py",
+      "top": "pytest",
+      "prerequisites": [
+        "FLOW-04"
+      ],
+      "estimated_minutes": 30,
+      "difficulty": "medium",
+      "concepts": [
+        "Look between pixels with bilinear interpolation",
+        "array conventions and evidence"
+      ],
+      "hints": [
+        "Locate the surrounding integer coordinates.",
+        "Use fractional x/y offsets as weights that sum to one.",
+        "Validate original coordinates first; clamp neighbor indices only to make indexing safe, not to label outside coordinates valid."
+      ],
+      "lesson": "A half-pixel displacement is meaningful even though there is no array index 0.5. Bilinear sampling combines the four neighboring intensities according to distance. This function is the shared numerical foundation for warping, refinement, flow expansion and round-trip checks.\n\nFor image=[[0,10],[20,30]], query x=0.25,y=0.5. Horizontal fractions are 0.75 and 0.25, vertical fractions both 0.5. In upper-left, upper-right, lower-left, lower-right order, the weights are [0.375,0.125,0.375,0.125]. Multiplying by [0,10,20,30] gives [0,1.25,7.5,3.75], totaling 12.5. With length-one coordinate arrays, return values=[12.5], valid=[True]. At (1,1) return 30 and True; at (1.01,1) return 0 and False.\n\nDetermine which queries are in the closed pixel-center domain before constructing safe neighbor indices. Use floor coordinates for the lower neighbors, cap the upper neighbors at the last index, and combine four contributions. Preserve the original query array shape even for a scalar-shaped array. Clipping indices to make indexing safe must not turn out-of-bounds queries into valid samples. A one-pixel image still supports exactly (0,0).\n\n## What the public checks reveal\nThe fractional check verifies all four contributions and the coordinate-array shape. The closed-border-and-outside check separates the last center from just beyond it; neither wrapping nor extrapolation passes. The constant-and-single-pixel check catches duplicated-weight errors at collapsed neighbors and verifies preservation.",
+      "visual": "",
+      "fixture": {
+        "id": "flow-05-worked",
+        "label": "Worked example: Look between pixels with bilinear interpolation",
+        "views": [
+          {
+            "title": "Follow the worked values",
+            "columns": [
+              "Sample x,y",
+              "Value",
+              "Valid"
+            ],
+            "rows": [
+              [
+                "0.25,0.5",
+                12.5,
+                true
+              ],
+              [
+                "1,1",
+                30,
+                true
+              ],
+              [
+                "1.01,1",
+                0,
+                false
+              ]
+            ],
+            "caption": "Source image [[0,10],[20,30]]; outside-domain zero is only a placeholder."
+          }
+        ],
+        "visual_spec": {
+          "labels": [
+            "Sample x,y",
+            "Value",
+            "Valid"
+          ],
+          "view_type": "operation-specific worked table",
+          "selected_element": "current worked example",
+          "step_sequence": [
+            "Read inputs",
+            "Predict",
+            "Reveal and compare"
+          ],
+          "expected_observation": "Source image [[0,10],[20,30]]; outside-domain zero is only a placeholder.",
+          "caption": "Supplied teaching fixture, not learner execution.",
+          "text_fallback": "[[\"0.25,0.5\",12.5,true],[\"1,1\",30,true],[\"1.01,1\",0,false]]",
+          "data_origin": "Authored numeric example"
+        }
+      },
+      "prediction": "What should the sampler return exactly on the final pixel center?",
+      "reflection": "Why must a zero sampled intensity and an invalid sample be distinguishable?",
+      "expected_public_checks": 3,
+      "experiment": "Sample a constant image at integer, fractional, border and out-of-frame coordinates.",
+      "optional_math": "",
+      "optional_hardware": "",
+      "misconception": "Source image [[0,10],[20,30]]; outside-domain zero is only a placeholder.",
+      "completion": "Run the public checks and submit. All named checks must pass; zero collected checks is not success. Explain the reflection in your own words. These small contracts do not establish general optical-flow accuracy.",
+      "takeaway": "Look between pixels with bilinear interpolation is one part of the motion-estimation pipeline, with explicit validity rather than hidden assumptions.",
+      "input_reference": "Edit python/sampling.py. NumPy is imported as np in these examples.\n\n~~~\nbilinear_sample(image, x, y)\n~~~\n\nimage is finite floating (H,W), H,W≥1. x and y are same-shaped finite floating NumPy coordinate arrays, with any shape; x means column and y means row. Return a tuple of floating values and boolean valid arrays, both shaped exactly like x. Invalid queries store 0 and False.\n\nConcrete invocation (inputs are constructed here, not assumed):\n~~~\nimage=np.array([[0.,10.],[20.,30.]])\nvalues, valid = bilinear_sample(\n    image, np.array([0.25]), np.array([0.5]))\n~~~\n\nUse NumPy and the earlier course functions; preserve every input. Public checks run in a fresh offline process."
+    },
+    {
+      "id": "FLOW-06",
+      "title": "Use forward flow to pull the second frame back",
+      "goal": "Align the later frame on the reference grid",
+      "description": "frame1: finite float (H,W). flow: finite float (H,W,2), [u,v] in pixels. Return (warped float (H,W), valid bool (H,W)) using bilinear_sample(frame1, x+u, y+v). Invalid samples zero. Do not wrap edges and do not negate forward flow.",
+      "requirements": [
+        "frame1: finite float (H,W). flow: finite float (H,W,2), [u,v] in pixels. Return (warped float (H,W), valid bool (H,W)) using bilinear_sample(frame1, x+u, y+v). Invalid samples zero. Do not wrap edges and do not negate forward flow.",
+        "Use NumPy, not an optical-flow library. Do not mutate inputs. Public tests run in an offline fresh process."
+      ],
+      "module": "warping",
+      "source_files": [
+        "python/gradients.py",
+        "python/windows.py",
+        "python/solve.py",
+        "python/dense.py",
+        "python/sampling.py",
+        "python/warping.py"
+      ],
+      "editable_files": [
+        "python/warping.py"
+      ],
+      "public_testbench": "tests/public/test_warping.py",
+      "top": "pytest",
+      "prerequisites": [
+        "FLOW-05"
+      ],
+      "estimated_minutes": 25,
+      "difficulty": "medium",
+      "concepts": [
+        "Use forward flow to pull the second frame back",
+        "array conventions and evidence"
+      ],
+      "hints": [
+        "Start from a meshgrid of the first frame's x/y positions.",
+        "Add component 0 to x and component 1 to y.",
+        "Sample the second frame at those coordinates and carry the sampler's validity mask."
+      ],
+      "lesson": "Forward flow tells us where a first-frame point appears in the second frame. A pull-warp asks that question independently for each output position, then reads the later image there. This aligns corresponding intensities without scattering pixels or leaving holes between destinations.\n\nUse a later image with three identical rows [9,0,1,2]. A proposed flow [1,0] at every pixel asks output column 0 to read input column 1, output column 1 to read column 2, and output column 2 to read column 3. The last output column asks for input column 4, which is outside. Each warped row is [0,1,2,0], with mask [True,True,True,False]. The first zero is an observed dark pixel; the last is an invalid placeholder. This distinction is why a second return array is needed.\n\nBuild arrays of integer reference coordinates covering (H,W). Add component 0 of flow to x and component 1 to y, then reuse bilinear_sample on frame1. Return its values and mask. Do not negate the displacement: a point moving right is found to the right in the second image. Do not roll the image, which would wrap borders and cannot represent fractional coordinates.\n\n## What the public checks reveal\nThe direction check uses the [9,0,1,2] rows to expose a reversed sign or wraparound. The component-order check uses vertical motion to ensure v changes rows. The fractional-and-preserve check samples a ramp at half-pixel offsets, requiring interpolation and unchanged flow input.",
+      "visual": "",
+      "fixture": {
+        "id": "flow-06-worked",
+        "label": "Worked example: Use forward flow to pull the second frame back",
+        "views": [
+          {
+            "title": "Follow the worked values",
+            "columns": [
+              "Frame0 x",
+              "Lookup x+u",
+              "Sample frame1",
+              "Valid"
+            ],
+            "rows": [
+              [
+                0,
+                1,
+                0,
+                true
+              ],
+              [
+                1,
+                2,
+                1,
+                true
+              ],
+              [
+                2,
+                3,
+                2,
+                true
+              ],
+              [
+                3,
+                4,
+                0,
+                false
+              ]
+            ],
+            "caption": "One-row illustration, frame1=[9,0,1,2], u=1,v=0. The final lookup is not observed."
+          }
+        ],
+        "visual_spec": {
+          "labels": [
+            "Frame0 x",
+            "Lookup x+u",
+            "Sample frame1",
+            "Valid"
+          ],
+          "view_type": "operation-specific worked table",
+          "selected_element": "current worked example",
+          "step_sequence": [
+            "Read inputs",
+            "Predict",
+            "Reveal and compare"
+          ],
+          "expected_observation": "One-row illustration, frame1=[9,0,1,2], u=1,v=0. The final lookup is not observed.",
+          "caption": "Supplied teaching fixture, not learner execution.",
+          "text_fallback": "[[0,1,0,true],[1,2,1,true],[2,3,2,true],[3,4,0,false]]",
+          "data_origin": "Authored numeric example"
+        }
+      },
+      "prediction": "Which sign of u aligns a pattern that moved right?",
+      "reflection": "Why does using forward flow here still produce an image on the first frame's grid?",
+      "expected_public_checks": 3,
+      "experiment": "Set u to +1 and then -1 on the supplied right-moving pair. Inspect the residual and invalid border.",
+      "optional_math": "",
+      "optional_hardware": "",
+      "misconception": "One-row illustration, frame1=[9,0,1,2], u=1,v=0. The final lookup is not observed.",
+      "completion": "Run the public checks and submit. All named checks must pass; zero collected checks is not success. Explain the reflection in your own words. These small contracts do not establish general optical-flow accuracy.",
+      "takeaway": "Use forward flow to pull the second frame back is one part of the motion-estimation pipeline, with explicit validity rather than hidden assumptions.",
+      "input_reference": "Edit python/warping.py. NumPy is imported as np in these examples.\n\n~~~\nwarp_frame(frame1, flow)\n~~~\n\nframe1 is finite floating (H,W); flow is finite floating (H,W,2) on the reference grid, with [u,v] measured in pixels. H,W≥1. Return (warped,valid), floating and boolean arrays of shape (H,W). Out-of-domain samples are 0 with False.\n\nConcrete invocation (inputs are constructed here, not assumed):\n~~~\nframe1=np.tile(np.array([9.,0.,1.,2.]), (3,1))\nflow=np.zeros((3,4,2)); flow[...,0]=1\nwarped, valid = warp_frame(frame1, flow)\n~~~\n\nUse NumPy and the earlier course functions; preserve every input. Public checks run in a fresh offline process."
+    },
+    {
+      "id": "FLOW-07",
+      "title": "Warp, measure what remains, and update",
+      "goal": "Use the remaining mismatch to correct a patch translation",
+      "description": "Frames finite same-shape (H,W); initial_flow finite (H,W,2). iterations>=0, radius>=0. Return (flow float (H,W,2), valid bool (H,W)). Copy initial_flow. For each full patch center in each round, use that CENTER'S current [u,v] to sample the ENTIRE frame1 patch at (patch_x+u,patch_y+v). Fit its residual with fixed frame0 patch gradients using solve_window. If all patch samples are in bounds and solve valid, add that center's delta. Invalid centers retain prior estimates. Return last-round accepted mask. Zero rounds return initial copy and all-False mask.",
+      "requirements": [
+        "Frames finite same-shape (H,W); initial_flow finite (H,W,2). iterations>=0, radius>=0. Return (flow float (H,W,2), valid bool (H,W)). Copy initial_flow. For each full patch center in each round, use that CENTER'S current [u,v] to sample the ENTIRE frame1 patch at (patch_x+u,patch_y+v). Fit its residual with fixed frame0 patch gradients using solve_window. If all patch samples are in bounds and solve valid, add that center's delta. Invalid centers retain prior estimates. Return last-round accepted mask. Zero rounds return initial copy and all-False mask.",
+        "Use NumPy, not an optical-flow library. Do not mutate inputs. Public tests run in an offline fresh process."
+      ],
+      "module": "refinement",
+      "source_files": [
+        "python/gradients.py",
+        "python/windows.py",
+        "python/solve.py",
+        "python/dense.py",
+        "python/sampling.py",
+        "python/warping.py",
+        "python/refinement.py"
+      ],
+      "editable_files": [
+        "python/refinement.py"
+      ],
+      "public_testbench": "tests/public/test_refinement.py",
+      "top": "pytest",
+      "prerequisites": [
+        "FLOW-06"
+      ],
+      "estimated_minutes": 45,
+      "difficulty": "medium",
+      "concepts": [
+        "Warp, measure what remains, and update",
+        "array conventions and evidence"
+      ],
+      "hints": [
+        "A patch gets one translation: its center's current vector.",
+        "Use fixed reference gradients and a freshly sampled target patch; reject if any patch coordinate is outside the image.",
+        "Form b as reference minus sampled patch, solve the two-column gradient system, and add that correction only to its center."
+      ],
+      "lesson": "A first guess rarely aligns a real patch exactly. Refinement samples the second image with the current estimate, measures what remains, fits a small correction and adds it. The gradient model describes a shared translation per patch, so every coordinate in a patch must use the center’s vector. Neighboring centers can have different guesses, but those guesses do not deform this patch’s sampling grid.\n\nUse 5×5 images I0=x·y and I1=(x−0.5)y, a true horizontal translation of 0.5. Initialize every vector to [0.25,0]. At center (2,2), reference rows are [1,2,3], [2,4,6], [3,6,9]. Sampling at x+0.25 gives rows [0.75,1.75,2.75], [1.5,3.5,5.5], [2.25,5.25,8.25]. The sampled-minus-reference residual is −0.25y; the fitting right-hand side is +0.25y.\n\nThe fixed gradients give A.T@A=[[42,36],[36,42]] and A.T@b=[10.5,9]. Solving yields correction [0.25,0]; the updated center is [0.5,0]. After one round, valid centers are rows 1..3 and columns 1..2 (six centers). Centers at column 3 would sample beyond x=4, so they retain [0.25,0] with False, as do incomplete border centers. This is a full output convention, not just an interior accuracy claim.\n\nCopy initial_flow and compute reference gradients once. For each round start a new False mask. At each complete center build the patch coordinates, add that center’s current vector to every coordinate, and use bilinear_sample on the original frame1. Reject unless every sample is supported. Flatten reference-minus-sampled values as b, pair the fixed gradients as A and reuse solve_window. Add a valid correction only at that center. Return the last round’s mask. With zero rounds, return the independent copy and an all-False mask. Repeatedly warping an already warped image would accumulate interpolation error.\n\n## What the public checks reveal\nThe stationary check expects supported interiors to remain at zero. The zero-rounds-and-preserve check requires an independent output copy and no claimed update. The small-translation-and-support check measures mean endpoint error on a fixed interior and rejects a wildly out-of-bounds initial guess without overwriting it. These checks exercise ordinary cases; also reason through the center-vector rule when neighboring initial vectors differ.",
+      "visual": "",
+      "fixture": {
+        "id": "flow-07-worked",
+        "label": "Worked example: Warp, measure what remains, and update",
+        "views": [
+          {
+            "title": "Follow the worked values",
+            "columns": [
+              "Stage",
+              "Flow",
+              "Meaning"
+            ],
+            "rows": [
+              [
+                "initial",
+                "[0.2,0]",
+                "current estimate"
+              ],
+              [
+                "delta",
+                "[0.05,-0.01]",
+                "fitted remaining motion"
+              ],
+              [
+                "updated",
+                "[0.25,-0.01]",
+                "add only where the full patch is valid"
+              ]
+            ],
+            "caption": "These are supplied arithmetic values, not a claim that a particular image produces that correction."
+          }
+        ],
+        "visual_spec": {
+          "labels": [
+            "Stage",
+            "Flow",
+            "Meaning"
+          ],
+          "view_type": "operation-specific worked table",
+          "selected_element": "current worked example",
+          "step_sequence": [
+            "Read inputs",
+            "Predict",
+            "Reveal and compare"
+          ],
+          "expected_observation": "These are supplied arithmetic values, not a claim that a particular image produces that correction.",
+          "caption": "Supplied teaching fixture, not learner execution.",
+          "text_fallback": "[[\"initial\",\"[0.2,0]\",\"current estimate\"],[\"delta\",\"[0.05,-0.01]\",\"fitted remaining motion\"],[\"updated\",\"[0.25,-0.01]\",\"add only where the full patch is valid\"]]",
+          "data_origin": "Authored numeric example"
+        }
+      },
+      "prediction": "Which source image is resampled on the second update?",
+      "reflection": "Why should every update warp the original second frame rather than the previous warped result?",
+      "expected_public_checks": 3,
+      "experiment": "Compare one versus several updates on a small translation, keeping the initial flow and image pair identical.",
+      "optional_math": "",
+      "optional_hardware": "",
+      "misconception": "These are supplied arithmetic values, not a claim that a particular image produces that correction.",
+      "completion": "Run the public checks and submit. All named checks must pass; zero collected checks is not success. Explain the reflection in your own words. These small contracts do not establish general optical-flow accuracy.",
+      "takeaway": "Warp, measure what remains, and update is one part of the motion-estimation pipeline, with explicit validity rather than hidden assumptions.",
+      "input_reference": "Edit python/refinement.py. NumPy is imported as np in these examples.\n\n~~~\nrefine_flow(frame0, frame1, initial_flow, iterations=3, radius=1, min_eigenvalue=1e-6)\n~~~\n\nframe0 and frame1 are finite real numeric arrays with equal shape (H,W), H,W≥2. initial_flow is finite floating (H,W,2). iterations and radius are nonnegative integers; min_eigenvalue is positive. Return floating flow (H,W,2) and boolean valid (H,W). Invalid centers retain prior vectors; zero iterations returns no valid updates. Inputs must remain unchanged.\n\nConcrete invocation (inputs are constructed here, not assumed):\n~~~\ny,x=np.mgrid[:5,:5].astype(float)\nframe0=x*y; frame1=(x-0.5)*y\ninitial=np.zeros((5,5,2)); initial[...,0]=0.25\nflow, valid = refine_flow(frame0, frame1, initial, iterations=1)\n~~~\n\nUse NumPy and the earlier course functions; preserve every input. Public checks run in a fresh offline process."
+    },
+    {
+      "id": "FLOW-08",
+      "title": "Make large motion small before solving it",
+      "goal": "Remove fine texture before reducing resolution",
+      "description": "image: finite float 2-D array, H,W>=2. Return low-pass-filtered image sampled at [::2,::2], shape (ceil(H/2),ceil(W/2)). Separable kernel [1,4,6,4,1]/16, np.pad mode='reflect' on each axis. Return float, preserve input. No scipy/OpenCV resize.",
+      "requirements": [
+        "image: finite float 2-D array, H,W>=2. Return low-pass-filtered image sampled at [::2,::2], shape (ceil(H/2),ceil(W/2)). Separable kernel [1,4,6,4,1]/16, np.pad mode='reflect' on each axis. Return float, preserve input. No scipy/OpenCV resize.",
+        "Use NumPy, not an optical-flow library. Do not mutate inputs. Public tests run in an offline fresh process."
+      ],
+      "module": "pyramid",
+      "source_files": [
+        "python/gradients.py",
+        "python/windows.py",
+        "python/solve.py",
+        "python/dense.py",
+        "python/sampling.py",
+        "python/warping.py",
+        "python/refinement.py",
+        "python/pyramid.py"
+      ],
+      "editable_files": [
+        "python/pyramid.py"
+      ],
+      "public_testbench": "tests/public/test_pyramid.py",
+      "top": "pytest",
+      "prerequisites": [
+        "FLOW-07"
+      ],
+      "estimated_minutes": 30,
+      "difficulty": "medium",
+      "concepts": [
+        "Make large motion small before solving it",
+        "array conventions and evidence"
+      ],
+      "hints": [
+        "Think of smoothing and decimation as separate steps.",
+        "The 2-D filter is the outer product of the 1-D kernel.",
+        "Use reflected padding for each axis, preserve the filtered shape, then retain even-indexed rows and columns."
+      ],
+      "lesson": "Large displacement becomes smaller in pixel units after reducing both images. But simply skipping pixels can convert stripes into a false constant pattern. Low-pass filtering first makes each retained intensity represent a neighborhood.\n\nFor an 8×8 image whose every row is [0,1,0,1,0,1,0,1], a five-tap filter with weights [1,4,6,4,1]/16 returns 0.5 everywhere. At even centers the weighted neighborhood is (0+4+0+4+0)/16; at odd centers it is (1+0+6+0+1)/16. The vertical filter preserves this constant. Taking rows and columns 0,2,4,6 then gives a 4×4 array filled with 0.5. Without filtering you would get zeros.\n\nFor a 5×5 image with every row [0,1,2,3,4], reflecting without repeating the endpoint gives first neighborhood [2,1,0,1,2]. Its sum is (2+4+0+4+2)/16=0.75. The retained interior value at x=2 is 2, and the last is 3.25. Return three rows [0.75,2,3.25].\n\nApply the specified kernel along one axis with np.pad mode=\"reflect\", then the other. “Separable” means these two one-dimensional passes equal the corresponding two-dimensional product filter. Select even rows and columns only after both passes. Preserve floating arithmetic and the input. You may use NumPy convolution or weighted shifted slices; no external resize routine is needed.\n\n## What the public checks reveal\nThe constant-shape check expects 5×7 to become 3×4 with intensity 3 unchanged. The filter-before-decimate check uses alternating stripes, catching an omitted or reordered filter. The reflect-phase check uses the ramp above to detect a different padding mode or sampling phase.",
+      "visual": "",
+      "fixture": {
+        "id": "flow-08-worked",
+        "label": "Worked example: Make large motion small before solving it",
+        "views": [
+          {
+            "title": "Follow the worked values",
+            "columns": [
+              "Stage",
+              "Shape",
+              "Translation units"
+            ],
+            "rows": [
+              [
+                "original",
+                "(5,7)",
+                "4 pixels"
+              ],
+              [
+                "reduce_half",
+                "(3,4)",
+                "roughly 2 pixels"
+              ],
+              [
+                "kernel",
+                "[1,4,6,4,1]/16",
+                "apply on both axes"
+              ]
+            ],
+            "caption": "Filter before decimation. The shape uses retained even indices, so odd dimensions round up."
+          }
+        ],
+        "visual_spec": {
+          "labels": [
+            "Stage",
+            "Shape",
+            "Translation units"
+          ],
+          "view_type": "operation-specific worked table",
+          "selected_element": "current worked example",
+          "step_sequence": [
+            "Read inputs",
+            "Predict",
+            "Reveal and compare"
+          ],
+          "expected_observation": "Filter before decimation. The shape uses retained even indices, so odd dimensions round up.",
+          "caption": "Supplied teaching fixture, not learner execution.",
+          "text_fallback": "[[\"original\",\"(5,7)\",\"4 pixels\"],[\"reduce_half\",\"(3,4)\",\"roughly 2 pixels\"],[\"kernel\",\"[1,4,6,4,1]/16\",\"apply on both axes\"]]",
+          "data_origin": "Authored numeric example"
+        }
+      },
+      "prediction": "What happens to an odd input dimension?",
+      "reflection": "Why can the coarsest level lose a feature that was useful at full resolution?",
+      "expected_public_checks": 3,
+      "experiment": "Compare smoothing-then-sampling with raw [::2,::2] on alternating stripes.",
+      "optional_math": "",
+      "optional_hardware": "",
+      "misconception": "Filter before decimation. The shape uses retained even indices, so odd dimensions round up.",
+      "completion": "Run the public checks and submit. All named checks must pass; zero collected checks is not success. Explain the reflection in your own words. These small contracts do not establish general optical-flow accuracy.",
+      "takeaway": "Make large motion small before solving it is one part of the motion-estimation pipeline, with explicit validity rather than hidden assumptions.",
+      "input_reference": "Edit python/pyramid.py. NumPy is imported as np in these examples.\n\n~~~\nreduce_half(image)\n~~~\n\nimage is a finite floating two-dimensional array (H,W), H,W≥2. Return one floating array with shape (ceil(H/2),ceil(W/2)). The kernel is [1,4,6,4,1]/16 on both axes, with reflect padding; keep filtered coordinates [::2,::2].\n\nConcrete invocation (inputs are constructed here, not assumed):\n~~~\nimage=np.tile(np.arange(5.,dtype=float), (5,1))\ncoarse = reduce_half(image)\n~~~\n\nUse NumPy and the earlier course functions; preserve every input. Public checks run in a fresh offline process."
+    },
+    {
+      "id": "FLOW-09",
+      "title": "A resized vector field needs resized vectors",
+      "goal": "Move a flow field to a finer grid and finer units",
+      "description": "flow finite float (h,w,2), h,w>=1. target_shape=(H,W), each dimension either 2*coarse or 2*coarse-1. Return float (H,W,2). Sample each component at (min(x/2,w-1),min(y/2,h-1)) with bilinear interpolation; multiply BOTH components by 2. Border extension is deliberate here. No mutation.",
+      "requirements": [
+        "flow finite float (h,w,2), h,w>=1. target_shape=(H,W), each dimension either 2*coarse or 2*coarse-1. Return float (H,W,2). Sample each component at (min(x/2,w-1),min(y/2,h-1)) with bilinear interpolation; multiply BOTH components by 2. Border extension is deliberate here. No mutation.",
+        "Use NumPy, not an optical-flow library. Do not mutate inputs. Public tests run in an offline fresh process."
+      ],
+      "module": "resize",
+      "source_files": [
+        "python/gradients.py",
+        "python/windows.py",
+        "python/solve.py",
+        "python/dense.py",
+        "python/sampling.py",
+        "python/warping.py",
+        "python/refinement.py",
+        "python/pyramid.py",
+        "python/resize.py"
+      ],
+      "editable_files": [
+        "python/resize.py"
+      ],
+      "public_testbench": "tests/public/test_resize.py",
+      "top": "pytest",
+      "prerequisites": [
+        "FLOW-08"
+      ],
+      "estimated_minutes": 25,
+      "difficulty": "medium",
+      "concepts": [
+        "A resized vector field needs resized vectors",
+        "array conventions and evidence"
+      ],
+      "hints": [
+        "Separate spatial interpolation from displacement-unit conversion.",
+        "Interpolate component 0 and component 1 with the same coordinates.",
+        "Use the factor-two pyramid coordinate map, extend boundary endpoints, then multiply both components by two."
+      ],
+      "lesson": "A coarse vector of one pixel spans two pixels on the next finer level. Expanding flow therefore has two jobs: interpolate where vectors are stored and convert the units of the vectors themselves. Keeping those jobs distinct prevents the common mistake of returning the right array shape with half-sized motion.\n\nTake a 2×2 coarse field whose horizontal component is [[0,2],[0,2]] and vertical component is zero. To build a 4×4 field, fine columns [0,1,2,3] query coarse columns [0,0.5,1,1.5]. Clamp the final query to 1. Bilinear interpolation yields [0,1,2,2]; multiplying by two gives [0,2,4,4] in every row. v remains zero. Both components must be scaled: a constant [1,−0.5] becomes [2,−1].\n\nFor a 2×3 field, valid finer shapes include (4,6) and (3,5). Odd sizes come from rounding during reduction, not a different coordinate spacing. Always divide fine coordinates by two and multiply vectors by two; do not use target_width/coarse_width.\n\nBuild the fine coordinate grid, map it to half coordinates and clamp each axis to the last coarse center. Use bilinear_sample separately for u and v. Stack the interpolated components on the last axis and convert their units. Border extension here is deliberate: you are extending a field onto a finer grid, not claiming an observed image correspondence beyond its crop.\n\n## What the public checks reveal\nThe constant-even-odd check verifies the same [2,−1] result at both target shapes and preservation. The interpolation-and-endpoint-extension check expects [0,2,4,4], exposing nearest-neighbor resizing or invalidating the last coordinate. The vertical-and-single-cell check requires a 1×1 field [0.25,2] to expand to [0.5,4], catching horizontal-only scaling.",
+      "visual": "",
+      "fixture": {
+        "id": "flow-09-worked",
+        "label": "Worked example: A resized vector field needs resized vectors",
+        "views": [
+          {
+            "title": "Follow the worked values",
+            "columns": [
+              "Coarse vector",
+              "Fine shape",
+              "Fine vector"
+            ],
+            "rows": [
+              [
+                "[1,-0.5]",
+                "even target",
+                "[2,-1]"
+              ],
+              [
+                "[1,-0.5]",
+                "odd target",
+                "[2,-1]"
+              ]
+            ],
+            "caption": "Vector magnitude doubles regardless of rounded width ratio; interpolate positions separately."
+          }
+        ],
+        "visual_spec": {
+          "labels": [
+            "Coarse vector",
+            "Fine shape",
+            "Fine vector"
+          ],
+          "view_type": "operation-specific worked table",
+          "selected_element": "current worked example",
+          "step_sequence": [
+            "Read inputs",
+            "Predict",
+            "Reveal and compare"
+          ],
+          "expected_observation": "Vector magnitude doubles regardless of rounded width ratio; interpolate positions separately.",
+          "caption": "Supplied teaching fixture, not learner execution.",
+          "text_fallback": "[[\"[1,-0.5]\",\"even target\",\"[2,-1]\"],[\"[1,-0.5]\",\"odd target\",\"[2,-1]\"]]",
+          "data_origin": "Authored numeric example"
+        }
+      },
+      "prediction": "Should an odd target width change the displacement scale factor?",
+      "reflection": "Why is multiplying only the horizontal component wrong, even when the image is wider than it is tall?",
+      "expected_public_checks": 3,
+      "experiment": "Upsample a constant field into both even and odd target shapes. Does the displacement scale differ?",
+      "optional_math": "",
+      "optional_hardware": "",
+      "misconception": "Vector magnitude doubles regardless of rounded width ratio; interpolate positions separately.",
+      "completion": "Run the public checks and submit. All named checks must pass; zero collected checks is not success. Explain the reflection in your own words. These small contracts do not establish general optical-flow accuracy.",
+      "takeaway": "A resized vector field needs resized vectors is one part of the motion-estimation pipeline, with explicit validity rather than hidden assumptions.",
+      "input_reference": "Edit python/resize.py. NumPy is imported as np in these examples.\n\n~~~\nupsample_flow(flow, target_shape)\n~~~\n\nflow is finite floating (h,w,2), h,w≥1. target_shape=(H,W) contains integers; each target dimension is either twice its coarse dimension or one less. Return floating (H,W,2), sampling components at (min(x/2,w−1),min(y/2,h−1)) and multiplying both by two. Do not mutate flow.\n\nConcrete invocation (inputs are constructed here, not assumed):\n~~~\nflow=np.zeros((2,2,2))\nflow[...,0]=[[0.,2.],[0.,2.]]\nfine = upsample_flow(flow, target_shape=(4,4))\n~~~\n\nUse NumPy and the earlier course functions; preserve every input. Public checks run in a fresh offline process."
+    },
+    {
+      "id": "FLOW-10",
+      "title": "Assemble coarse-to-fine optical flow",
+      "goal": "Connect the pieces into a coarse-to-fine estimator",
+      "description": "Frames finite same-shape 2-D, H,W>=2; levels>=1, iterations>=0. All requested levels must have min dimension>=2*radius+1 and >=2; otherwise ValueError. Return (flow float original (H,W,2), valid bool (H,W)). Build both pyramids with reduce_half; start zero at coarsest, refine_flow at each level from coarse to fine; upsample_flow between levels. Return final level's validity only. No OpenCV/SciPy flow solver.",
+      "requirements": [
+        "Frames finite same-shape 2-D, H,W>=2; levels>=1, iterations>=0. All requested levels must have min dimension>=2*radius+1 and >=2; otherwise ValueError. Return (flow float original (H,W,2), valid bool (H,W)). Build both pyramids with reduce_half; start zero at coarsest, refine_flow at each level from coarse to fine; upsample_flow between levels. Return final level's validity only. No OpenCV/SciPy flow solver.",
+        "Use NumPy, not an optical-flow library. Do not mutate inputs. Public tests run in an offline fresh process."
+      ],
+      "module": "multiscale",
+      "source_files": [
+        "python/gradients.py",
+        "python/windows.py",
+        "python/solve.py",
+        "python/dense.py",
+        "python/sampling.py",
+        "python/warping.py",
+        "python/refinement.py",
+        "python/pyramid.py",
+        "python/resize.py",
+        "python/multiscale.py"
+      ],
+      "editable_files": [
+        "python/multiscale.py"
+      ],
+      "public_testbench": "tests/public/test_multiscale.py",
+      "top": "pytest",
+      "prerequisites": [
+        "FLOW-09"
+      ],
+      "estimated_minutes": 50,
+      "difficulty": "hard",
+      "concepts": [
+        "Assemble coarse-to-fine optical flow",
+        "array conventions and evidence"
+      ],
+      "hints": [
+        "Work from the end of the pyramid list back to the original image.",
+        "Expand flow once per level transition, not once per iteration.",
+        "Initialize zero only at the coarsest level; reuse reduce_half, upsample_flow and refine_flow."
+      ],
+      "lesson": "You now have image reduction, local refinement and flow expansion. The final estimator uses a small image to obtain a useful starting guess, then asks successively finer images to correct it. Every vector is measured in pixels of its current level.\n\nFollow a displacement [4,−2] through a 17×21 pair: the grids 17×21, 9×11 and 5×6 have truth [4,−2], [2,−1] and [1,−0.5]. Start with zero on 5×6; if refinement finds [1,−0.5], expansion supplies [2,−1] on 9×11 and then [4,−2] on 17×21. Those are unit conversions, not guaranteed estimates. Each level must actually fit its images.\n\nFor a small exact invocation, use identical 5×5 images I=x·y with levels=1 and iterations=1. There is no reduction. The initial flow is zero, every residual is zero, and every complete radius-one patch supports a zero correction. Expected flow is all zeros with shape (5,5,2); valid has rows 00000, 01110, 01110, 01110, 00000. With levels=3, the requested shapes would be 5×5, 3×3, 2×2; radius=1 needs a 3×3 patch, so raise ValueError rather than silently removing a requested level.\n\nBuild both pyramids with reduce_half and validate every level against the patch size and minimum axis length two. Allocate zero flow only on the coarsest level. Moving from coarse to fine, call refine_flow with that level’s original frames, then upsample_flow once for the next level. Return the finest flow and that level’s final validity. Do not reset to zero at each level or multiply vectors once per iteration.\n\n## What the public checks reveal\nThe identity check expects zero motion on supported stationary texture at two levels. The translation check uses a smooth analytic scene with true [1,−0.5], requires a fixed core to remain valid and mean endpoint error below 0.3 pixels, and checks input preservation. The flat-and-level-validation check rejects unsupported flat texture and raises ValueError for excessive levels. These are modest controlled examples, not a benchmark of general accuracy.",
+      "visual": "",
+      "fixture": {
+        "id": "flow-10-worked",
+        "label": "Worked example: Assemble coarse-to-fine optical flow",
+        "views": [
+          {
+            "title": "Follow the worked values",
+            "columns": [
+              "Stage",
+              "Grid shape",
+              "Illustrative translation"
+            ],
+            "rows": [
+              [
+                "coarsest",
+                "(8,10)",
+                "1 pixel"
+              ],
+              [
+                "middle",
+                "(16,20)",
+                "2 pixels"
+              ],
+              [
+                "original",
+                "(32,40)",
+                "4 pixels"
+              ]
+            ],
+            "caption": "Starting estimates travel upward; refinement must still verify useful local evidence at each scale."
+          }
+        ],
+        "visual_spec": {
+          "labels": [
+            "Stage",
+            "Grid shape",
+            "Illustrative translation"
+          ],
+          "view_type": "operation-specific worked table",
+          "selected_element": "current worked example",
+          "step_sequence": [
+            "Read inputs",
+            "Predict",
+            "Reveal and compare"
+          ],
+          "expected_observation": "Starting estimates travel upward; refinement must still verify useful local evidence at each scale.",
+          "caption": "Supplied teaching fixture, not learner execution.",
+          "text_fallback": "[[\"coarsest\",\"(8,10)\",\"1 pixel\"],[\"middle\",\"(16,20)\",\"2 pixels\"],[\"original\",\"(32,40)\",\"4 pixels\"]]",
+          "data_origin": "Authored numeric example"
+        }
+      },
+      "prediction": "At which resolution is the returned flow measured?",
+      "reflection": "Why can extra coarse levels make a tiny moving feature harder to track?",
+      "expected_public_checks": 3,
+      "experiment": "Compare levels=1 with levels=3 on the same translation, reporting masked endpoint error AND valid coverage.",
+      "optional_math": "",
+      "optional_hardware": "",
+      "misconception": "Starting estimates travel upward; refinement must still verify useful local evidence at each scale.",
+      "completion": "Run the public checks and submit. All named checks must pass; zero collected checks is not success. Explain the reflection in your own words. These small contracts do not establish general optical-flow accuracy.",
+      "takeaway": "Assemble coarse-to-fine optical flow is one part of the motion-estimation pipeline, with explicit validity rather than hidden assumptions.",
+      "input_reference": "Edit python/multiscale.py. NumPy is imported as np in these examples.\n\n~~~\npyramidal_flow(frame0, frame1, levels=3, iterations=3, radius=1, min_eigenvalue=1e-6)\n~~~\n\nframe0 and frame1 are finite real numeric (H,W) arrays of equal shape, H,W≥2. levels is a positive integer counting the original image; iterations is a nonnegative number of refinement rounds per level; radius is a nonnegative integer and min_eigenvalue is positive. Every level must have both dimensions ≥max(2,2·radius+1), else ValueError. Return floating flow (H,W,2) in original pixels and boolean valid (H,W).\n\nConcrete invocation (inputs are constructed here, not assumed):\n~~~\ny,x=np.mgrid[:5,:5].astype(float)\nframe=x*y\nflow, valid = pyramidal_flow(frame, frame, levels=1, iterations=1)\n~~~\n\nUse NumPy and the earlier course functions; preserve every input. Public checks run in a fresh offline process."
+    },
+    {
+      "id": "FLOW-11",
+      "title": "Measure motion error, not just image alignment",
+      "goal": "Evaluate the arrow tips on a declared region",
+      "description": "estimate,truth finite float (H,W,2), mask bool (H,W). Return dict errors float (H,W), mean float, count Python int. errors is Euclidean vector difference at masked pixels and NaN elsewhere. mean is masked average; with no selected pixels mean=NaN and count=0. No mutation.",
+      "requirements": [
+        "estimate,truth finite float (H,W,2), mask bool (H,W). Return dict errors float (H,W), mean float, count Python int. errors is Euclidean vector difference at masked pixels and NaN elsewhere. mean is masked average; with no selected pixels mean=NaN and count=0. No mutation.",
+        "Use NumPy, not an optical-flow library. Do not mutate inputs. Public tests run in an offline fresh process."
+      ],
+      "module": "metrics",
+      "source_files": [
+        "python/gradients.py",
+        "python/windows.py",
+        "python/solve.py",
+        "python/dense.py",
+        "python/sampling.py",
+        "python/warping.py",
+        "python/refinement.py",
+        "python/pyramid.py",
+        "python/resize.py",
+        "python/multiscale.py",
+        "python/metrics.py"
+      ],
+      "editable_files": [
+        "python/metrics.py"
+      ],
+      "public_testbench": "tests/public/test_metrics.py",
+      "top": "pytest",
+      "prerequisites": [
+        "FLOW-10"
+      ],
+      "estimated_minutes": 20,
+      "difficulty": "medium",
+      "concepts": [
+        "Measure motion error, not just image alignment",
+        "array conventions and evidence"
+      ],
+      "hints": [
+        "Take the norm along the final, two-component axis.",
+        "Select evaluation pixels before calculating the mean.",
+        "Use NaN for unmeasured entries and explicitly handle an empty mask."
+      ],
+      "lesson": "Image alignment can hide a wrong correspondence. To evaluate displacement directly, compare estimated vectors with independent truth. Endpoint error is the Euclidean distance between their tips, measured in pixels of the evaluation image. This function measures a completed estimate; truth must never be an input to the estimator itself.\n\nUse a 2×3 zero truth field. Set estimate[0,0]=[3,4], leave other estimates zero and select mask[0,:2]=True. The selected vector differences are [3,4] and [0,0]. Their lengths are sqrt(9+16)=5 and 0; the mean is 2.5 and count is 2. Return errors=[[5,0,NaN],[NaN,NaN,NaN]], mean=2.5, count=2. Coverage, computed from this result and the image size, is 2/6=33.3%. It is not an additional return key required by this contract.\n\nInitialize the error image to NaN, compute vector lengths on selected pixels and fill only those entries. Average over the selected count, not all image positions or both vector components. Handle the empty mask explicitly with mean=NaN and count=0. Keep both inputs unchanged. The caller chooses the evaluation region; this function does not invent extra validity criteria.\n\n## What the public checks reveal\nThe masked-mean check uses the six-pixel example and catches dividing by the full image area. The empty-is-not-perfect check requires NaN, because no measurements cannot establish zero error. The axes-and-preservation check expects sqrt(2) for a two-component unit difference and checks the returned image shape and unchanged estimate.",
+      "visual": "",
+      "fixture": {
+        "id": "flow-11-worked",
+        "label": "Worked example: Measure motion error, not just image alignment",
+        "views": [
+          {
+            "title": "Follow the worked values",
+            "columns": [
+              "Truth",
+              "Estimate",
+              "Endpoint error"
+            ],
+            "rows": [
+              [
+                "[2,-1]",
+                "[1,1]",
+                "sqrt(5)"
+              ],
+              [
+                "[2,-1]",
+                "[2,-1]",
+                0
+              ],
+              [
+                "empty mask",
+                "no observations",
+                "NaN, count=0"
+              ]
+            ],
+            "caption": "Report selected count or coverage together with masked mean error."
+          }
+        ],
+        "visual_spec": {
+          "labels": [
+            "Truth",
+            "Estimate",
+            "Endpoint error"
+          ],
+          "view_type": "operation-specific worked table",
+          "selected_element": "current worked example",
+          "step_sequence": [
+            "Read inputs",
+            "Predict",
+            "Reveal and compare"
+          ],
+          "expected_observation": "Report selected count or coverage together with masked mean error.",
+          "caption": "Supplied teaching fixture, not learner execution.",
+          "text_fallback": "[[\"[2,-1]\",\"[1,1]\",\"sqrt(5)\"],[\"[2,-1]\",\"[2,-1]\",0],[\"empty mask\",\"no observations\",\"NaN, count=0\"]]",
+          "data_origin": "Authored numeric example"
+        }
+      },
+      "prediction": "Does an empty evaluation mask mean zero error?",
+      "reflection": "How could an estimator appear to improve its mean error simply by rejecting more pixels?",
+      "expected_public_checks": 3,
+      "experiment": "Compare zero flow, correct flow and a deliberately swapped [v,u] field on one known translation.",
+      "optional_math": "",
+      "optional_hardware": "",
+      "misconception": "Report selected count or coverage together with masked mean error.",
+      "completion": "Run the public checks and submit. All named checks must pass; zero collected checks is not success. Explain the reflection in your own words. These small contracts do not establish general optical-flow accuracy.",
+      "takeaway": "Measure motion error, not just image alignment is one part of the motion-estimation pipeline, with explicit validity rather than hidden assumptions.",
+      "input_reference": "Edit python/metrics.py. NumPy is imported as np in these examples.\n\n~~~\nendpoint_error(estimate, truth, mask)\n~~~\n\nestimate and truth are finite floating (H,W,2) arrays; mask is boolean (H,W). Return a dict with errors: floating (H,W), mean: float, count: Python int. Unselected errors are NaN. Selected errors are Euclidean lengths over the last axis. Empty selection gives count=0 and mean=NaN.\n\nConcrete invocation (inputs are constructed here, not assumed):\n~~~\ntruth=np.zeros((2,3,2)); estimate=truth.copy()\nestimate[0,0]=[3.,4.]\nmask=np.zeros((2,3),bool); mask[0,:2]=True\nresult = endpoint_error(estimate, truth, mask)\n~~~\n\nUse NumPy and the earlier course functions; preserve every input. Public checks run in a fresh offline process."
+    },
+    {
+      "id": "FLOW-12",
+      "title": "Ask whether the estimated path comes back",
+      "goal": "Check whether a proposed correspondence returns home",
+      "description": "forward/backward finite float (H,W,2); validity bool (H,W); threshold>=0. Return consistent bool (H,W). At p sample B at p+F(p); require in-bounds, forward_valid[p], all contributing bilinear backward samples valid (sample float validity mask isclose(1)), and norm(F(p)+B(p+F(p)))<=threshold. Never compare F(p) with B(p) at the same coordinate unless F=0.",
+      "requirements": [
+        "forward/backward finite float (H,W,2); validity bool (H,W); threshold>=0. Return consistent bool (H,W). At p sample B at p+F(p); require in-bounds, forward_valid[p], all contributing bilinear backward samples valid (sample float validity mask isclose(1)), and norm(F(p)+B(p+F(p)))<=threshold. Never compare F(p) with B(p) at the same coordinate unless F=0.",
+        "Use NumPy, not an optical-flow library. Do not mutate inputs. Public tests run in an offline fresh process."
+      ],
+      "module": "consistency",
+      "source_files": [
+        "python/gradients.py",
+        "python/windows.py",
+        "python/solve.py",
+        "python/dense.py",
+        "python/sampling.py",
+        "python/warping.py",
+        "python/refinement.py",
+        "python/pyramid.py",
+        "python/resize.py",
+        "python/multiscale.py",
+        "python/metrics.py",
+        "python/consistency.py"
+      ],
+      "editable_files": [
+        "python/consistency.py"
+      ],
+      "public_testbench": "tests/public/test_consistency.py",
+      "top": "pytest",
+      "prerequisites": [
+        "FLOW-11"
+      ],
+      "estimated_minutes": 35,
+      "difficulty": "medium",
+      "concepts": [
+        "Ask whether the estimated path comes back",
+        "array conventions and evidence"
+      ],
+      "hints": [
+        "Follow the forward endpoint before reading backward flow.",
+        "Use the sampler for both backward components and for the backward validity mask.",
+        "Intersect source validity, destination support, contributing validity and the round-trip norm threshold."
+      ],
+      "lesson": "Forward–backward agreement is useful when true motion is unknown. Starting at a first-frame position, follow forward flow into the second frame, then read backward flow there. If those estimates describe the same correspondence, their sum should be near zero. A consistency flag is evidence of agreement, not proof of correct motion.\n\nFor a complete tiny example, use forward=[1,0] everywhere on a 2×3 grid, backward=[−1,0] everywhere, and both validity masks True. At p=(0,0), the destination is (1,0); reading backward there returns to (0,0). Column 1 also returns. Column 2 points outside the crop. Thus consistent is [[True,True,False],[True,True,False]] at threshold=0.5.\n\nA fractional example shows why the lookup matters. At p=(1,1), let F=[0.5,0] and let B(1,1)=[−0.25,0], B(2,1)=[−0.75,0]. Destination (1.5,1) gives their half-weight average [−0.5,0], hence round-trip vector [0,0]. Reading B at p instead gives [0.25,0]. If either contributing backward sample is invalid, interpolating its floating validity mask gives 0.5, so reject even if the numerical vector sum is zero.\n\nBuild the destination coordinates from forward flow. Use bilinear_sample on both backward components and on backward_valid converted to floating values. Require forward_valid, an in-bounds destination and sampled backward validity np.isclose to 1. Then compare the Euclidean length of forward plus sampled backward to the inclusive threshold. A zero-weight neighbor need not be valid. Return only the combined boolean mask; leave the vector inputs unchanged.\n\n## What the public checks reveal\nThe constant-inverse-and-border check verifies inverse motion while excluding the exiting column. The destination-not-same-index check puts the inverse vector only at the destination; comparing B at the starting index fails. The invalid-reverse-and-fractional check invalidates one contributing half-weight sample, so neighboring forward lookups must fail support rather than accepting placeholder cancellation.",
+      "visual": "",
+      "fixture": {
+        "id": "flow-12-worked",
+        "label": "Worked example: Ask whether the estimated path comes back",
+        "views": [
+          {
+            "title": "Follow the worked values",
+            "columns": [
+              "Forward",
+              "Backward at destination",
+              "Round trip",
+              "Consistent at threshold .5"
+            ],
+            "rows": [
+              [
+                "[1,0]",
+                "[-1,0]",
+                "[0,0]",
+                true
+              ],
+              [
+                "[1,0]",
+                "[0,0]",
+                "[1,0]",
+                false
+              ]
+            ],
+            "caption": "Both the endpoint and contributing reverse-flow samples must be valid. Agreement is not proof of truth."
+          }
+        ],
+        "visual_spec": {
+          "labels": [
+            "Forward",
+            "Backward at destination",
+            "Round trip",
+            "Consistent at threshold .5"
+          ],
+          "view_type": "operation-specific worked table",
+          "selected_element": "current worked example",
+          "step_sequence": [
+            "Read inputs",
+            "Predict",
+            "Reveal and compare"
+          ],
+          "expected_observation": "Both the endpoint and contributing reverse-flow samples must be valid. Agreement is not proof of truth.",
+          "caption": "Supplied teaching fixture, not learner execution.",
+          "text_fallback": "[[\"[1,0]\",\"[-1,0]\",\"[0,0]\",true],[\"[1,0]\",\"[0,0]\",\"[1,0]\",false]]",
+          "data_origin": "Authored numeric example"
+        }
+      },
+      "prediction": "At which coordinate should backward flow be read?",
+      "reflection": "Why can forward–backward agreement still accept a wrong correspondence on repeated texture?",
+      "expected_public_checks": 3,
+      "experiment": "Corrupt one backward-flow vector and inspect which forward destination samples are affected.",
+      "optional_math": "",
+      "optional_hardware": "",
+      "misconception": "Both the endpoint and contributing reverse-flow samples must be valid. Agreement is not proof of truth.",
+      "completion": "Run the public checks and submit. All named checks must pass; zero collected checks is not success. Explain the reflection in your own words. These small contracts do not establish general optical-flow accuracy.",
+      "takeaway": "Ask whether the estimated path comes back is one part of the motion-estimation pipeline, with explicit validity rather than hidden assumptions.",
+      "input_reference": "Edit python/consistency.py. NumPy is imported as np in these examples.\n\n~~~\nfb_consistency(forward, backward, forward_valid, backward_valid, threshold=0.5)\n~~~\n\nforward and backward are finite floating (H,W,2) arrays, H,W≥1. forward_valid and backward_valid are boolean (H,W). threshold is a nonnegative pixel distance. Return consistent, a boolean (H,W) array requiring supported source and destination plus round-trip norm ≤threshold. A passing flag can still describe two mutually agreeing wrong matches.\n\nConcrete invocation (inputs are constructed here, not assumed):\n~~~\nforward=np.zeros((2,3,2)); forward[...,0]=1\nbackward=-forward\nvalid=np.ones((2,3),bool)\nconsistent = fb_consistency(\n    forward, backward, valid, valid, threshold=0.5)\n~~~\n\nUse NumPy and the earlier course functions; preserve every input. Public checks run in a fresh offline process."
+    }
+  ]
+}

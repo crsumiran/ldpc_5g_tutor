@@ -1,0 +1,63 @@
+services:
+  opencode:
+    build:
+      context: ./harness
+    # No tutor repository, learner workspace, Docker socket, or host credentials.
+    # OpenCode auth/session files are confined to RAM and cleared on restart.
+    tmpfs:
+      - /runtime:size=256m,mode=0700
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "node", "-e", "fetch('http://127.0.0.1:4096/global/health').then(r=>r.json()).then(x=>process.exit(x.healthy?0:1)).catch(()=>process.exit(1))"]
+      interval: 5s
+      timeout: 3s
+      retries: 20
+
+  sandbox-image:
+    build:
+      context: ./sandbox
+      dockerfile: Dockerfile
+    image: de-tutor-sandbox:latest
+    entrypoint: ["true"]
+
+  api:
+    build:
+      context: ./backend
+      dockerfile: Dockerfile
+    env_file: .env
+    ports:
+      - "8000:8000"
+    volumes:
+      - ${PROJECT_ROOT}:${PROJECT_ROOT}
+      - /var/run/docker.sock:/var/run/docker.sock
+    environment:
+      PYTHONPATH: ${PROJECT_ROOT}/backend
+      DATABASE_URL: sqlite:///${PROJECT_ROOT}/data/tutor.db
+      ALLOWED_IMPORT_ROOTS: ${PROJECT_ROOT}
+      DATA_DIR: ${PROJECT_ROOT}/data
+      CURRICULUM_DIR: ${PROJECT_ROOT}/curriculum
+      TUTOR_OPENROUTER_MIN_INTERVAL_SECONDS: ${TUTOR_OPENROUTER_MIN_INTERVAL_SECONDS:-3.2}
+      TUTOR_ENGINE: ${TUTOR_ENGINE:-opencode}
+      OPENCODE_URL: http://opencode:4096
+    depends_on:
+      opencode:
+        condition: service_healthy
+    healthcheck:
+      test: ["CMD", "python", "-c", "import urllib.request; urllib.request.urlopen('http://127.0.0.1:8000/api/health')"]
+      interval: 5s
+      timeout: 3s
+      retries: 10
+
+  web:
+    build:
+      context: ./web
+      dockerfile: Dockerfile
+      args:
+        BACKEND_INTERNAL_URL: http://api:8000
+    environment:
+      BACKEND_INTERNAL_URL: http://api:8000
+    depends_on:
+      api:
+        condition: service_healthy
+    ports:
+      - "3000:3000"

@@ -1,0 +1,91 @@
+body {
+  font-family: system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
+  max-width: 960px;
+  margin: 2rem auto;
+  padding: 0 1rem;
+  color: #1f2933;
+  line-height: 1.5;
+}
+
+h1, h2, h3 {
+  color: #0f172a;
+}
+
+textarea, pre, code {
+  font-family: "SF Mono", "JetBrains Mono", Menlo, Consolas, monospace;
+}
+
+textarea {
+  width: 100%;
+  padding: 0.6rem;
+  border: 1px solid #cbd2d9;
+  border-radius: 6px;
+  background: #f8fafc;
+  box-sizing: border-box;
+}
+
+pre {
+  background: #0f172a;
+  color: #e2e8f0;
+  padding: 1rem;
+  border-radius: 6px;
+  overflow-x: auto;
+  white-space: pre-wrap;
+}
+
+.card {
+  border: 1px solid #e2e8f0;
+  border-radius: 8px;
+  padding: 1rem;
+  margin-bottom: 1rem;
+}
+
+button {
+  background: #2563eb;
+  color: white;
+  border: none;
+  padding: 0.5rem 1rem;
+  border-radius: 6px;
+  cursor: pointer;
+  margin: 0.25rem 0.25rem 0.25rem 0;
+  font-size: 0.9rem;
+}
+
+button:hover {
+  background: #1d4ed8;
+}
+
+button.secondary {
+  background: #475569;
+}
+
+button.secondary:hover {
+  background: #334155;
+}
+
+input[type="text"], input[type="file"] {
+  width: 100%;
+  padding: 0.5rem;
+  border: 1px solid #cbd2d9;
+  border-radius: 6px;
+  margin-bottom: 0.5rem;
+  box-sizing: border-box;
+}
+
+label {
+  font-weight: 600;
+  font-size: 0.85rem;
+}
+
+.status {
+  font-weight: bold;
+}
+
+.status.pass { color: #16a34a; }
+.status.fail { color: #dc2626; }
+
+nav a {
+  margin-right: 1rem;
+  color: #2563eb;
+  text-decoration: none;
+}

@@ -1,0 +1,191 @@
+[
+  {
+    "id": "motion",
+    "title": "From image gradients to image motion",
+    "goal": "Use the image-processing ideas you know to ask where a pattern went.",
+    "diagram": "flow",
+    "sections": [
+      {
+        "title": "Follow a piece of the pattern",
+        "text": "Imagine a small textured patch painted on a card. Between two photographs the card slides right. We will follow that same patch throughout this course. Call the first image I0 and the second I1. An image location has horizontal coordinate x and vertical coordinate y; y increases downward. At a point p=(x,y), forward flow is the displacement [u,v] to the corresponding point (x+u,y+v) in I1. The array stores this vector at p in the first image.\n\nA point at (2,2) that moves half a pixel right arrives at (2.5,2). The brightness carried by that point may stay the same even though the value at the fixed array position (2,2) changes. Subtracting images compares fixed positions. Following correspondence compares moving positions. Those are different questions.\n\nThe supplied timeline below renders the same pattern at successive positions. Scene motion changes the second frame. Proposed flow changes where we read that frame. Keeping those controls separate lets us test a guess rather than accidentally changing the answer to match it.\n\nFor the supplied picture, use the simple textured surface I0(x,y)=x·y. Its intensity at (2,2) is 4. At the final time, a half-pixel rightward shift makes I1(2,2)=3 while the corresponding intensity at (2.5,2) remains 4. Play reveals intermediate positions; it starts at time zero. We will unpack that change with a simpler ramp next.",
+        "visual": "correspondence"
+      },
+      {
+        "title": "A ramp makes the sign visible",
+        "text": "Before using a full texture, take a horizontal intensity ramp I0(x,y)=10+2x. Intensity is in arbitrary linear units. Moving this ramp right by u=0.5 gives I1(x,y)=10+2(x−0.5)=9+2x. At x=2, the first image is 14 and the second is 13. The fixed-position temporal difference, called It, is I1−I0=−1.\n\nThe horizontal gradient Ix is 2 intensity units per pixel. Reading I1 at x+0.5 adds 2×0.5=1 intensity unit, bringing 13 back to 14. Thus 2u=1, or Ix·u=−It. The negative sign is a consequence of following the moved pattern: a rightward-moving rising ramp becomes darker at a fixed position.\n\nAn intensity change of −1 is not itself a displacement of −1 pixel. On a gentler ramp with Ix=1 it would suggest u=1; on a flat patch with Ix=0 it provides no horizontal motion information. A lighting change could also cause that −1 without any motion."
+      },
+      {
+        "title": "From the ramp to two dimensions",
+        "text": "Brightness constancy says I1(x+u,y+v)≈I0(x,y): the corresponding visible point keeps its brightness. A first-order approximation predicts a small shift from the local slope. Let Iy be the vertical intensity gradient. Call the later image’s horizontal and vertical gradients I1x and I1y. Expanding the later image gives I1(x+u,y+v)≈I1(x,y)+I1x·u+I1y·v. Subtract I0 and collect terms to obtain I1x·u+I1y·v≈−It.\n\nFor nearby frames we approximate those later-frame slopes by the reference-frame gradients Ix and Iy measured in I0. Our working equation is therefore:\n~~~\nIx·u + Iy·v = −It\n~~~\nThis fixed-reference approximation makes the same derivative images reusable during refinement. It is not an exact derivative of every warped image. It is useful when the remaining shift is small and gradients change slowly; larger shifts or changing appearance can invalidate it.\n\nFor I0(x,y)=x+2y, Ix=1 and Iy=2. If It=−0.5, the equation is u+2v=0.5. Both [0.5,0] and [0,0.25] fit. One brightness equation cannot generally determine two motion components. We need the surrounding patch.\n\nIn FLOW-01 you will return three floating arrays Ix, Iy and It, each shaped (H,W), where H is the number of rows and W the number of columns. Cast before subtraction, use centered spatial differences inside I0 and one-sided differences at its border. Image access is image[y,x], while the vector order is [u,v]. These conventions will stay fixed through all twelve assignments."
+      }
+    ],
+    "question": "Why does a large frame difference not necessarily mean large motion?",
+    "answer": "Intensity can change because of illumination, and its sensitivity to motion also depends on the spatial gradient. Frame difference alone has neither a unique cause nor two motion components.",
+    "connections": [
+      {
+        "id": "FLOW-01",
+        "why": "Turn the two frames into spatial and temporal measurements with a consistent sign."
+      }
+    ]
+  },
+  {
+    "id": "patches",
+    "title": "Why corners reveal motion and edges hide part of it",
+    "goal": "Understand the Lucas–Kanade patch model before writing the solver.",
+    "diagram": "flow",
+    "sections": [
+      {
+        "title": "Nine observations, two unknowns",
+        "text": "Return to the textured card. Within a small patch we assume every visible point shares one translation [u,v]. To make all the arithmetic visible, replace the texture locally with I0(x,y)=x·y on a 5×5 image. This small analytic patch has gradients Ix=y and Iy=x. Select the 3×3 patch centered at (2,2), containing coordinates x,y=1,2,3. Its intensities are rows [1,2,3], [2,4,6], [3,6,9]. Different rows and columns have different slopes, just as a textured patch does.\n\nThe gradients and temporal difference are not generally constant across a patch. For this image, Ix=y and Iy=x change at every coordinate; It also has its own value at every pixel. The patch model makes a different assumption: the unknown displacement [u,v] is shared by all nine pixels. That shared motion lets us combine nine different local measurements into evidence about one vector. A real translated, noisy patch will only approximately agree with one shared vector.\n\nFor this first linear experiment, deliberately set It=−0.5y+0.25x at each pixel. At y=1 the three values across x=1,2,3 are [−0.25,0,0.25]; at y=2 they are [−0.75,−0.5,−0.25]; at y=3 they are [−1.25,−1,−0.75]. These values are constructed to illustrate the linear equations. They are not an exact finite translation of x·y; the first-order model is the approximation being studied. The nine equations in row-major order (across a row, then down) are:\n~~~\n(x,y)  Ix·u + Iy·v = −It\n(1,1)    u +   v =  0.25\n(2,1)    u +  2v =  0\n(3,1)    u +  3v = −0.25\n(1,2)   2u +   v =  0.75\n(2,2)   2u +  2v =  0.50\n(3,2)   2u +  3v =  0.25\n(1,3)   3u +   v =  1.25\n(2,3)   3u +  2v =  1\n(3,3)   3u +  3v =  0.75\n~~~\nPut each pair [Ix,Iy] into a row of a matrix A and each right-hand side into a vector b. A has nine rows and two columns; b has nine entries. Matrix multiplication A@[u,v] simply evaluates the left-hand side of all nine equations. FLOW-02 constructs these observations; it does not yet estimate motion.",
+        "visual": "patch"
+      },
+      {
+        "title": "What least squares is choosing",
+        "text": "Real measurements usually disagree because of noise, interpolation or different motion within the window. For a proposed vector q=[u,v], define the residual vector r=A@q−b. Each entry says how far one brightness equation misses. Squaring prevents positive and negative misses from canceling. The sum E=r.T@r is the squared error; T means transpose, which turns a column into a row for a dot product.\n\nOn our nine rows, q=[0,0] gives E=4.125. Trying [0.5,0] gives E=2.625. Trying [0.5,−0.25] gives E=0. Least squares chooses the vector with the smallest sum, even when no vector reaches zero. It fits one shared vector, not nine independent motions.\n\nTo find the minimum, differentiate that sum with respect to the two components. Setting both derivatives to zero gives (A.T@A)@q=A.T@b, the normal equations. The small matrix collects products of gradients:\n~~~\nA.T@A = [[sum(Ix²), sum(Ix·Iy)],\n         [sum(Ix·Iy), sum(Iy²)]]\nsum(Ix²) = 3×(1²+2²+3²) = 42\nsum(Iy²) = 42\nsum(Ix·Iy) = (1+2+3)×(1+2+3) = 36\nA.T@b = [12, 7.5]\n42u + 36v = 12\n36u + 42v = 7.5\n~~~\nSubtract the last equations: 6(u−v)=4.5. Add them: 78(u+v)=19.5. Hence u−v=0.75, u+v=0.25, and [u,v]=[0.5,−0.25]. In code a least-squares routine can solve directly from A and b; explicitly inverting A.T@A is unnecessary and can amplify numerical errors."
+      },
+      {
+        "title": "Eigenvalues tell us which direction is missing",
+        "text": "A small error is not enough: a flat patch fits any displacement equally well. To measure directional evidence, normalize the matrix by N, the number of pixels: G=(A.T@A)/N. An eigenvector is a direction that G scales without turning. Its eigenvalue is that scale factor. Moving the candidate along a direction with a large eigenvalue changes the predicted brightness strongly; a zero eigenvalue means no evidence in that direction.\n\nFor our patch, G=[[42,36],[36,42]]/9. Applying it to [1,1] gives (78/9)[1,1]; applying it to [1,−1] gives (6/9)[1,−1]. These are its two eigenvector directions, with eigenvalues 26/3 and 2/3. Both are positive, so both components can be constrained.\n\nCompare a flat patch: every gradient is [0,0], so G is zero and both eigenvalues are zero. For a vertical ramp or edge with all gradients [1,0], G=[[1,0],[0,0]], with eigenvalues 1 and 0. Horizontal motion changes the image; vertical motion is invisible. This missing along-edge information is the aperture problem. For balanced corner evidence with gradient rows [1,0] and [0,1], G is half the identity and both eigenvalues are 0.5.\n\nFLOW-03 compares the smaller eigenvalue with min_eigenvalue. Normalizing by N keeps a repeated set of observations from artificially increasing confidence. Reject unsupported windows with valid=False and a placeholder [0,0]; adding an epsilon does not create missing evidence. FLOW-04 repeats this fit at complete patch centers and stores flow with shape (H,W,2) plus a boolean validity mask. A valid zero vector means stationary supported texture. An invalid zero vector means no estimate. A larger window gathers more information but can cross a boundary between moving objects.",
+        "visual": "ambiguity"
+      }
+    ],
+    "question": "Why can a flat patch and a stationary textured patch both return zero flow but require different validity flags?",
+    "answer": "The flat patch cannot determine motion; zero is a placeholder. The textured stationary patch can constrain both directions and support an actual zero-displacement estimate.",
+    "connections": [
+      {
+        "id": "FLOW-02",
+        "why": "Assemble one row per observation without confusing pixels with unknowns."
+      },
+      {
+        "id": "FLOW-03",
+        "why": "Solve only when the patch supports both motion directions."
+      },
+      {
+        "id": "FLOW-04",
+        "why": "Place checked local estimates on a dense grid."
+      }
+    ]
+  },
+  {
+    "id": "alignment",
+    "title": "Warp first, then solve for what remains",
+    "goal": "Make fractional coordinates, flow direction and iterative updates concrete.",
+    "diagram": "flow",
+    "sections": [
+      {
+        "title": "Four pixels can describe a fractional location",
+        "text": "Our patch may move half a pixel. Its destination still exists even though the array contains only integer pixel centers. Bilinear interpolation estimates the intensity from four neighbors. Use the tiny image with top row [0,10] and bottom row [20,30], and read at x=0.25,y=0.5. The fractional distances from the upper-left neighbor are a=0.25 horizontally and b=0.5 vertically.\n\nThe weights are (1−a)(1−b)=0.375 at (0,0), a(1−b)=0.125 at (1,0), (1−a)b=0.375 at (0,1), and ab=0.125 at (1,1). Their contributions are 0, 1.25, 7.5 and 3.75. They sum to 12.5. The weights sum to one, so constant intensity stays constant. This smaller example isolates exactly the sampler we will use on the moving patch.\n\nFLOW-05 accepts arrays of lookup coordinates and returns both sampled values and validity. The last pixel center is inside the image: collapse the neighbor index at that border. A location beyond it is outside. Store zero for an absent sample and mark it False; that zero is not an observation of darkness.",
+        "visual": "sampling"
+      },
+      {
+        "title": "Forward flow is a lookup instruction",
+        "text": "Take I0(x,y)=x·y again, now really translated horizontally by 0.5: I1(x,y)=(x−0.5)y. At p=(2,2), I0=4. Forward flow [0.5,0] points to (2.5,2). The two horizontal neighbors in I1 are 3 at (2,2) and 5 at (3,2). Equal weights give 4, exactly the reference brightness.\n\nA pull-warp keeps the output on the first frame’s grid: output[y,x]=I1 sampled at (x+u,y+v). “Forward” describes the correspondence direction; “pull” describes how we fill the output. No sign reversal is needed. Looking at (1.5,2) instead gives 2, the wrong point.\n\nFLOW-06 applies this lookup at every pixel using that pixel’s vector. The explorer keeps scene displacement separate from proposed flow. Brightness changes affect the later frame and its residual; proposed flow affects only sampled values, support and residual. On a flat scene, changing the lookup leaves all supported intensities the same. Along a vertical edge, changing v leaves interior intensity unchanged. Borders can still change validity.",
+        "visual": "alignment"
+      },
+      {
+        "title": "Fit a correction to an actual sampled patch",
+        "text": "Suppose the same translated patch is currently estimated at [0.25,0], short of the true [0.5,0]. Use the patch centered at (2,2), with x,y=1,2,3. Every sample uses this center’s current translation. At each patch coordinate (x,y), read I1 at (x+0.25,y). Since I1 is linear along each row, bilinear interpolation is exact here. The reference and sampled intensities are:\n~~~\nreference I0           sampled I1\n[1, 2, 3]              [0.75, 1.75, 2.75]\n[2, 4, 6]              [1.50, 3.50, 5.50]\n[3, 6, 9]              [2.25, 5.25, 8.25]\n~~~\nDefine the image residual as sampled−reference. Its rows are [−0.25,−0.25,−0.25], [−0.5,−0.5,−0.5] and [−0.75,−0.75,−0.75]. A correction [du,dv] should compensate that deficit, so the fitting right-hand side is reference−sampled, the negative residual. Using fixed gradients [y,x] gives:\n~~~\nA.T@A = [[42,36],[36,42]]\nA.T@(reference−sampled) = [10.5,9]\n42du+36dv=10.5; 36du+42dv=9\n[du,dv]=[0.25,0]\nnew flow = [0.25,0]+[0.25,0] = [0.5,0]\n~~~\nSampling again at the updated translation returns the reference patch exactly. The next correction is zero. The demonstration steps through sampling, fitting, updating and resampling so each number has a visible source.",
+        "visual": "refinement"
+      },
+      {
+        "title": "Why the whole patch follows its center",
+        "text": "The fit has two unknowns because we assume a single translation of this patch. If every neighbor used its own current flow, the sampled patch would already be deformed by many different vectors; its residual would no longer describe the center’s two-parameter problem. FLOW-07 therefore samples all coordinates of a patch with flow[y_center,x_center], then updates only that center. The pixelwise warp from FLOW-06 teaches sampling direction but is not a substitute for this patchwise lookup when neighboring flows differ.\n\nCompute reference gradients once. At every round sample the original I1, fit reference−sampled, and add the correction. Require the entire destination patch to lie inside the image and the smaller eigenvalue to meet the threshold. If rejected, retain that center’s previous vector and mark it invalid for this round. Return the final round’s mask. With zero rounds return an independent copy of the initial field and an all-False mask.\n\nA smaller residual does not prove correct correspondence: repeated texture can fit the wrong repetition, and lighting changes need not be motion. Also, keeping reference gradients is an approximation. Pyramids help bring larger displacement into the range where this local update is useful."
+      }
+    ],
+    "question": "For a point moving right by one pixel, why does pull-warping frame1 use x+1 rather than x-1?",
+    "answer": "We keep the output at the frame0 location x and read the point's corresponding location in frame1, which is x+1. We are selecting an input sample, not moving the output grid.",
+    "connections": [
+      {
+        "id": "FLOW-05",
+        "why": "Sample fractional locations with explicit border validity."
+      },
+      {
+        "id": "FLOW-06",
+        "why": "Align the later frame using the declared forward-flow direction."
+      },
+      {
+        "id": "FLOW-07",
+        "why": "Use residual motion for repeated, masked additive updates."
+      }
+    ]
+  },
+  {
+    "id": "scales",
+    "title": "Large motion, smaller images",
+    "goal": "Build a pyramid without losing the meaning of pixel units.",
+    "diagram": "flow",
+    "sections": [
+      {
+        "title": "Make the displacement smaller before refining",
+        "text": "Return to the moving textured card, now displaced [8,−4] pixels. A local gradient is unlikely to predict brightness accurately that far away. If both images are reduced by two, the same displacement is [4,−2] in the smaller image. Reduce again and it is [2,−1]. The physical correspondence is unchanged; a pixel at the coarser scale covers more of the original image.\n\nFor a 17×21 image, the three grids are 17×21, 9×11 and 5×6. Their coordinate spacing is 1, 2 and 4 original pixels. A point (8,8) becomes (4,4), then (2,2). Estimate at the coarsest level, carry that estimate upward and refine what remains. Two coarse pixels can still be challenging; these numbers explain units, not a guarantee of convergence.",
+        "visual": "pyramid"
+      },
+      {
+        "title": "Smooth before keeping alternate samples",
+        "text": "Simply taking columns 0,2,4,… from stripes [0,1,0,1,…] gives all zeros. Taking the other phase gives all ones. Both erase the true average of 0.5. Filtering before reduction removes this dependence on sampling phase.\n\nUse the one-dimensional kernel k=[1,4,6,4,1]/16 horizontally and vertically. At an even stripe location its neighborhood is [0,1,0,1,0]; the weighted sum is (0+4+0+4+0)/16=0.5. At an odd location [1,0,1,0,1] gives (1+0+6+0+1)/16=0.5 too. A vertically constant image is unchanged by the vertical pass because the weights sum to one.\n\nAt borders, reflect the data without repeating the endpoint, as np.pad(mode=\"reflect\") does. For a row [0,1,2,3,4], the first neighborhood is [2,1,0,1,2], giving 12/16=0.75. At x=2 the filtered value is 2; at x=4 it is 3.25. Keeping even centers returns [0.75,2,3.25]. FLOW-08 applies these two separable filtering passes before selecting [::2,::2]. A 5×7 image becomes 3×4, rounding each dimension upward."
+      },
+      {
+        "title": "Grid interpolation and unit conversion are two operations",
+        "text": "A coarse field stores vectors only at coarse grid points. To obtain a value at fine coordinate (x,y), first sample each coarse component at (x/2,y/2). This interpolates the field’s positions. Then multiply both vector components by two to convert coarse-pixel displacement into fine-pixel displacement.\n\nFor coarse horizontal values [0,2] at columns 0 and 1, fine columns 0,1,2,3 query coarse columns 0,0.5,1,1.5. Extend the last coarse value by clamping 1.5 to 1. Interpolation gives [0,1,2,2]; unit conversion gives [0,2,4,4]. These are separate steps even though a library resize call may obscure them.\n\nFor a constant 3×4 field [1,−0.5], expanding to 5×7 yields [2,−1] everywhere. Neither 7/4 nor 5/3 is the scale factor: coarse centers came from fine coordinates 0,2,4,…, so the spacing is exactly two. On an even target size the last query can exceed the coarse domain by half a pixel; border extension is intentional here, unlike image sampling for correspondence. FLOW-09 makes that distinction explicit."
+      },
+      {
+        "title": "Assemble the journey back to full resolution",
+        "text": "FLOW-10 builds identical pyramids for the two frames. Initialize zero flow only on the coarsest grid. Refine there, expand to the next grid using FLOW-09, and refine with that level’s original images. Continue until the field has the original shape and its vectors are in original-image pixels. Return only the final refinement mask; a coarse valid estimate cannot certify a later lookup.\n\nCheck every requested level has at least two pixels per axis and enough space for a complete patch of side 2·radius+1. A radius is the number of pixels from the center to each edge. Too many reductions remove the patch itself. Even before that limit, smoothing may erase a small feature or mix different motions. Choose levels for the displacement and texture, then measure the result rather than assuming more levels always help."
+      }
+    ],
+    "question": "Why does upsampling a constant [1,-0.5] coarse flow to an odd-sized finer image still produce [2,-1]?",
+    "answer": "The coordinate spacing is a factor-two pyramid regardless of rounded array dimensions. Interpolation changes where vectors are stored; multiplying by two converts their displacement units.",
+    "connections": [
+      {
+        "id": "FLOW-08",
+        "why": "Reduce images with low-pass filtering and a fixed sampling phase."
+      },
+      {
+        "id": "FLOW-09",
+        "why": "Interpolate vector positions and convert displacement units separately."
+      },
+      {
+        "id": "FLOW-10",
+        "why": "Assemble and inspect the full coarse-to-fine estimator."
+      }
+    ]
+  },
+  {
+    "id": "trust",
+    "title": "When should you believe a flow field?",
+    "goal": "Separate agreement, confidence, image residual and actual motion error.",
+    "diagram": "flow",
+    "sections": [
+      {
+        "title": "Measure the vector against known motion",
+        "text": "A smoothly drawn arrow field can still follow the wrong features. Synthetic images let us separate appearance from truth. Render the moving texture at shifted coordinates and keep its known displacement in a separate truth field; never pass that truth into the estimator. The supplied scene generator uses an analytic texture, so objects leaving one border do not wrap around to the other.\n\nEndpoint error is the distance between estimated and true arrow tips. If the true vector is [2,−1] and the estimate is [1,1], their difference is [−1,2]. Its length is sqrt((−1)²+2²)=sqrt(5)≈2.236 pixels. Summing signed errors would let mistakes cancel. FLOW-11 uses the Euclidean length along the final component axis of the (H,W,2) arrays."
+      },
+      {
+        "title": "Always name the pixels being measured",
+        "text": "Suppose an image has six pixels and the evaluation mask selects only two. Their vector errors are [3,4] and [0,0], with lengths 5 and 0. Mean endpoint error is (5+0)/2=2.5 pixels and coverage is 2/6≈33.3%. The other four errors are stored as NaN (not measured), not as zeros. Rejecting the harder selected pixel would make the mean zero while reducing coverage to 1/6. That is not automatically a better estimator.\n\nThe evaluation mask says which pixels enter a comparison. It may intersect the estimator’s valid mask with a fixed region and available truth. Report both the count and denominator. For an empty mask, mean=NaN and count=0: no accuracy has been measured. Keep image pair and evaluation region fixed when comparing radius, pyramid depth or iteration count.\n\nThe supplied mask demonstration gives the other four positions vector differences [2,0], [4,0], [1,0] and [3,0], in row-major order after the first two. Selecting them reveals endpoint errors 2, 4, 1 and 3. Selecting all six gives (5+0+2+4+1+3)/6=2.5 pixels at 100% coverage. The same mean can therefore summarize very different coverage.",
+        "visual": "evaluation"
+      },
+      {
+        "title": "Follow a forward path, then a backward path",
+        "text": "On real images truth is usually unavailable. Estimate forward flow F from I0 to I1 and backward flow B from I1 to I0. Begin at p, follow F(p) to the destination d=p+F(p), then read B at d. The return point is d+B(d). The round-trip error is the length of F(p)+B(d).\n\nFor p=(1,1) and F(p)=[0.5,0], d=(1.5,1). Suppose B(1,1)=[−0.25,0] and B(2,1)=[−0.75,0]. Half weights give B(d)=[−0.5,0]; the sum is [0,0] and the path returns to (1,1). Reading B at p instead would give an error of 0.25 and test the wrong correspondence.\n\nFLOW-12 requires a valid forward vector, an in-bounds destination and valid contributing backward samples. Interpolate the backward validity mask as floating values: if one of those half-weight neighbors is invalid, its sampled validity is 0.5, so reject the path even if the placeholder vectors happen to cancel. Zero-weight neighbors do not contribute. Compare the return-vector length to the inclusive threshold; a 0.5-pixel error passes at threshold=0.5.",
+        "visual": "consistency"
+      },
+      {
+        "title": "Agreement can be confidently wrong",
+        "text": "Imagine vertical stripes repeating every four pixels. If the true horizontal displacement is one pixel, a guess of five pixels can align with the next stripe just as well. A backward guess of −5 can return to the start. Photometric alignment and round-trip agreement both succeed even though endpoint error is four pixels. A flat patch is even more ambiguous: every supported lookup has the same intensity.\n\nThe smaller eigenvalue asks whether local gradients support two directions. Photometric residual asks whether sampled intensities agree. Forward–backward consistency asks whether two estimated maps agree. Endpoint error asks whether the displacement matches independent truth. These checks answer different questions. Occlusions, lighting changes and motion boundaries can break assumptions in different ways.\n\nAfter FLOW-11 and FLOW-12, compare one setting at a time on the supplied scene, recording endpoint error, coverage and round-trip support. Then inspect your own grayscale pairs with the same skepticism. Your implementation exposes where its evidence comes from; a passing contract is the beginning of that investigation, not a promise of general optical-flow accuracy."
+      }
+    ],
+    "question": "Can a low photometric residual and a successful round trip both occur for an incorrect flow?",
+    "answer": "Yes. Repeated or flat texture can support ambiguous matches, and forward/backward estimates can agree on the wrong one. Independent ground truth is needed to measure actual displacement error.",
+    "connections": [
+      {
+        "id": "FLOW-11",
+        "why": "Measure endpoint error and disclose evaluation coverage."
+      },
+      {
+        "id": "FLOW-12",
+        "why": "Test round-trip correspondence at the displaced destination."
+      }
+    ]
+  }
+]

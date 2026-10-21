@@ -1,4 +1,3 @@
-/bin/bash: /home/ranga/miniconda3/lib/libtinfo.so.6: no version information available (required by /bin/bash)
 # LDPC 5G Hardware Accelerator Tutor
 
 A local, browser-based tutor for learning LDPC decoding and hardware design through short theory chapters, Python assignments, public tests, and an optional AI guide. The interface is a notebook-style web app; it does not require Jupyter.

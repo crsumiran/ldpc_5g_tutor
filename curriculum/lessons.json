@@ -1,0 +1,12 @@
+{
+  "lessons": [
+    {
+      "id": "and2",
+      "title": "2-input AND gate",
+      "module": "and2",
+      "student_file": "and2.v",
+      "testbench": "tb_and2.v",
+      "pass_token": "ALL_TESTS_PASSED"
+    }
+  ]
+}

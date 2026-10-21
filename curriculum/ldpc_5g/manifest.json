@@ -1,0 +1,833 @@
+{
+  "schema_version": 1,
+  "id": "ldpc-5g",
+  "title": "LDPC: From Bits to Accelerator Thinking",
+  "subtitle": "17 Python checkpoints · toy decoder → QC → fixed-point primitives · public-only",
+  "toolchain": "python",
+  "overview_file": "overview.md",
+  "architecture_file": "architecture.md",
+  "provided_files": [
+    "python/provided/nr_sets.py"
+  ],
+  "checkpoints": [
+    {
+      "id": "LDPC-01",
+      "title": "GF(2): bits are not ordinary numbers",
+      "goal": "Return the parity of the pairwise AND of equal-length binary vectors. Ordinary addition counts; modulo two asks whether the count is odd.",
+      "description": "Return the parity of the pairwise AND of equal-length binary vectors. Ordinary addition counts; modulo two asks whether the count is odd.",
+      "requirements": [
+        "a,b: binary 1-D arrays of equal length; return Python int 0 or 1. Do not mutate inputs. Empty equal vectors return 0.",
+        "Never mutate input arrays; tests run in a fresh Python process.",
+        "Public-only learning checks; complete submits rerun the same public suite."
+      ],
+      "module": "gf2",
+      "source_files": [
+        "python/gf2.py"
+      ],
+      "editable_files": [
+        "python/gf2.py"
+      ],
+      "public_testbench": "tests/public/test_gf2.py",
+      "top": "pytest",
+      "prerequisites": [],
+      "estimated_minutes": 25,
+      "difficulty": "easy",
+      "concepts": [
+        "GF(2): bits are not ordinary numbers",
+        "hardware dataflow"
+      ],
+      "hints": [
+        "Compute pairwise products first.",
+        "Reduce the sum modulo two.",
+        "Validate the equal lengths; reduce the dot product to one binary value."
+      ],
+      "lesson": "## The question\nGF(2): bits are not ordinary numbers\n\n## Intuition\nThink of a check as a rule: the selected bits must contain an even number of ones. GF(2) is arithmetic with only 0 and 1. Addition wraps after one; it becomes XOR. Multiplication becomes AND. We start here because every later parity check uses exactly this operation.\n\n## Walk the example\n```text\n[1,1,1] AND [1,0,1] = [1,0,1]\ncount = 2 → parity = 0\n1 XOR 1 = 0, not 2.\n```\n\n## Representation and contract\na,b: binary 1-D arrays of equal length; return Python int 0 or 1. Do not mutate inputs. Empty equal vectors return 0.\n\n## Your task\nComplete only gf2.py. Use the worked values to predict your result before running the public checks. Provided plotting and sandbox plumbing are not your assignment.\n\n## Hardware connection\nWhy is counting ones alone not the final parity result?\n\n## Scope\nToy mathematical / algorithm example; not a full NR code.",
+      "visual": "parity",
+      "prediction": "How does parity change when one selected bit is flipped?",
+      "reflection": "Why is counting ones alone not the final parity result?",
+      "expected_public_checks": 3
+    },
+    {
+      "id": "LDPC-02",
+      "title": "Syndrome: which rules are broken?",
+      "goal": "Compute one parity result per row of H. A zero syndrome means the candidate is a valid codeword, not necessarily the original transmitted word.",
+      "description": "Compute one parity result per row of H. A zero syndrome means the candidate is a valid codeword, not necessarily the original transmitted word.",
+      "requirements": [
+        "bits: length n binary array; h: binary shape (m,n); return binary shape (m,), preserve inputs.",
+        "Never mutate input arrays; tests run in a fresh Python process.",
+        "Public-only learning checks; complete submits rerun the same public suite."
+      ],
+      "module": "syndrome",
+      "source_files": [
+        "python/gf2.py",
+        "python/syndrome.py"
+      ],
+      "editable_files": [
+        "python/syndrome.py"
+      ],
+      "public_testbench": "tests/public/test_syndrome.py",
+      "top": "pytest",
+      "prerequisites": [
+        "LDPC-01"
+      ],
+      "estimated_minutes": 25,
+      "difficulty": "easy",
+      "concepts": [
+        "Syndrome: which rules are broken?",
+        "hardware dataflow"
+      ],
+      "hints": [
+        "Reuse your GF(2) dot function for a row.",
+        "One output belongs to each row of H.",
+        "Return a vector of row parities, not a real-valued sum."
+      ],
+      "lesson": "## The question\nSyndrome: which rules are broken?\n\n## Intuition\nEach row selects the bits connected to one rule. A one means select this bit; a zero means ignore it. The syndrome is the list of rule results. It has one entry per row, not per bit. Two different codewords can both satisfy all the rules; parity alone cannot tell which was sent.\n\n## Walk the example\n```text\nH = [[1,1,0,1,0,0],\n     [0,1,1,0,1,0],\n     [1,0,1,0,0,1]]\nbits = [1,0,1,1,1,0]\nrow 0: 1 XOR 0 XOR 1 = 0\nrow 1: 0 XOR 1 XOR 1 = 0\nrow 2: 1 XOR 1 XOR 0 = 0\nflip b1 → syndrome [1,1,0]\n```\n\n## Representation and contract\nbits: length n binary array; h: binary shape (m,n); return binary shape (m,), preserve inputs.\n\n## Your task\nComplete only syndrome.py. Use the worked values to predict your result before running the public checks. Provided plotting and sandbox plumbing are not your assignment.\n\n## Hardware connection\nWhy can the syndrome be zero even when the decoded payload is wrong?\n\n## Scope\nToy mathematical / algorithm example; not a full NR code.",
+      "visual": "parity",
+      "prediction": "Before flipping b1, predict which rows select it.",
+      "reflection": "Why can the syndrome be zero even when the decoded payload is wrong?",
+      "expected_public_checks": 3
+    },
+    {
+      "id": "LDPC-03",
+      "title": "Tanner graph: store connections",
+      "goal": "Turn each row of the binary parity matrix into a list of variable indices. Ordering is ascending variable index.",
+      "description": "Turn each row of the binary parity matrix into a list of variable indices. Ordering is ascending variable index.",
+      "requirements": [
+        "h: shape (m,n); return list of m lists of integer indices. Empty rows produce an empty list.",
+        "Never mutate input arrays; tests run in a fresh Python process.",
+        "Public-only learning checks; complete submits rerun the same public suite."
+      ],
+      "module": "graph",
+      "source_files": [
+        "python/gf2.py",
+        "python/syndrome.py",
+        "python/graph.py"
+      ],
+      "editable_files": [
+        "python/graph.py"
+      ],
+      "public_testbench": "tests/public/test_graph.py",
+      "top": "pytest",
+      "prerequisites": [
+        "LDPC-02"
+      ],
+      "estimated_minutes": 25,
+      "difficulty": "easy",
+      "concepts": [
+        "Tanner graph: store connections",
+        "hardware dataflow"
+      ],
+      "hints": [
+        "Look for ones in each row.",
+        "Return indices, not the selected values.",
+        "Use a stable increasing index order."
+      ],
+      "lesson": "## The question\nTanner graph: store connections\n\n## Intuition\nA Tanner graph has two kinds of nodes: bits and parity checks. An edge says this check uses that bit. Sparse storage records only the connections. If the matrix is mostly zero, storing all zeros wastes memory. Graph edge order later determines where messages live, so freeze it now.\n\n## Walk the example\n```text\nrow c0: [1,1,0,1,0,0] → [0,1,3]\nc0 connects to b0, b1, b3.\nA matrix 1 = one graph edge.\n```\n\n## Representation and contract\nh: shape (m,n); return list of m lists of integer indices. Empty rows produce an empty list.\n\n## Your task\nComplete only graph.py. Use the worked values to predict your result before running the public checks. Provided plotting and sandbox plumbing are not your assignment.\n\n## Hardware connection\nWhy does an edge list save storage but require careful indexing?\n\n## Scope\nToy mathematical / algorithm example; not a full NR code.",
+      "visual": "graph",
+      "prediction": "How many edges leave check c0?",
+      "reflection": "Why does an edge list save storage but require careful indexing?",
+      "expected_public_checks": 2
+    },
+    {
+      "id": "LDPC-04",
+      "title": "Soft bits: hard decisions from LLRs",
+      "goal": "Use LLR = log(P(bit 0)/P(bit 1)). Positive favors zero, negative favors one. Exactly zero chooses zero in this course.",
+      "description": "Use LLR = log(P(bit 0)/P(bit 1)). Positive favors zero, negative favors one. Exactly zero chooses zero in this course.",
+      "requirements": [
+        "llrs: finite 1-D real array; return binary integer array of same length. No mutation.",
+        "Never mutate input arrays; tests run in a fresh Python process.",
+        "Public-only learning checks; complete submits rerun the same public suite."
+      ],
+      "module": "channel",
+      "source_files": [
+        "python/gf2.py",
+        "python/syndrome.py",
+        "python/graph.py",
+        "python/channel.py"
+      ],
+      "editable_files": [
+        "python/channel.py"
+      ],
+      "public_testbench": "tests/public/test_channel.py",
+      "top": "pytest",
+      "prerequisites": [
+        "LDPC-03"
+      ],
+      "estimated_minutes": 25,
+      "difficulty": "easy",
+      "concepts": [
+        "Soft bits: hard decisions from LLRs",
+        "hardware dataflow"
+      ],
+      "hints": [
+        "Decisions depend on sign.",
+        "Magnitude is confidence, not a decoded bit.",
+        "Use a strict negative comparison to implement the zero tie."
+      ],
+      "lesson": "## The question\nSoft bits: hard decisions from LLRs\n\n## Intuition\nA radio observation is uncertain. A hard bit discards confidence; an LLR keeps both the favored bit and how strongly it is favored. Here bit 0 maps to BPSK +1 and bit 1 to -1. Received amplitude is not itself an LLR unless noise scaling is accounted for. This checkpoint starts with supplied LLRs, not an unmodeled radio.\n\n## Walk the example\n```text\nLLRs:  [+1.3, +0.15, -0.2, -2.1, 0]\nbits:  [   0,     0,    1,    1, 0]\nSmall magnitude = uncertain, not a third bit.\n```\n\n## Representation and contract\nllrs: finite 1-D real array; return binary integer array of same length. No mutation.\n\n## Your task\nComplete only channel.py. Use the worked values to predict your result before running the public checks. Provided plotting and sandbox plumbing are not your assignment.\n\n## Hardware connection\nWhy must the zero tie policy be fixed before comparing decoders?\n\n## Scope\nToy mathematical / algorithm example; not a full NR code.",
+      "visual": "llr",
+      "prediction": "Which is more confident: +0.15 or -2.1?",
+      "reflection": "Why must the zero tie policy be fixed before comparing decoders?",
+      "expected_public_checks": 2
+    },
+    {
+      "id": "LDPC-05",
+      "title": "Check-node messages: exclude the recipient",
+      "goal": "For each edge, exclude that edge; multiply signs of the others and use their minimum absolute value. Zero has positive sign but zero magnitude. Degree must be at least two.",
+      "description": "For each edge, exclude that edge; multiply signs of the others and use their minimum absolute value. Zero has positive sign but zero magnitude. Degree must be at least two.",
+      "requirements": [
+        "q: finite 1-D float array length d >= 2; return float array (d,). Preserve input.",
+        "Never mutate input arrays; tests run in a fresh Python process.",
+        "Public-only learning checks; complete submits rerun the same public suite."
+      ],
+      "module": "minsum",
+      "source_files": [
+        "python/gf2.py",
+        "python/syndrome.py",
+        "python/graph.py",
+        "python/channel.py",
+        "python/minsum.py"
+      ],
+      "editable_files": [
+        "python/minsum.py"
+      ],
+      "public_testbench": "tests/public/test_minsum.py",
+      "top": "pytest",
+      "prerequisites": [
+        "LDPC-04"
+      ],
+      "estimated_minutes": 25,
+      "difficulty": "medium",
+      "concepts": [
+        "Check-node messages: exclude the recipient",
+        "hardware dataflow"
+      ],
+      "hints": [
+        "Construct the other-edge messages for each output.",
+        "Treat zero consistently; its minimum magnitude forces zero.",
+        "Test [3,3,5,9] before optimizing to a two-minimum network."
+      ],
+      "lesson": "## The question\nCheck-node messages: exclude the recipient\n\n## Intuition\nThe check tells each bit what the other bits suggest. It must not send a bit its own evidence back. This is extrinsic information: information from elsewhere. Min-Sum approximates the confidence calculation with a minimum. It is an algorithm choice, not a 5G standard requirement.\n\n## Walk the example\n```text\nincoming: [+7,-3,+5,-9]\nto e0: exclude +7; use [-3,+5,-9]\ntwo negatives → positive; min magnitude 3 → +3\nall outgoing: [+3,-5,+3,-3]\n```\n\n## Representation and contract\nq: finite 1-D float array length d >= 2; return float array (d,). Preserve input.\n\n## Your task\nComplete only minsum.py. Use the worked values to predict your result before running the public checks. Provided plotting and sandbox plumbing are not your assignment.\n\n## Hardware connection\nWhy would including the recipient's own message create misleading confidence?\n\n## Scope\nToy mathematical / algorithm example; not a full NR code.",
+      "visual": "cnu",
+      "prediction": "What changes when two incoming magnitudes share the minimum?",
+      "reflection": "Why would including the recipient's own message create misleading confidence?",
+      "expected_public_checks": 4
+    },
+    {
+      "id": "LDPC-06",
+      "title": "Variable-node messages: remove the destination",
+      "goal": "Compute posterior = channel LLR + sum incoming. Outgoing edge j equals posterior minus incoming[j].",
+      "description": "Compute posterior = channel LLR + sum incoming. Outgoing edge j equals posterior minus incoming[j].",
+      "requirements": [
+        "channel_llr: scalar; incoming: finite 1-D floats; return tuple (posterior scalar, outgoing array).",
+        "Never mutate input arrays; tests run in a fresh Python process.",
+        "Public-only learning checks; complete submits rerun the same public suite."
+      ],
+      "module": "variable",
+      "source_files": [
+        "python/gf2.py",
+        "python/syndrome.py",
+        "python/graph.py",
+        "python/channel.py",
+        "python/minsum.py",
+        "python/variable.py"
+      ],
+      "editable_files": [
+        "python/variable.py"
+      ],
+      "public_testbench": "tests/public/test_variable.py",
+      "top": "pytest",
+      "prerequisites": [
+        "LDPC-05"
+      ],
+      "estimated_minutes": 25,
+      "difficulty": "medium",
+      "concepts": [
+        "Variable-node messages: remove the destination",
+        "hardware dataflow"
+      ],
+      "hints": [
+        "First compute the full posterior.",
+        "Broadcast the scalar posterior against the incoming array.",
+        "Return both the posterior and extrinsic messages."
+      ],
+      "lesson": "## The question\nVariable-node messages: remove the destination\n\n## Intuition\nThe variable node combines independent evidence from its channel and neighboring checks. For a decision, use all contributions. For a message back to a check, remove that check's own contribution. This subtraction is also central to layered hardware: old stored messages are removed before new ones are added.\n\n## Walk the example\n```text\nchannel = 2; incoming = [3,-1]\nposterior = 2+3-1 = 4\nto edge 0: 4-3 = 1\nto edge 1: 4-(-1) = 5\n```\n\n## Representation and contract\nchannel_llr: scalar; incoming: finite 1-D floats; return tuple (posterior scalar, outgoing array).\n\n## Your task\nComplete only variable.py. Use the worked values to predict your result before running the public checks. Provided plotting and sandbox plumbing are not your assignment.\n\n## Hardware connection\nHow does subtracting the destination prevent feedback from reinforcing itself?\n\n## Scope\nToy mathematical / algorithm example; not a full NR code.",
+      "visual": "llr",
+      "prediction": "Which value is used for the bit decision: posterior or outgoing e0?",
+      "reflection": "How does subtracting the destination prevent feedback from reinforcing itself?",
+      "expected_public_checks": 2
+    },
+    {
+      "id": "LDPC-07",
+      "title": "One flooding iteration: freeze old messages",
+      "goal": "Compute all check messages from old v2c, then all posteriors and new v2c. Store zero at nonedges.",
+      "description": "Compute all check messages from old v2c, then all posteriors and new v2c. Store zero at nonedges.",
+      "requirements": [
+        "h: binary (m,n) with every check degree >=2; channel: (n,); v2c: (m,n). Return (c2v, new_v2c, posterior).",
+        "Never mutate input arrays; tests run in a fresh Python process.",
+        "Public-only learning checks; complete submits rerun the same public suite."
+      ],
+      "module": "iteration",
+      "source_files": [
+        "python/gf2.py",
+        "python/syndrome.py",
+        "python/graph.py",
+        "python/channel.py",
+        "python/minsum.py",
+        "python/variable.py",
+        "python/iteration.py"
+      ],
+      "editable_files": [
+        "python/iteration.py"
+      ],
+      "public_testbench": "tests/public/test_iteration.py",
+      "top": "pytest",
+      "prerequisites": [
+        "LDPC-06"
+      ],
+      "estimated_minutes": 45,
+      "difficulty": "medium",
+      "concepts": [
+        "One flooding iteration: freeze old messages",
+        "hardware dataflow"
+      ],
+      "hints": [
+        "Compute a separate c2v array first.",
+        "For a variable, select rows connected to that variable.",
+        "Use your variable helper, writing new v2c only after checks finish."
+      ],
+      "lesson": "## The question\nOne flooding iteration: freeze old messages\n\n## Intuition\nAn iteration is a controlled exchange of evidence. Flooding separates two phases: every check reads the same old message state, then variables combine the new check results. Updating v2c halfway through the check phase accidentally changes the schedule. The dense representation is deliberately small and educational; a hardware decoder will store edges or QC groups instead.\n\n## Walk the example\n```text\nH = [[1,1,0],[0,1,1]]\nchannel = [3,-1,2]\nold V→C = [[3,-1,0],[0,-1,2]]\nnew C→V = [[-1,3,0],[0,2,-1]]\nposterior = [2,4,1]\nnew V→C = [[3,1,0],[0,2,2]]\n```\n\n## Representation and contract\nh: binary (m,n) with every check degree >=2; channel: (n,); v2c: (m,n). Return (c2v, new_v2c, posterior).\n\n## Your task\nComplete only iteration.py. Use the worked values to predict your result before running the public checks. Provided plotting and sandbox plumbing are not your assignment.\n\n## Hardware connection\nWhich arrays are old and which are new during each phase?\n\n## Scope\nToy mathematical / algorithm example; not a full NR code.",
+      "visual": "iteration",
+      "prediction": "What would happen if check 1 saw an already updated message from check 0?",
+      "reflection": "Which arrays are old and which are new during each phase?",
+      "expected_public_checks": 2
+    },
+    {
+      "id": "LDPC-08",
+      "title": "Assemble a toy decoder",
+      "goal": "Initialize v2c from channel at edges. Check initial syndrome. Run flooding steps until zero syndrome or the iteration cap. Return bits, iterations used, and syndrome weight history including initial state.",
+      "description": "Initialize v2c from channel at edges. Check initial syndrome. Run flooding steps until zero syndrome or the iteration cap. Return bits, iterations used, and syndrome weight history including initial state.",
+      "requirements": [
+        "Return dict: bits array (n,), iterations int, syndrome_weights list. max_iterations >=0. Toy code only.",
+        "Never mutate input arrays; tests run in a fresh Python process.",
+        "Public-only learning checks; complete submits rerun the same public suite."
+      ],
+      "module": "decoder",
+      "source_files": [
+        "python/gf2.py",
+        "python/syndrome.py",
+        "python/graph.py",
+        "python/channel.py",
+        "python/minsum.py",
+        "python/variable.py",
+        "python/iteration.py",
+        "python/decoder.py"
+      ],
+      "editable_files": [
+        "python/decoder.py"
+      ],
+      "public_testbench": "tests/public/test_decoder.py",
+      "top": "pytest",
+      "prerequisites": [
+        "LDPC-07"
+      ],
+      "estimated_minutes": 45,
+      "difficulty": "hard",
+      "concepts": [
+        "Assemble a toy decoder",
+        "hardware dataflow"
+      ],
+      "hints": [
+        "Initialize edge messages from each bit's channel LLR.",
+        "Record syndrome weight before the loop.",
+        "Return on parity success or after the maximum permitted updates."
+      ],
+      "lesson": "## The question\nAssemble a toy decoder\n\n## Intuition\nReuse your primitives, not a library decoder. The iteration cap makes execution bounded. An initial valid candidate can stop with zero iterations. Stop means the candidate satisfies parity; it does not prove it matches the transmitted payload. This is a toy code, not a 5G NR codeword or realistic performance benchmark.\n\n## Walk the example\n```text\nH = [[1,1,0],[0,1,1]] checks equality\nchannel = [-0.2,3,3]\ninitial bits [1,0,0] → syndrome weight 1\nfirst posterior [2.8,5.8,6] → bits [0,0,0]\nweight history [1,0], iterations used 1\n```\n\n## Representation and contract\nReturn dict: bits array (n,), iterations int, syndrome_weights list. max_iterations >=0. Toy code only.\n\n## Your task\nComplete only decoder.py. Use the worked values to predict your result before running the public checks. Provided plotting and sandbox plumbing are not your assignment.\n\n## Hardware connection\nWhy should syndrome history include the initial hard decision?\n\n## Scope\nToy mathematical / algorithm example; not a full NR code.",
+      "visual": "iteration",
+      "prediction": "With an iteration cap of zero, can the decoder repair a bit?",
+      "reflection": "Why should syndrome history include the initial hard decision?",
+      "expected_public_checks": 6
+    },
+    {
+      "id": "LDPC-09",
+      "title": "Correct Min-Sum confidence",
+      "goal": "Start from uncorrected check_messages. Preserve sign; output magnitude alpha * max(abs(r)-beta,0). alpha in (0,1], beta >=0. beta=0 is NMS; alpha=1 is OMS.",
+      "description": "Start from uncorrected check_messages. Preserve sign; output magnitude alpha * max(abs(r)-beta,0). alpha in (0,1], beta >=0. beta=0 is NMS; alpha=1 is OMS.",
+      "requirements": [
+        "Finite q length >=2; return array same shape. No mutation.",
+        "Never mutate input arrays; tests run in a fresh Python process.",
+        "Public-only learning checks; complete submits rerun the same public suite."
+      ],
+      "module": "corrected",
+      "source_files": [
+        "python/gf2.py",
+        "python/syndrome.py",
+        "python/graph.py",
+        "python/channel.py",
+        "python/minsum.py",
+        "python/variable.py",
+        "python/iteration.py",
+        "python/decoder.py",
+        "python/corrected.py"
+      ],
+      "editable_files": [
+        "python/corrected.py"
+      ],
+      "public_testbench": "tests/public/test_corrected.py",
+      "top": "pytest",
+      "prerequisites": [
+        "LDPC-08"
+      ],
+      "estimated_minutes": 25,
+      "difficulty": "medium",
+      "concepts": [
+        "Correct Min-Sum confidence",
+        "hardware dataflow"
+      ],
+      "hints": [
+        "Reuse your uncorrected primitive.",
+        "Clip magnitude after offset at zero.",
+        "Keep the original sign when scaling magnitude."
+      ],
+      "lesson": "## The question\nCorrect Min-Sum confidence\n\n## Intuition\nMin-Sum often overstates check confidence compared with the more exact sum-product calculation. Scaling or subtracting an offset can soften it. These correction parameters are implementation choices. This checkpoint allows a combined rule for experimentation, but the comparison experiments should isolate OMS and NMS rather than pretend this choice is standard-defined.\n\n## Walk the example\n```text\nuncorrected [+3,-5,+3,-3]\nOMS beta=1 → [+2,-4,+2,-2]\nNMS alpha=0.5 → [+1.5,-2.5,+1.5,-1.5]\n```\n\n## Representation and contract\nFinite q length >=2; return array same shape. No mutation.\n\n## Your task\nComplete only corrected.py. Use the worked values to predict your result before running the public checks. Provided plotting and sandbox plumbing are not your assignment.\n\n## Hardware connection\nWhy does a correction parameter need an experiment rather than being called a universal constant?\n\n## Scope\nToy mathematical / algorithm example; not a full NR code.",
+      "visual": "cnu",
+      "prediction": "What happens to magnitude 0.5 with offset 1?",
+      "reflection": "Why does a correction parameter need an experiment rather than being called a universal constant?",
+      "expected_public_checks": 3
+    },
+    {
+      "id": "LDPC-10",
+      "title": "Layered update: remove old, add new",
+      "goal": "For this one check layer, q = posterior[indices] - old_messages; compute new check messages; replace those contributions in a copy of posterior.",
+      "description": "For this one check layer, q = posterior[indices] - old_messages; compute new check messages; replace those contributions in a copy of posterior.",
+      "requirements": [
+        "indices: unique ascending indices, degree >=2; old_messages: same length. Return (new_posterior, new_messages).",
+        "Never mutate input arrays; tests run in a fresh Python process.",
+        "Public-only learning checks; complete submits rerun the same public suite."
+      ],
+      "module": "layered",
+      "source_files": [
+        "python/gf2.py",
+        "python/syndrome.py",
+        "python/graph.py",
+        "python/channel.py",
+        "python/minsum.py",
+        "python/variable.py",
+        "python/iteration.py",
+        "python/decoder.py",
+        "python/corrected.py",
+        "python/layered.py"
+      ],
+      "editable_files": [
+        "python/layered.py"
+      ],
+      "public_testbench": "tests/public/test_layered.py",
+      "top": "pytest",
+      "prerequisites": [
+        "LDPC-09"
+      ],
+      "estimated_minutes": 25,
+      "difficulty": "medium",
+      "concepts": [
+        "Layered update: remove old, add new",
+        "hardware dataflow"
+      ],
+      "hints": [
+        "Extract selected posterior values and subtract stored old messages.",
+        "Compute new messages from that extrinsic vector.",
+        "Replace only selected positions; preserve the other entries."
+      ],
+      "lesson": "## The question\nLayered update: remove old, add new\n\n## Intuition\nFlooding waits for the full check phase. Layered decoding updates posterior information immediately after each layer. The next layer reads the new posterior. Stored old check messages must be subtracted first or evidence gets counted twice. A hardware pipeline must respect the read-after-write dependency between overlapping layers.\n\n## Walk the example\n```text\nposterior [5,1,4]; selected indices [0,1]\nold check contributions [2,-1]\nextrinsic q = [3,2]\nnew check contributions [2,3]\nnew posterior [5,5,4]\n```\n\n## Representation and contract\nindices: unique ascending indices, degree >=2; old_messages: same length. Return (new_posterior, new_messages).\n\n## Your task\nComplete only layered.py. Use the worked values to predict your result before running the public checks. Provided plotting and sandbox plumbing are not your assignment.\n\n## Hardware connection\nWhen could two layers run at once without sharing a posterior entry?\n\n## Scope\nToy mathematical / algorithm example; not a full NR code.",
+      "visual": "iteration",
+      "prediction": "Which posterior entry changes in this example, and which stays untouched?",
+      "reflection": "When could two layers run at once without sharing a posterior entry?",
+      "expected_public_checks": 2
+    },
+    {
+      "id": "LDPC-11",
+      "title": "QC rotation: follow the indices",
+      "goal": "Rotate right by shift modulo vector length: output[i] = input[(i-shift) mod Z]. Reject empty vectors with ValueError.",
+      "description": "Rotate right by shift modulo vector length: output[i] = input[(i-shift) mod Z]. Reject empty vectors with ValueError.",
+      "requirements": [
+        "Nonempty 1-D array, integer shift (negative supported); return same shape and dtype, no mutation.",
+        "Never mutate input arrays; tests run in a fresh Python process.",
+        "Public-only learning checks; complete submits rerun the same public suite."
+      ],
+      "module": "rotation",
+      "source_files": [
+        "python/gf2.py",
+        "python/syndrome.py",
+        "python/graph.py",
+        "python/channel.py",
+        "python/minsum.py",
+        "python/variable.py",
+        "python/iteration.py",
+        "python/decoder.py",
+        "python/corrected.py",
+        "python/layered.py",
+        "python/rotation.py"
+      ],
+      "editable_files": [
+        "python/rotation.py"
+      ],
+      "public_testbench": "tests/public/test_rotation.py",
+      "top": "pytest",
+      "prerequisites": [
+        "LDPC-10"
+      ],
+      "estimated_minutes": 25,
+      "difficulty": "medium",
+      "concepts": [
+        "QC rotation: follow the indices",
+        "hardware dataflow"
+      ],
+      "hints": [
+        "Reduce shift modulo Z.",
+        "Map each output index to its source index.",
+        "Try shifts 0, Z, Z+1 and -1."
+      ],
+      "lesson": "## The question\nQC rotation: follow the indices\n\n## Intuition\nQC means quasi-cyclic: connections repeat with circular shifts. Rotating a vector changes addresses, not message arithmetic. This lesson fixes a right-rotation convention explicitly. Matrix-times-column-vector may require the inverse rotation; do not infer direction from a picture alone. An 8-lane rotation can use conditional shifts of 1, 2 and 4; this is one architecture, not a universal solution.\n\n## Walk the example\n```text\nZ=8, right shift 3:\n[0,1,2,3,4,5,6,7] → [5,6,7,0,1,2,3,4]\nright shift 11 is the same because 11 mod 8 = 3.\n```\n\n## Representation and contract\nNonempty 1-D array, integer shift (negative supported); return same shape and dtype, no mutation.\n\n## Your task\nComplete only rotation.py. Use the worked values to predict your result before running the public checks. Provided plotting and sandbox plumbing are not your assignment.\n\n## Hardware connection\nCould memory address mapping replace physical movement for this operation?\n\n## Scope\nToy mathematical / algorithm example; not a full NR code.",
+      "visual": "rotation",
+      "prediction": "Where does input index 0 appear after right shift 3?",
+      "reflection": "Could memory address mapping replace physical movement for this operation?",
+      "expected_public_checks": 4
+    },
+    {
+      "id": "LDPC-12",
+      "title": "Lift a toy QC base matrix",
+      "goal": "Replace -1 by zero block; nonnegative k by identity with columns rotated right k mod Z. Set block[i,(i+k) mod Z]=1.",
+      "description": "Replace -1 by zero block; nonnegative k by identity with columns rotated right k mod Z. Set block[i,(i+k) mod Z]=1.",
+      "requirements": [
+        "base: integer (r,c), entries >=-1; z positive int. Return binary array (r*z,c*z). Toy base only.",
+        "Never mutate input arrays; tests run in a fresh Python process.",
+        "Public-only learning checks; complete submits rerun the same public suite."
+      ],
+      "module": "qc",
+      "source_files": [
+        "python/gf2.py",
+        "python/syndrome.py",
+        "python/graph.py",
+        "python/channel.py",
+        "python/minsum.py",
+        "python/variable.py",
+        "python/iteration.py",
+        "python/decoder.py",
+        "python/corrected.py",
+        "python/layered.py",
+        "python/rotation.py",
+        "python/qc.py"
+      ],
+      "editable_files": [
+        "python/qc.py"
+      ],
+      "public_testbench": "tests/public/test_qc.py",
+      "top": "pytest",
+      "prerequisites": [
+        "LDPC-11"
+      ],
+      "estimated_minutes": 25,
+      "difficulty": "medium",
+      "concepts": [
+        "Lift a toy QC base matrix",
+        "hardware dataflow"
+      ],
+      "hints": [
+        "Allocate the expanded shape first.",
+        "For each nonempty block, write exactly one one per block row.",
+        "Use modulo indexing for the shifted column."
+      ],
+      "lesson": "## The question\nLift a toy QC base matrix\n\n## Intuition\nA base matrix compresses a large structured parity matrix. A nonempty entry describes Z connections; -1 describes none. Dense expansion is for understanding and tiny fixtures, not the production storage format. This example is not BG1 or BG2. Matrix right-shift convention follows the pinned standard construction, but B itself is authored toy data. Multiplying this block by a column vector produces the inverse of our right vector rotation.\n\n## Walk the example\n```text\nB=[[0,1,-1],[2,-1,0]], Z=4\nexpanded H has 8 rows and 12 columns.\nEach k describes a 4×4 block, not one edge.\nI shifted right 1 has row0 [0,1,0,0].\n```\n\n## Representation and contract\nbase: integer (r,c), entries >=-1; z positive int. Return binary array (r*z,c*z). Toy base only.\n\n## Your task\nComplete only qc.py. Use the worked values to predict your result before running the public checks. Provided plotting and sandbox plumbing are not your assignment.\n\n## Hardware connection\nWhy can we store a shift coefficient instead of Z squared binary entries?\n\n## Scope\nToy mathematical / algorithm example; not a full NR code.",
+      "visual": "qc",
+      "prediction": "How many ones does one nonempty Z×Z permutation block contain?",
+      "reflection": "Why can we store a shift coefficient instead of Z squared binary entries?",
+      "expected_public_checks": 2
+    },
+    {
+      "id": "LDPC-13",
+      "title": "NR lifting sizes: legal is not every integer",
+      "goal": "Return the set index 0..7 for a legal NR lifting size from provided LIFTING_SETS. Unsupported Z raises ValueError.",
+      "description": "Return the set index 0..7 for a legal NR lifting size from provided LIFTING_SETS. Unsupported Z raises ValueError.",
+      "requirements": [
+        "z integer. Return Python int. Standards data: TS38.212 V17.9.0 Table 5.3.2-1.",
+        "Never mutate input arrays; tests run in a fresh Python process.",
+        "Public-only learning checks; complete submits rerun the same public suite."
+      ],
+      "module": "lifting",
+      "source_files": [
+        "python/gf2.py",
+        "python/syndrome.py",
+        "python/graph.py",
+        "python/channel.py",
+        "python/minsum.py",
+        "python/variable.py",
+        "python/iteration.py",
+        "python/decoder.py",
+        "python/corrected.py",
+        "python/layered.py",
+        "python/rotation.py",
+        "python/qc.py",
+        "python/lifting.py"
+      ],
+      "editable_files": [
+        "python/lifting.py"
+      ],
+      "public_testbench": "tests/public/test_lifting.py",
+      "top": "pytest",
+      "prerequisites": [
+        "LDPC-12"
+      ],
+      "estimated_minutes": 25,
+      "difficulty": "medium",
+      "concepts": [
+        "NR lifting sizes: legal is not every integer",
+        "hardware dataflow"
+      ],
+      "hints": [
+        "Search each provided set.",
+        "The position of the containing set is the result.",
+        "Raise ValueError when no set contains z."
+      ],
+      "lesson": "## The question\nNR lifting sizes: legal is not every integer\n\n## Intuition\nThe lifting size determines the width of each QC block. NR defines a finite list of choices. A table set index also selects the correct base-graph shift coefficients; it is not a random grouping. This lesson uses verified lifting-set data only: it does not implement BG selection, encoding, rate matching or a complete NR decoder.\n\n## Walk the example\n```text\nZ=8 belongs to set 0; Z=96 belongs to set 1.\nZ=384: effective rotations 0..383.\nZ=97 is not a legal lifting size.\nA full codeword contains many Z-wide groups, not just Z bits.\n```\n\n## Representation and contract\nz integer. Return Python int. Standards data: TS38.212 V17.9.0 Table 5.3.2-1.\n\n## Your task\nComplete only lifting.py. Use the worked values to predict your result before running the public checks. Provided plotting and sandbox plumbing are not your assignment.\n\n## Hardware connection\nHow is lifting size different from total codeword length?\n\n## Scope\nStandard-derived lifting-size data only. Other NR behavior is not yet implemented.",
+      "visual": "rotation",
+      "prediction": "Is 97 legal just because it lies between 2 and 384?",
+      "reflection": "How is lifting size different from total codeword length?",
+      "expected_public_checks": 3
+    },
+    {
+      "id": "LDPC-14",
+      "title": "Saturation: overflow must be deliberate",
+      "goal": "Clip integer values to two's-complement signed range [-2^(w-1),2^(w-1)-1]. Width >=2. Return int64 array.",
+      "description": "Clip integer values to two's-complement signed range [-2^(w-1),2^(w-1)-1]. Width >=2. Return int64 array.",
+      "requirements": [
+        "values: integer array representable in int64; width 2..32. Use wider intermediates, preserve input.",
+        "Never mutate input arrays; tests run in a fresh Python process.",
+        "Public-only learning checks; complete submits rerun the same public suite."
+      ],
+      "module": "fixed",
+      "source_files": [
+        "python/gf2.py",
+        "python/syndrome.py",
+        "python/graph.py",
+        "python/channel.py",
+        "python/minsum.py",
+        "python/variable.py",
+        "python/iteration.py",
+        "python/decoder.py",
+        "python/corrected.py",
+        "python/layered.py",
+        "python/rotation.py",
+        "python/qc.py",
+        "python/lifting.py",
+        "python/fixed.py"
+      ],
+      "editable_files": [
+        "python/fixed.py"
+      ],
+      "public_testbench": "tests/public/test_fixed.py",
+      "top": "pytest",
+      "prerequisites": [
+        "LDPC-13"
+      ],
+      "estimated_minutes": 25,
+      "difficulty": "medium",
+      "concepts": [
+        "Saturation: overflow must be deliberate",
+        "hardware dataflow"
+      ],
+      "hints": [
+        "Derive asymmetric positive and negative limits.",
+        "Use a wide dtype before clipping.",
+        "Do not cast to a narrow integer before limiting values."
+      ],
+      "lesson": "## The question\nSaturation: overflow must be deliberate\n\n## Intuition\nFinite hardware storage cannot hold arbitrarily large values. Saturation clamps to the nearest limit; wraparound changes the sign and can turn strong confidence into the opposite bit. Signed width alone defines range, not fractional precision. We use explicit integer codes here before introducing a scale.\n\n## Walk the example\n```text\nwidth 4 → range -8..7\n[-12,-8,-1,0,7,11] → [-8,-8,-1,0,7,7]\nclip, do not wrap 11 into a negative number.\n```\n\n## Representation and contract\nvalues: integer array representable in int64; width 2..32. Use wider intermediates, preserve input.\n\n## Your task\nComplete only fixed.py. Use the worked values to predict your result before running the public checks. Provided plotting and sandbox plumbing are not your assignment.\n\n## Hardware connection\nWhy is saturating a posterior safer than relying on accidental NumPy overflow?\n\n## Scope\nImplementation-choice model; not a measured accelerator.",
+      "visual": "fixed",
+      "prediction": "What is the largest positive value in six signed bits?",
+      "reflection": "Why is saturating a posterior safer than relying on accidental NumPy overflow?",
+      "expected_public_checks": 2
+    },
+    {
+      "id": "LDPC-15",
+      "title": "Quantization: scale, round, clip",
+      "goal": "Return stored integer codes: values * 2^fraction_bits, round ties to even, then signed saturation. fraction_bits >=0; inputs finite.",
+      "description": "Return stored integer codes: values * 2^fraction_bits, round ties to even, then signed saturation. fraction_bits >=0; inputs finite.",
+      "requirements": [
+        "Return int64 array. Real reconstructed value = code / 2^fraction_bits. Use saturate_signed helper.",
+        "Never mutate input arrays; tests run in a fresh Python process.",
+        "Public-only learning checks; complete submits rerun the same public suite."
+      ],
+      "module": "quantize",
+      "source_files": [
+        "python/gf2.py",
+        "python/syndrome.py",
+        "python/graph.py",
+        "python/channel.py",
+        "python/minsum.py",
+        "python/variable.py",
+        "python/iteration.py",
+        "python/decoder.py",
+        "python/corrected.py",
+        "python/layered.py",
+        "python/rotation.py",
+        "python/qc.py",
+        "python/lifting.py",
+        "python/fixed.py",
+        "python/quantize.py"
+      ],
+      "editable_files": [
+        "python/quantize.py"
+      ],
+      "public_testbench": "tests/public/test_quantize.py",
+      "top": "pytest",
+      "prerequisites": [
+        "LDPC-14"
+      ],
+      "estimated_minutes": 25,
+      "difficulty": "medium",
+      "concepts": [
+        "Quantization: scale, round, clip",
+        "hardware dataflow"
+      ],
+      "hints": [
+        "Scale before rounding.",
+        "np.rint uses the chosen ties-to-even convention.",
+        "Apply your saturation helper to rounded wide codes."
+      ],
+      "lesson": "## The question\nQuantization: scale, round, clip\n\n## Intuition\nQuantization trades precision and range for bounded storage. Fractional bits set the step size; total signed bits set the integer-code range. Rounding ties to even is an explicit teaching convention, not a mandatory accelerator choice. The eventual full decoder must specify each quantization point and accumulator width; this primitive alone is not a bit-accurate complete decoder.\n\n## Walk the example\n```text\nwidth=4, fractional bits=1:\n[1.25,1.75,-1.25,10]\nscaled [2.5,3.5,-2.5,20]\nrounded [2,4,-2,20]\nclipped codes [2,4,-2,7]\nreconstructed [1,2,-1,3.5]\n```\n\n## Representation and contract\nReturn int64 array. Real reconstructed value = code / 2^fraction_bits. Use saturate_signed helper.\n\n## Your task\nComplete only quantize.py. Use the worked values to predict your result before running the public checks. Provided plotting and sandbox plumbing are not your assignment.\n\n## Hardware connection\nWhat changes if the fractional-bit count increases but total width stays fixed?\n\n## Scope\nImplementation-choice model; not a measured accelerator.",
+      "visual": "fixed",
+      "prediction": "Why does 1.25 round differently from 1.75 at this scale?",
+      "reflection": "What changes if the fractional-bit count increases but total width stays fixed?",
+      "expected_public_checks": 2
+    },
+    {
+      "id": "LDPC-16",
+      "title": "32 lanes: model work, not clock frequency",
+      "goal": "Partition z independent lifted positions into groups of at most lanes. Return groups count, valid count per group, utilization = z/(groups*lanes). Positive integers only.",
+      "description": "Partition z independent lifted positions into groups of at most lanes. Return groups count, valid count per group, utilization = z/(groups*lanes). Positive integers only.",
+      "requirements": [
+        "Return dict with groups:int, valid:list[int], utilization:float. This is a lane-issue model, not total decoder cycles.",
+        "Never mutate input arrays; tests run in a fresh Python process.",
+        "Public-only learning checks; complete submits rerun the same public suite."
+      ],
+      "module": "lanes",
+      "source_files": [
+        "python/gf2.py",
+        "python/syndrome.py",
+        "python/graph.py",
+        "python/channel.py",
+        "python/minsum.py",
+        "python/variable.py",
+        "python/iteration.py",
+        "python/decoder.py",
+        "python/corrected.py",
+        "python/layered.py",
+        "python/rotation.py",
+        "python/qc.py",
+        "python/lifting.py",
+        "python/fixed.py",
+        "python/quantize.py",
+        "python/lanes.py"
+      ],
+      "editable_files": [
+        "python/lanes.py"
+      ],
+      "public_testbench": "tests/public/test_lanes.py",
+      "top": "pytest",
+      "prerequisites": [
+        "LDPC-15"
+      ],
+      "estimated_minutes": 25,
+      "difficulty": "medium",
+      "concepts": [
+        "32 lanes: model work, not clock frequency",
+        "hardware dataflow"
+      ],
+      "hints": [
+        "Compute ceiling division.",
+        "All but the last group are full.",
+        "Keep the final valid-lane count and normalize useful work by issued capacity."
+      ],
+      "lesson": "## The question\n32 lanes: model work, not clock frequency\n\n## Intuition\nParallel lanes process multiple lifted check positions at once. The number of neighbors of a check is a different axis: minima are reduced over incident-edge messages for each check position, not across unrelated Z positions. This model counts lane groups only. Actual layer latency also needs edge reads, memory ports, pipeline delays and hazards. No frequency, throughput or area has been synthesized.\n\n## Walk the example\n```text\nZ=384, P=32 → 12 full groups\nZ=104, P=32 → [32,32,32,8]\nutilization 104/128 = 0.8125\nZ=352 is exactly divisible by 32: 11 groups.\n```\n\n## Representation and contract\nReturn dict with groups:int, valid:list[int], utilization:float. This is a lane-issue model, not total decoder cycles.\n\n## Your task\nComplete only lanes.py. Use the worked values to predict your result before running the public checks. Provided plotting and sandbox plumbing are not your assignment.\n\n## Hardware connection\nWhat extra assumptions are required to turn a group count into a decoder cycle estimate?\n\n## Scope\nImplementation-choice model; not a measured accelerator.",
+      "visual": "lanes",
+      "prediction": "Which group needs masking for Z=104 and P=32?",
+      "reflection": "What extra assumptions are required to turn a group count into a decoder cycle estimate?",
+      "expected_public_checks": 3
+    },
+    {
+      "id": "LDPC-17",
+      "title": "Memory banking: compute lanes can still stall",
+      "goal": "Detect conflicts in a simple single-read-port modulo-banked memory.",
+      "description": "Map addresses to banks and count simultaneous requests. Enough arithmetic lanes do not guarantee enough memory bandwidth.",
+      "requirements": [
+        "addresses: nonnegative 1-D integer array; banks positive int. Return dict bank_ids (array), counts (array length banks), conflict (bool). No mutation.",
+        "Mapping is address % banks; conflict when any count exceeds one.",
+        "Toy single-read-port bank model, not an NR memory layout or full cycle model."
+      ],
+      "module": "banking",
+      "source_files": [
+        "python/banking.py"
+      ],
+      "editable_files": [
+        "python/banking.py"
+      ],
+      "public_testbench": "tests/public/test_banking.py",
+      "top": "pytest",
+      "prerequisites": [
+        "LDPC-16"
+      ],
+      "estimated_minutes": 30,
+      "difficulty": "medium",
+      "concepts": [
+        "memory bandwidth",
+        "bank conflicts"
+      ],
+      "hints": [
+        "Assign each address a bank ID.",
+        "Count requests per bank, keeping empty banks.",
+        "Compare each count against the one read port available."
+      ],
+      "visual": "banks",
+      "expected_public_checks": 3,
+      "prediction": "With four banks, can addresses 0 and 4 be read in the same cycle?",
+      "reflection": "Could a different layout, a second port, or staggering reads avoid the conflict?",
+      "lesson": "## The problem\n32 compute lanes may need data at once. Each SRAM bank has a limited number of ports. If two reads need one single-ported bank, one must wait even while other banks are idle.\n\n## Walk the example\n```text\n4 banks, addresses [0,4,1]\nbank IDs [0,0,1]\ncounts [2,1,0,0]\nbank 0 has two requests for one port → conflict\n```\n\n## Your task\nModel this one issue group. Return bank IDs and per-bank counts before declaring a conflict. Preserve the original address array.\n\n## Hardware connection\nChanging memory layout, adding ports, buffering, or scheduling reads in different cycles can help, but each costs something. This toy modulo mapping is an implementation choice, not a standard rule.\n\n## Next NR milestone\nYou now have the primitives. A full NR course still needs verified BG1/BG2 tables and fixtures, rate recovery, the complete bit-accurate decoder, cycle scheduling and performance experiments. Do not label this toy path a complete 5G accelerator."
+    },
+    {
+      "id": "LDPC-18",
+      "title": "Min1/min2: summarize a check",
+      "goal": "Reconstruct extrinsic outputs from two minima and sign parity.",
+      "description": "Optional branch after LDPC-05: summarize once and reconstruct all outputs.",
+      "requirements": [
+        "Finite 1-D float q, degree >=2. Preserve input.",
+        "Return min1, min2 including duplicates, first-index argmin, negative_parity, and outgoing float array.",
+        "Zero sign is positive; handle ties and degree-two checks."
+      ],
+      "module": "minima",
+      "source_files": [
+        "python/minima.py"
+      ],
+      "editable_files": [
+        "python/minima.py"
+      ],
+      "public_testbench": "tests/public/test_minima.py",
+      "top": "pytest",
+      "prerequisites": [
+        "LDPC-05"
+      ],
+      "estimated_minutes": 30,
+      "difficulty": "medium",
+      "concepts": [
+        "two-minimum invariant",
+        "extrinsic reconstruction"
+      ],
+      "hints": [
+        "Separate signs and magnitudes.",
+        "Keep two minima including duplicates.",
+        "Remove recipient sign; choose min2 for the first minimum index, min1 otherwise."
+      ],
+      "visual": "minima",
+      "prediction": "Does excluding one of two equal minima change the minimum?",
+      "reflection": "Why must min2 count repeated values?",
+      "expected_public_checks": 6
+    }
+  ]
+}

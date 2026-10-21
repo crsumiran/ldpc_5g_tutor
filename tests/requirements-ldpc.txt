@@ -1,0 +1,2 @@
+# Author-only course verification; learner NumPy is supplied by the sandbox.
+numpy==2.2.6

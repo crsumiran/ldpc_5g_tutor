@@ -1,0 +1,285 @@
+[
+  {
+    "id": "why-coding",
+    "title": "Why do we need error correction?",
+    "goal": "Understand the problem LDPC solves before learning its mathematics.",
+    "diagram": "channel",
+    "sections": [
+      {
+        "title": "A message arrives with a mistake",
+        "text": "Imagine sending a friend the three bits 101. Perhaps those bits are part of a photograph or a voice recording. Whatever they represent, you want your friend to receive exactly the same values.\n\nBut a radio does not carry neat little zeros and ones through the air. It carries a physical signal. The receiver measures that signal and decides which bits it most likely represents. Noise can make that decision wrong, so your 101 might arrive as 001. The first bit has changed.\n\nHere is the difficulty: your friend does not have your original 101 to compare against. Looking at 001, they cannot tell whether you sent 001 correctly or sent something else that was damaged. Both explanations are possible. The received bits alone contain no note saying which ones are wrong."
+      },
+      {
+        "title": "Give the receiver something it can check",
+        "text": "To help, we can add extra bits before sending the message. We choose those extra bits so that the complete sequence follows rules that both sides already know. If the receiver's guesses break a rule, it has a reason to suspect an error. With enough useful rules and information about the received signal, it may also be able to work out a better guess.\n\nThe original information is called the payload. The process of adding protection is encoding, and the protected sequence is called a codeword. At the receiving end, decoding means using the noisy observations and the known rules to estimate the original information.\n\nNotice what the receiver is given: the observations and the rules, not the answer. When a teaching example shows you what was actually sent, that is for you to judge the result. A real decoder cannot look up the transmitted message."
+      },
+      {
+        "title": "This is the problem LDPC is designed to solve",
+        "text": "LDPC is a way to build these protection rules and use them to recover information after transmission errors. It is not a way to hide the message or shrink it. We deliberately send some extra information because we want the receiver to have a better chance of recovering the data.\n\nYou do not need to understand its name or its equations yet. First, we will try the simplest possible protection: sending a bit more than once. That example will show why adding information can help, and why it still cannot promise to fix every error."
+      }
+    ],
+    "question": "If an unprotected 101 arrives as 001, can the receiver know which bit changed just by looking at 001?",
+    "answer": "No. It could have been sent as 001. The receiver needs extra constraints or other evidence to distinguish possible original messages.",
+    "connections": [
+      {
+        "id": "LDPC-01",
+        "why": "Your first function will evaluate one tiny protection rule. It is a building block, not yet a decoder."
+      }
+    ],
+    "optional_sections": [
+      {
+        "title": "Optional Python and NumPy refresher",
+        "text": "Before assignment 1, try these tiny expressions in your editor. An array stores values; its shape tells you what the indices mean.\n```python\nimport numpy as np\nbits = np.array([1, 0, 1])\nmask = np.array([1, 0, 1])\nprint(bits.shape)           # (3,) -- one index\nprint(bits[mask == 1])      # [1 1] -- select positions\nh = np.array([[1, 1, 0], [0, 1, 1]])\nprint(h.shape)              # (2, 3) -- rows, columns\nprint(h[1, 2])              # 1 -- rule 1 includes bit 2\nprint(np.flatnonzero(h[0])) # [0 1] -- nonzero indices\ncopy = bits.copy()         # independent storage\ncopy[0] = 0                # bits is unchanged\n```\n\nPython a ^ b is XOR for integer bits; a & b selects with a binary mask. Do not confuse XOR with ordinary addition. A comparison such as scores < 0 returns a Boolean array; astype(int) converts False/True to 0/1. np.zeros((m,n)) initializes a matrix; a scalar, vector, and matrix are different shapes. The NumPy docs are at https://numpy.org/doc/stable/user/absolute_beginners.html. These snippets are preparation, not solutions to your target functions."
+      }
+    ]
+  },
+  {
+    "id": "redundancy",
+    "title": "Extra bits make mistakes recoverable",
+    "goal": "Meet payloads, codewords, and code rate through a tiny example.",
+    "diagram": "repetition",
+    "sections": [
+      {
+        "title": "Send one bit three times",
+        "text": "In the previous chapter, the receiver had no way to check an unprotected message. Let's give it a very simple rule: every bit is sent three times.\n\nIf the payload is 0, we send 000. If the payload is 1, we send 111. Those are the only two codewords this little system is allowed to send. Patterns such as 101 and 001 are not legal transmitted words, because their three copies disagree.\n\nNow suppose we send 111 and the receiver guesses 101. Two positions suggest 1 and one suggests 0. Taking a majority vote gives 1, so the receiver estimates that the codeword was 111 and recovers the original payload bit."
+      },
+      {
+        "title": "Why that choice makes sense",
+        "text": "Compare 101 with the two allowed codewords. It differs from 111 in just one position. It differs from 000 in two positions. If we assume that at most one bit was flipped, 111 is the only possible original word.\n\nCounting the positions that differ is called Hamming distance. The name is less important than the reasoning: we made the possible transmitted words different enough that a small mistake still leaves us closer to the original one.\n\nBut the assumption matters. If we send 111 and two bits flip, we might receive 001. Majority vote now chooses 000 and returns payload 0. The same decoder that fixed one error makes a wrong decision after two. It does not know how many flips actually happened."
+      },
+      {
+        "title": "Protection costs extra bits",
+        "text": "We transmitted three bits to carry one information bit. The fraction of transmitted bits that represent original information is called the code rate. Here it is 1/3. This is a fraction, not a clock frequency or a transmission speed.\n\nRepeating everything works as a first illustration, but it is expensive. We would like several information bits to share their protection instead of giving every bit its own copies. The next chapter introduces parity rules, which let us protect groups of bits together.\n\nKeep the central idea: a code restricts which patterns can be sent. The receiver uses those restrictions to make sense of a noisy pattern. Whether it succeeds depends on the code, the errors and the way we decode—not simply on how many extra bits we added."
+      }
+    ],
+    "question": "For the toy code, we transmit 000 and receive 010. What does majority vote estimate, and what assumption makes that reliable?",
+    "answer": "It estimates codeword 000 and payload 0. This is reliable if at most one bit was flipped. With more flips, the same received pattern might have come from the other codeword.",
+    "connections": [
+      {
+        "id": "LDPC-08",
+        "why": "The toy decoder later estimates legal bit patterns by iteration rather than by a hard-coded majority vote."
+      }
+    ],
+    "optional_sections": []
+  },
+  {
+    "id": "parity",
+    "title": "Parity rules, then the syndrome",
+    "goal": "Translate a protection rule into the operation you wrote in assignment 1.",
+    "diagram": "parity",
+    "sections": [
+      {
+        "title": "Protect a group instead of copying every bit",
+        "text": "We have seen how three copies can protect one bit. Now let's protect two bits with just one extra bit.\n\nSuppose the payload is 10. We add a third bit so that the complete group contains an even number of ones. There is currently one 1, so we add another 1 and send 101. If the payload were 11, we would add 0 and send 110, because two ones is already an even number.\n\nThis is an even-parity rule. Parity simply describes whether the number of ones is even or odd. Zero ones also counts as even, so 000 passes the rule too. The encoder chooses the extra parity bit to make the rule pass before transmission."
+      },
+      {
+        "title": "The receiver checks the same rule",
+        "text": "Both ends already know that the group should have even parity. The receiver does not need us to send that rule again with every message. The extra parity bit does travel with the message; the rule itself is agreed in advance.\n\nIf our transmitted 101 is guessed as 100, the receiver counts one 1 instead of two. The rule fails, so the receiver knows this candidate is inconsistent. However, the rule does not tell it which position changed. Changing any one of the three bits could restore even parity.\n\nXOR is the operation we use to do this check. XOR across a group returns 0 when the number of ones is even and 1 when it is odd. Thus 1 XOR 0 XOR 1 gives 0, while 1 XOR 0 XOR 0 gives 1.\n\nYou will also see the name GF(2). It means arithmetic on the two values 0 and 1, where addition behaves like XOR. That arithmetic can produce either value. It is our chosen code that requires a valid word's parity checks to produce 0; GF(2) does not independently force every calculation to be zero."
+      },
+      {
+        "title": "Give the bits several overlapping rules",
+        "text": "One rule can detect a problem, but it offers little help locating it. Let's use several rules that overlap. This is the six-bit toy example used in the assignments.\n\nCall the three payload bits b0, b1 and b2. Add three parity bits: b3 makes the group b0,b1,b3 even; b4 makes b1,b2,b4 even; and b5 makes b0,b2,b5 even.\n\nFor payload 101, the first group needs b3=1, the second needs b4=1, and the third needs b5=0. Our complete codeword is therefore [1,0,1,1,1,0]. You can check each group: each contains two ones, so all three rules pass. The first three positions carry the payload in this particular toy code.\n\nNow flip b1 from 0 to 1. The candidate becomes [1,1,1,1,1,0]. The first and second rules break, while the third still passes. That is more useful than a single failed rule: the two broken groups share b1. It is a clue about what might have happened, although a full decoder must also consider other possible errors."
+      },
+      {
+        "title": "A matrix records the rules; a syndrome records their results",
+        "text": "Instead of writing the groups in words, we can record them in a table called H, the parity-check matrix. Each row is one rule and each column is one bit. A 1 means include that bit; a 0 means leave it out. It does not mean that the bit itself must be 1.\n\nEvaluating all the rows produces a list called the syndrome. For our damaged candidate, the results are [1,1,0]: broken, broken, passing. There are three entries because there are three rules, even though there are six bits. The syndrome weight is just the number of broken rules—two here.\n\nAn all-zero syndrome means the candidate follows every rule. It does not prove it is the message we sent. For example, [0,0,1,0,1,1] also passes all three rules, but carries a different payload. The receiver's job is not merely to find any word that passes: it is to use the observations and rules to estimate the word that was actually transmitted.\n\nThis gives the first two assignments their purpose. Your parity function evaluates one rule. Your syndrome function collects the results of all the rules. Next, we will draw those same connections so we can see how information moves between them."
+      }
+    ],
+    "question": "There are six bits and three rules. How many entries does the syndrome have? Does [0, 0, 0] guarantee the original payload?",
+    "answer": "Three entries, one per rule. An all-zero syndrome means the candidate is a valid codeword under these rules; it does not guarantee it is the transmitted one.",
+    "connections": [
+      {
+        "id": "LDPC-01",
+        "why": "gf2_dot computes one row's parity."
+      },
+      {
+        "id": "LDPC-02",
+        "why": "syndrome collects all the row results. It detects violated rules, not the original payload by itself."
+      }
+    ],
+    "optional_sections": [
+      {
+        "title": "Why assignment 1 uses a dot product",
+        "text": "A rule needs to select which bits to check. In the assignment fixture, rule c0 selects b0, b1, and b3. Write its selection mask as [1, 1, 0, 1, 0, 0]. Multiply each mask entry by the matching bit, add the selected values, and take the remainder after division by 2. This is your gf2_dot.\n\nFor bits [1, 0, 1, 1, 1, 0], c0 gives (1 + 0 + 1) mod 2 = 0. Ordinary addition would give 2; parity gives 0. GF(2) is the name for arithmetic on the two values 0 and 1 with addition modulo 2. Your function tells us whether ONE selected rule is satisfied."
+      }
+    ]
+  },
+  {
+    "id": "sparse-graph",
+    "title": "What does LDPC actually mean?",
+    "goal": "See how sparse, overlapping rules become a graph and a memory layout.",
+    "diagram": "graph",
+    "sections": [
+      {
+        "title": "Draw the connections we already know",
+        "text": "In the last chapter, bit b1 belonged to two rules. That overlap gave us a useful clue when b1 was flipped. A drawing makes these relationships easier to follow.\n\nDraw a circle for each bit and a square for each parity rule. Connect a bit to a rule when that rule includes it. For example, the first rule connects to b0, b1 and b3. Bit b1 connects to the first and second rules.\n\nThis drawing is called a Tanner graph. It contains exactly the same information as H, just in a different form. A line is called an edge, and the nodes at the ends of that line are neighbors. The edge is a relationship—not an extra bit transmitted over the radio."
+      },
+      {
+        "title": "Why the name says low density",
+        "text": "LDPC stands for Low Density Parity Check. We already know what a parity check does. Low density describes the connection table: most entries of H are zero, so each rule includes only a small fraction of all the bits.\n\nIt does not describe how many ones happen to be in your message. A payload full of ones can still use an LDPC code. The sparsity is in the rules, not in the data.\n\nOur six-bit table is deliberately tiny so you can check it by hand. It is not a realistic demonstration of how sparse a large LDPC matrix is. In a practical code, there may be many bits and many rules, but each rule still connects to only a few of those bits."
+      },
+      {
+        "title": "A small set of neighbors is enough to work with",
+        "text": "If a rule includes only b0, b1 and b3, its calculation needs those three values. It does not need to inspect every bit in the codeword. We can store its neighbors as the list [0,1,3] instead of repeatedly reading a whole row of zeros and ones.\n\nThat is why assignment 3 asks you to build neighbor lists. It is preparing the connections that the decoder will use, not solving a separate graph puzzle.\n\nThe drawing will become more useful in the next chapter. Each rule will use its neighbors to advise a bit, and each bit will combine advice from its connected rules. No new information arrives from the transmitter during that conversation: it all happens inside the receiver, using the original observations and the known connections."
+      }
+    ],
+    "question": "If H[0, 3] = 1, does it force bit b3 to equal 1?",
+    "answer": "No. It means rule c0 includes b3 in its parity calculation. The bit value is stored separately and may be 0 or 1.",
+    "connections": [
+      {
+        "id": "LDPC-03",
+        "why": "Neighbor lists turn the graph's edges into the indices your Python code will process."
+      }
+    ],
+    "optional_sections": [
+      {
+        "title": "Stable edges connect equations to memory",
+        "text": "Use row-major global edge IDs in the supplied nine-edge fixture: e0=(c0,b0), e1=(c0,b1), e2=(c0,b3), e3=(c1,b1), e4=(c1,b2), e5=(c1,b4), e6=(c2,b0), e7=(c2,b2), e8=(c2,b5). No edge exists at an H entry of zero.\n\nThe bit-to-check message on e3 is q[3]; the check-to-bit message is r[3]. Bit b1 receives r[1] and r[3]. Dense teaching arrays instead store these at [check,bit], so e3 maps to [1,1]. Dense non-edge entries must stay zero. Select e3 below and follow its line and addresses. These IDs apply only to this fixture; another H gets another edge map."
+      }
+    ]
+  },
+  {
+    "id": "decoding",
+    "title": "How a decoder uses uncertain clues",
+    "goal": "Understand confidence and message passing before implementing the update equations.",
+    "diagram": "decoding",
+    "sections": [
+      {
+        "title": "A guess does not tell the whole story",
+        "text": "So far, we have checked rules using bits that are already 0 or 1. But a receiver is not equally sure about every bit. One noisy observation may strongly suggest 0, while another only slightly suggests 1. If we keep just the guesses, we throw away that difference.\n\nTo see why it matters, let's follow one small example from beginning to end. We are looking at three bits connected to one even-parity rule, not at the whole six-bit code from the earlier chapters. The receiver strongly favors 0 for the first bit, weakly favors 1 for the middle bit, and strongly favors 0 for the last bit.\n\nIts first guesses are therefore [0,1,0]. It does not know the original bits. The question is whether the rule can help it improve these guesses."
+      },
+      {
+        "title": "Keep a score alongside each guess",
+        "text": "We can represent the receiver's confidence with a signed score. In this tutorial, a positive score supports 0 and a negative score supports 1. The farther the score is from zero, the stronger the support. A score near zero means the receiver is unsure.\n\nOur three scores are +4, -0.2 and +3. The first and last strongly support 0. The middle score only weakly supports 1. Taking the sign of each score gives the same initial guesses [0,1,0], but now we have kept the information that the middle guess is much less convincing.\n\nThese scores are called log-likelihood ratios, or LLRs. They compare how well the observation supports 0 versus 1. You do not need their probability formula to follow this example. For now, remember what the sign and size mean. Zero is a tie; our assignments choose bit 0 in that case."
+      },
+      {
+        "title": "Ask what the rule can tell the middle bit",
+        "text": "The known rule says these three bits must contain an even number of ones. Our guesses [0,1,0] contain one 1, so they fail. This tells us something is inconsistent, but it does not name the guilty bit. The first or last bit could also be wrong.\n\nNow focus on the middle bit and consider the other two. Both strongly suggest 0. If those two really are 0, the middle bit must be 0 as well for the group to have even parity. The rule therefore has a reason to send the middle bit evidence favoring 0.\n\nThat evidence is called a message. It is computed inside the decoder, not another signal sent by the transmitter. To advise the middle bit, the rule deliberately leaves out the middle bit's own score. Otherwise it would feed the same original clue back to that bit as though it were new evidence.\n\nHow strong should the advice be? It depends on both of the other clues. If one were weak, we should not pretend their conclusion was strong. The simple method used here takes the weaker magnitude. Between +4 and +3, that is 3. Both clues favor 0, so this rule sends the middle bit a score of +3. This approximate check calculation is called Min-Sum."
+      },
+      {
+        "title": "Combine the advice with the original observation",
+        "text": "The middle bit now has its original score of -0.2 and the rule's message of +3. We add them: -0.2 + 3 = +2.8. The result favors 0, so its new guess is 0.\n\nWe have not erased the radio observation. It is still -0.2. We have formed a separate combined score using that observation and the extra evidence from the rule. The decoder changes its estimate because the new evidence outweighs the weak original clue, not because a broken rule ordered it to flip a particular bit.\n\nThe same rule advises the first and last bits too. To advise the first bit, it sees the middle bit suggesting 1 and the last bit suggesting 0. If those guesses were right, even parity would require the first bit to be 1. But the middle clue is weak, so this advice is only -0.2. The last bit receives the same weak advice. Adding it to their strong original scores gives +3.8 and +2.8, so both still favor 0.\n\nAll three combined scores are now [+3.8, +2.8, +2.8]. Our revised guesses are [0,0,0]. There are zero ones, which is even, so the rule passes. This is the whole update: start with uncertain observations, use the other bits to form advice, combine that advice with the original clue, and check the new guesses."
+      },
+      {
+        "title": "Repeat the same idea across the graph",
+        "text": "A larger LDPC code has many overlapping rules rather than just this one. Each rule advises its connected bits. Each bit combines its original observation with the advice it receives. When sending evidence back to a particular rule, it leaves out that rule's own contribution, for the same reason we left out the destination bit earlier: do not immediately echo someone's evidence back to them.\n\nA round of these updates is an iteration. One round may not be enough, because useful evidence can need several rounds to move through the graph. The decoder checks the syndrome after an update and continues if rules are still broken, until it reaches a chosen iteration limit.\n\nIf every rule passes, it has found a valid candidate. As we saw earlier, that is not proof that it recovered the transmitted word. Strongly misleading observations can lead to a different valid word, and some noisy cases never settle on a valid one before the limit.\n\nFor now, the important idea is the conversation: observations provide the starting clues, rules connect those clues, and messages help the bits revise their estimates. The assignments will let you build that conversation one operation at a time. The additional formulas and multi-round traces are available below when you want to look more closely; they are not another story you have to follow before this one makes sense."
+      }
+    ],
+    "question": "Why should a message from a parity rule to b1 exclude b1's own incoming message?",
+    "answer": "It should provide evidence from the other connected bits. Otherwise b1's original guess is echoed back as new support, double-counting the same evidence.",
+    "connections": [
+      {
+        "id": "LDPC-04",
+        "why": "Turn signed confidence into candidate bits."
+      },
+      {
+        "id": "LDPC-05",
+        "why": "Compute a rule's outgoing evidence."
+      },
+      {
+        "id": "LDPC-06",
+        "why": "Combine evidence at a bit without echoing the destination."
+      },
+      {
+        "id": "LDPC-07",
+        "why": "Connect the updates into one iteration."
+      },
+      {
+        "id": "LDPC-08",
+        "why": "Repeat iterations with a stopping condition."
+      },
+      {
+        "id": "LDPC-09",
+        "why": "Study corrections to the Min-Sum approximation."
+      },
+      {
+        "id": "LDPC-10",
+        "why": "Study the remove-old/add-new invariant used by a layered schedule."
+      },
+      {
+        "id": "LDPC-18",
+        "why": "Optional branch after assignment 5: compute two minima once, then reconstruct all outgoing messages."
+      }
+    ],
+    "optional_sections": [
+      {
+        "title": "Bridge a noisy sample to confidence",
+        "text": "For an intentionally simple BPSK channel, bit 0 maps to +1 and bit 1 to -1. Observation y is that symbol plus zero-mean Gaussian noise of variance sigma squared. With equal bit priors the channel score is L = 2y / sigma squared. Positive favors 0; negative favors 1; zero is a tie, chosen as 0 here.\n\nAt variance 1, y=[1.3,0.15,-0.1,-2.1,0] becomes L=[2.6,0.3,-0.2,-4.2,0], then bits [0,0,1,1,0]. Increasing variance to 4 divides the scores by four, reducing confidence without changing these signs. This is a pedagogical channel, not the full NR demapper. Assignment 4 receives scores; it does not implement the channel."
+      },
+      {
+        "title": "Four arrays with different jobs",
+        "text": "L[b] is original channel evidence and stays fixed during decoding. q[c,b] is bit-to-check evidence, excluding that check. r[c,b] is check-to-bit advice, excluding that bit. A[b] is the posterior score: L[b] plus incoming r messages. A changes as advice changes. In sparse storage q[e] and r[e] use the graph edge ID.\n\nOne check with incoming [7,-3,5,-9] must produce all outputs [3,-5,3,-3]. For each destination, omit its own input, multiply the other signs, and select their smallest magnitude. Never echo a bit its own evidence. At a bit with L=2 and incoming r=[3,-1], A=4 and outgoing q=[1,5]. The message back to the first check is 4-3=1, not 4."
+      },
+      {
+        "title": "A second round can matter",
+        "text": "Switch to a NEW three-bit chain with H=[[1,1,0],[0,1,1]] and L=[3,-1,-1]. Its four edge IDs are local to this chain, not the earlier six-bit graph. The supplied full trace below starts at hard bits 011, syndrome [1,0].\n\nFlooding round 1 gives A=[2,1,-2], bits 001, syndrome [0,1]. One rule improved while the other broke. Round 2 gives A=[1,1,1], bits 000, syndrome [0,0]. Checks in one round all read OLD q; only after computing all r do bits form new q.\n\nStop when the syndrome is zero or the iteration limit is reached. Zero means code-valid, not proven correct. If 000 was sent but L=[-3,-3,-3], the initial candidate 111 is already legal for this chain and the decoder stops wrongly at iteration zero. In simulation you know the sent bits for comparison; the decoder does not."
+      },
+      {
+        "title": "Why addition—and where that intuition has limits",
+        "text": "Independent likelihood ratios multiply when combining separate observations; taking logs turns multiplication into addition. That motivates combining channel and incoming evidence. The messages in a graph with cycles are not always independent: evidence may return along a loop. Excluding the destination avoids the immediate echo, but does not magically remove every long-loop correlation. Min-Sum is an approximation, not a guarantee of truth.\n\nFor a layered schedule, update one check immediately. Remove its old r contribution from A, compute replacement r, then add the replacement back. The next layer sees this updated A. The layered assignment visual follows both layers and a nonzero-old-message case."
+      }
+    ]
+  },
+  {
+    "id": "hardware",
+    "title": "From these ideas to 5G hardware",
+    "goal": "Know what every assignment contributes—and what this course does not yet implement.",
+    "diagram": "hardware",
+    "sections": [
+      {
+        "title": "Turn the decoder we understand into something we can run",
+        "text": "We now have a picture of decoding: keep confidence scores, exchange evidence through parity rules, revise the guesses and check again. Building hardware for this process does not change its purpose. It changes how we store the values and carry out the work.\n\nThe first useful step is a small Python decoder. With a tiny graph, we can inspect every message and check whether the implementation follows the reasoning. This is why the course begins with toy examples rather than a large 5G configuration. We want a model we understand before we try to make it fast."
+      },
+      {
+        "title": "Organize the connections so they are easier to handle",
+        "text": "A real decoder has far more connections than our hand-worked example. Storing and visiting every connection individually can be expensive. The LDPC codes used for 5G shared-channel data have a repeated structure that helps organize this work.\n\nYou can think of a small connection pattern being expanded into groups of similar connections. Within a group, a cyclic shift tells us which position connects to which. Instead of writing down every address separately, we can describe the group and its shift.\n\nThe later assignments introduce this idea with small rotations and expanded toy matrices. You will see the names quasi-cyclic and lifting there. Their exact indexing rules matter when you implement them, but you do not need to memorize them in this overview. The purpose is to make a large graph easier to describe and process."
+      },
+      {
+        "title": "Store the scores with a limited amount of precision",
+        "text": "Python lets us work conveniently with floating-point scores. Hardware often stores each score in a small, fixed number of bits. That saves storage and can simplify arithmetic, but some values will need to be rounded and values outside the allowed range will need a stated handling rule.\n\nThose changes can matter to decoding. A small negative score might round to zero and change a bit's decision. A large score might be clipped, making it less strong than it was in the floating-point model. We therefore need to check the effect on the decoder, not just confirm that the values fit in memory.\n\nThe saturation and quantization assignments are the first steps in understanding this tradeoff. A complete fixed-point decoder will need consistent rules for every stored message and intermediate result."
+      },
+      {
+        "title": "Parallel work still needs its data",
+        "text": "Once the arithmetic is clear, we can ask how much of it to do at once. A lane is one processing unit working on one item. For example, 32 lanes can process a group of up to 32 positions together. If there are 104 positions, we need three full groups and one group of eight.\n\nBut arithmetic units cannot work without their inputs. A memory bank is an independently accessible part of storage. If two lanes need different values from the same bank and that bank can serve only one read at a time, one lane must wait. Counting lanes alone therefore does not tell us how fast the decoder runs.\n\nThis is the path ahead: first get the decoding arithmetic right, then organize its connections, choose its numeric precision and plan how values reach the processing units. The current assignments teach these pieces. They are not yet a complete 5G decoder or a finished accelerator. We will need verified 5G graph data, the surrounding receiver processing and a full implementation model before making that claim."
+      }
+    ],
+    "question": "Why is a correct Python syndrome function useful but insufficient to claim a working 5G hardware decoder?",
+    "answer": "It implements only a rule-validity check. A full system also needs soft-input decoding, the actual NR code structure and surrounding processing, numerical and scheduling choices, and hardware verification.",
+    "connections": [
+      {
+        "id": "LDPC-11",
+        "why": "Represent cyclic data movement."
+      },
+      {
+        "id": "LDPC-12",
+        "why": "Expand a toy base graph into parity connections."
+      },
+      {
+        "id": "LDPC-13",
+        "why": "Recognize supported NR lifting sets."
+      },
+      {
+        "id": "LDPC-14",
+        "why": "Model finite signed range."
+      },
+      {
+        "id": "LDPC-15",
+        "why": "Model the conversion to fixed-point codes."
+      },
+      {
+        "id": "LDPC-16",
+        "why": "Plan parallel lane groups."
+      },
+      {
+        "id": "LDPC-17",
+        "why": "Identify simple memory-bank conflicts."
+      }
+    ],
+    "optional_sections": [
+      {
+        "title": "Name hardware terms before using them",
+        "text": "Gather means reading scattered addresses into the order the computation needs. Scatter means writing contributions back to their original addresses. With a Z=4 block shift k=1, a check gathers x[(i+1) mod 4]; bit accumulation scatters its outgoing message to the same bit index. This differs from the standalone right-vector-rotation helper.\n\nA lane is one parallel arithmetic slot. A bank is a separately accessible memory partition. A port is the number of accesses that a bank can serve per cycle. A mask disables unused lanes in a partial group. A pipeline overlaps stages from different work items; a dependency can prevent overlap. A read-after-write hazard occurs when a later operation needs a value that an earlier one has not yet stored. Group counts alone are not clock-cycle latency."
+      }
+    ]
+  }
+]

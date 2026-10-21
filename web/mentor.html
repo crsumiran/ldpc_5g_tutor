@@ -1,0 +1,63 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Mentor — Data Engineering Tutor</title>
+  <link rel="stylesheet" href="/styles.css" />
+</head>
+<body>
+  <h1>Mentor View</h1>
+  <p><a href="/">Home</a></p>
+
+  <div class="card">
+    <h2>1. Import Project</h2>
+    <label>Local path</label>
+    <input type="text" id="localPath" placeholder="/home/ranga/opencode/tutor/fixtures/python_etl" />
+    <button onclick="importLocal()">Import Local</button>
+
+    <label>Git URL</label>
+    <input type="text" id="gitUrl" placeholder="https://github.com/org/repo" />
+    <button onclick="importGit()">Import Git</button>
+
+    <label>ZIP file</label>
+    <input type="file" id="zipFile" accept=".zip" />
+    <button onclick="importZip()">Import ZIP</button>
+  </div>
+
+  <div class="card">
+    <h2>2. Project Workflow</h2>
+    <label>Project ID</label>
+    <input type="text" id="projectId" placeholder="project-id" />
+    <button onclick="analyzeProject()">Analyze</button>
+    <button onclick="generatePlan()">Generate Plan</button>
+    <button onclick="approvePlan()">Approve Plan</button>
+    <button onclick="generateAssignments()">Generate Assignments</button>
+  </div>
+
+  <div class="card">
+    <h2>3. Plan (editable JSON)</h2>
+    <label>Plan ID</label>
+    <input type="text" id="planId" placeholder="plan-id" />
+    <textarea id="planJson" rows="20"></textarea>
+    <button onclick="savePlan()">Save Plan (PATCH)</button>
+  </div>
+
+  <div class="card">
+    <h2>4. Assignment Preview</h2>
+    <label>Assignment ID</label>
+    <input type="text" id="assignmentId" placeholder="DE-001" />
+    <button onclick="loadAssignment()">Load Assignment</button>
+    <button onclick="publishAssignment()">Publish</button>
+    <button onclick="createWorkspace()">Create Workspace</button>
+    <pre id="assignmentPreview"></pre>
+  </div>
+
+  <div class="card">
+    <h2>Output</h2>
+    <pre id="out"></pre>
+  </div>
+
+  <script src="/app.js"></script>
+</body>
+</html>

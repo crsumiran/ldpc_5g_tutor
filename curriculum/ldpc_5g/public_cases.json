@@ -1,0 +1,1664 @@
+{
+  "LDPC-01": {
+    "function": "gf2_dot",
+    "cases": {
+      "test_even": [
+        {
+          "result": 0
+        }
+      ],
+      "test_odd": [
+        {
+          "result": 1
+        }
+      ],
+      "test_empty": [
+        {
+          "result": 0
+        }
+      ]
+    }
+  },
+  "LDPC-02": {
+    "function": "syndrome",
+    "cases": {
+      "test_valid": [
+        {
+          "result": {
+            "type": "array",
+            "shape": [
+              3
+            ],
+            "values": [
+              0,
+              0,
+              0
+            ]
+          }
+        }
+      ],
+      "test_flip": [
+        {
+          "result": {
+            "type": "array",
+            "shape": [
+              3
+            ],
+            "values": [
+              1,
+              1,
+              0
+            ]
+          }
+        }
+      ],
+      "test_zero": [
+        {
+          "result": {
+            "type": "array",
+            "shape": [
+              3
+            ],
+            "values": [
+              0,
+              0,
+              0
+            ]
+          }
+        }
+      ]
+    }
+  },
+  "LDPC-03": {
+    "function": "check_neighbors",
+    "cases": {
+      "test_neighbors": [
+        {
+          "result": [
+            [
+              0,
+              1,
+              3
+            ],
+            [
+              1,
+              2,
+              4
+            ],
+            [
+              0,
+              2,
+              5
+            ]
+          ]
+        }
+      ],
+      "test_empty_row": [
+        {
+          "result": [
+            [],
+            [
+              0
+            ]
+          ]
+        }
+      ]
+    }
+  },
+  "LDPC-04": {
+    "function": "hard_decisions",
+    "cases": {
+      "test_signs": [
+        {
+          "result": {
+            "type": "array",
+            "shape": [
+              5
+            ],
+            "values": [
+              0,
+              0,
+              1,
+              1,
+              0
+            ]
+          }
+        }
+      ],
+      "test_shape": [
+        {
+          "result": {
+            "type": "array",
+            "shape": [
+              2
+            ],
+            "values": [
+              0,
+              1
+            ]
+          }
+        }
+      ]
+    }
+  },
+  "LDPC-05": {
+    "function": "check_messages",
+    "cases": {
+      "test_manual": [
+        {
+          "result": {
+            "type": "array",
+            "shape": [
+              4
+            ],
+            "values": [
+              3.0,
+              -5.0,
+              3.0,
+              -3.0
+            ]
+          }
+        }
+      ],
+      "test_ties": [
+        {
+          "result": {
+            "type": "array",
+            "shape": [
+              4
+            ],
+            "values": [
+              3.0,
+              3.0,
+              3.0,
+              3.0
+            ]
+          }
+        }
+      ],
+      "test_zero": [
+        {
+          "result": {
+            "type": "array",
+            "shape": [
+              3
+            ],
+            "values": [
+              4.0,
+              0.0,
+              0.0
+            ]
+          }
+        }
+      ],
+      "test_signed_tie": [
+        {
+          "result": {
+            "type": "array",
+            "shape": [
+              3
+            ],
+            "values": [
+              2.0,
+              -2.0,
+              -2.0
+            ]
+          }
+        }
+      ]
+    }
+  },
+  "LDPC-06": {
+    "function": "variable_messages",
+    "cases": {
+      "test_values": [
+        {
+          "result": [
+            4.0,
+            {
+              "type": "array",
+              "shape": [
+                2
+              ],
+              "values": [
+                1.0,
+                5.0
+              ]
+            }
+          ]
+        }
+      ],
+      "test_no_neighbors": [
+        {
+          "result": [
+            -2.0,
+            {
+              "type": "array",
+              "shape": [
+                0
+              ],
+              "values": []
+            }
+          ]
+        }
+      ]
+    }
+  },
+  "LDPC-07": {
+    "function": "flooding_step",
+    "cases": {
+      "test_trace": [
+        {
+          "result": [
+            {
+              "type": "array",
+              "shape": [
+                2,
+                3
+              ],
+              "values": [
+                [
+                  -1.0,
+                  3.0,
+                  0.0
+                ],
+                [
+                  0.0,
+                  2.0,
+                  -1.0
+                ]
+              ]
+            },
+            {
+              "type": "array",
+              "shape": [
+                2,
+                3
+              ],
+              "values": [
+                [
+                  3.0,
+                  1.0,
+                  0.0
+                ],
+                [
+                  0.0,
+                  2.0,
+                  2.0
+                ]
+              ]
+            },
+            {
+              "type": "array",
+              "shape": [
+                3
+              ],
+              "values": [
+                2.0,
+                4.0,
+                1.0
+              ]
+            }
+          ]
+        }
+      ],
+      "test_no_mutation": [
+        {
+          "result": [
+            {
+              "type": "array",
+              "shape": [
+                2,
+                3
+              ],
+              "values": [
+                [
+                  -1.0,
+                  3.0,
+                  0.0
+                ],
+                [
+                  0.0,
+                  2.0,
+                  -1.0
+                ]
+              ]
+            },
+            {
+              "type": "array",
+              "shape": [
+                2,
+                3
+              ],
+              "values": [
+                [
+                  3.0,
+                  1.0,
+                  0.0
+                ],
+                [
+                  0.0,
+                  2.0,
+                  2.0
+                ]
+              ]
+            },
+            {
+              "type": "array",
+              "shape": [
+                3
+              ],
+              "values": [
+                2.0,
+                4.0,
+                1.0
+              ]
+            }
+          ]
+        }
+      ],
+      "test_two_round_state": [
+        {
+          "result": [
+            {
+              "type": "array",
+              "shape": [
+                2,
+                3
+              ],
+              "values": [
+                [
+                  -1.0,
+                  3.0,
+                  0.0
+                ],
+                [
+                  0.0,
+                  -1.0,
+                  -1.0
+                ]
+              ]
+            },
+            {
+              "type": "array",
+              "shape": [
+                2,
+                3
+              ],
+              "values": [
+                [
+                  3.0,
+                  -2.0,
+                  0.0
+                ],
+                [
+                  0.0,
+                  2.0,
+                  -1.0
+                ]
+              ]
+            },
+            {
+              "type": "array",
+              "shape": [
+                3
+              ],
+              "values": [
+                2.0,
+                1.0,
+                -2.0
+              ]
+            }
+          ]
+        },
+        {
+          "result": [
+            {
+              "type": "array",
+              "shape": [
+                2,
+                3
+              ],
+              "values": [
+                [
+                  -2.0,
+                  3.0,
+                  0.0
+                ],
+                [
+                  0.0,
+                  -1.0,
+                  2.0
+                ]
+              ]
+            },
+            {
+              "type": "array",
+              "shape": [
+                2,
+                3
+              ],
+              "values": [
+                [
+                  3.0,
+                  -2.0,
+                  0.0
+                ],
+                [
+                  0.0,
+                  2.0,
+                  -1.0
+                ]
+              ]
+            },
+            {
+              "type": "array",
+              "shape": [
+                3
+              ],
+              "values": [
+                1.0,
+                1.0,
+                1.0
+              ]
+            }
+          ]
+        }
+      ]
+    }
+  },
+  "LDPC-08": {
+    "function": "decode_toy",
+    "cases": {
+      "test_already_valid": [
+        {
+          "result": {
+            "bits": {
+              "type": "array",
+              "shape": [
+                3
+              ],
+              "values": [
+                0,
+                0,
+                0
+              ]
+            },
+            "iterations": 0,
+            "syndrome_weights": [
+              0
+            ]
+          }
+        }
+      ],
+      "test_repair": [
+        {
+          "result": {
+            "bits": {
+              "type": "array",
+              "shape": [
+                3
+              ],
+              "values": [
+                0,
+                0,
+                0
+              ]
+            },
+            "iterations": 1,
+            "syndrome_weights": [
+              1,
+              0
+            ]
+          }
+        }
+      ],
+      "test_bounded": [
+        {
+          "result": {
+            "bits": {
+              "type": "array",
+              "shape": [
+                3
+              ],
+              "values": [
+                1,
+                0,
+                0
+              ]
+            },
+            "iterations": 0,
+            "syndrome_weights": [
+              1
+            ]
+          }
+        }
+      ],
+      "test_two_rounds": [
+        {
+          "result": {
+            "bits": {
+              "type": "array",
+              "shape": [
+                3
+              ],
+              "values": [
+                0,
+                0,
+                0
+              ]
+            },
+            "iterations": 2,
+            "syndrome_weights": [
+              1,
+              1,
+              0
+            ]
+          }
+        }
+      ],
+      "test_wrong_but_valid": [
+        {
+          "result": {
+            "bits": {
+              "type": "array",
+              "shape": [
+                3
+              ],
+              "values": [
+                1,
+                1,
+                1
+              ]
+            },
+            "iterations": 0,
+            "syndrome_weights": [
+              0
+            ]
+          }
+        }
+      ],
+      "test_cap_before_valid": [
+        {
+          "result": {
+            "bits": {
+              "type": "array",
+              "shape": [
+                3
+              ],
+              "values": [
+                0,
+                0,
+                1
+              ]
+            },
+            "iterations": 1,
+            "syndrome_weights": [
+              1,
+              1
+            ]
+          }
+        }
+      ]
+    }
+  },
+  "LDPC-09": {
+    "function": "corrected_messages",
+    "cases": {
+      "test_oms": [
+        {
+          "result": {
+            "type": "array",
+            "shape": [
+              4
+            ],
+            "values": [
+              2.0,
+              -4.0,
+              2.0,
+              -2.0
+            ]
+          }
+        }
+      ],
+      "test_nms": [
+        {
+          "result": {
+            "type": "array",
+            "shape": [
+              4
+            ],
+            "values": [
+              1.5,
+              -2.5,
+              1.5,
+              -1.5
+            ]
+          }
+        }
+      ],
+      "test_clip": [
+        {
+          "result": {
+            "type": "array",
+            "shape": [
+              2
+            ],
+            "values": [
+              1.0,
+              0.0
+            ]
+          }
+        }
+      ]
+    }
+  },
+  "LDPC-10": {
+    "function": "layer_update",
+    "cases": {
+      "test_layer": [
+        {
+          "result": [
+            {
+              "type": "array",
+              "shape": [
+                3
+              ],
+              "values": [
+                5.0,
+                5.0,
+                4.0
+              ]
+            },
+            {
+              "type": "array",
+              "shape": [
+                2
+              ],
+              "values": [
+                2.0,
+                3.0
+              ]
+            }
+          ]
+        }
+      ],
+      "test_preserve": [
+        {
+          "result": [
+            {
+              "type": "array",
+              "shape": [
+                3
+              ],
+              "values": [
+                5.0,
+                5.0,
+                4.0
+              ]
+            },
+            {
+              "type": "array",
+              "shape": [
+                2
+              ],
+              "values": [
+                2.0,
+                3.0
+              ]
+            }
+          ]
+        }
+      ],
+      "test_two_layers": [
+        {
+          "result": [
+            {
+              "type": "array",
+              "shape": [
+                3
+              ],
+              "values": [
+                2.0,
+                2.0,
+                -1.0
+              ]
+            },
+            {
+              "type": "array",
+              "shape": [
+                2
+              ],
+              "values": [
+                -1.0,
+                3.0
+              ]
+            }
+          ]
+        },
+        {
+          "result": [
+            {
+              "type": "array",
+              "shape": [
+                3
+              ],
+              "values": [
+                2.0,
+                1.0,
+                1.0
+              ]
+            },
+            {
+              "type": "array",
+              "shape": [
+                2
+              ],
+              "values": [
+                -1.0,
+                2.0
+              ]
+            }
+          ]
+        }
+      ]
+    }
+  },
+  "LDPC-11": {
+    "function": "qc_rotate",
+    "cases": {
+      "test_right": [
+        {
+          "result": {
+            "type": "array",
+            "shape": [
+              8
+            ],
+            "values": [
+              5,
+              6,
+              7,
+              0,
+              1,
+              2,
+              3,
+              4
+            ]
+          }
+        }
+      ],
+      "test_modulo": [
+        {
+          "result": {
+            "type": "array",
+            "shape": [
+              8
+            ],
+            "values": [
+              5,
+              6,
+              7,
+              0,
+              1,
+              2,
+              3,
+              4
+            ]
+          }
+        }
+      ],
+      "test_negative": [
+        {
+          "result": {
+            "type": "array",
+            "shape": [
+              4
+            ],
+            "values": [
+              1,
+              2,
+              3,
+              0
+            ]
+          }
+        }
+      ],
+      "test_empty": [
+        {
+          "raises": "ValueError"
+        }
+      ]
+    }
+  },
+  "LDPC-12": {
+    "function": "expand_qc",
+    "cases": {
+      "test_blocks": [
+        {
+          "result": {
+            "type": "array",
+            "shape": [
+              8,
+              12
+            ],
+            "values": [
+              [
+                1,
+                0,
+                0,
+                0,
+                0,
+                1,
+                0,
+                0,
+                0,
+                0,
+                0,
+                0
+              ],
+              [
+                0,
+                1,
+                0,
+                0,
+                0,
+                0,
+                1,
+                0,
+                0,
+                0,
+                0,
+                0
+              ],
+              [
+                0,
+                0,
+                1,
+                0,
+                0,
+                0,
+                0,
+                1,
+                0,
+                0,
+                0,
+                0
+              ],
+              [
+                0,
+                0,
+                0,
+                1,
+                1,
+                0,
+                0,
+                0,
+                0,
+                0,
+                0,
+                0
+              ],
+              [
+                0,
+                0,
+                1,
+                0,
+                0,
+                0,
+                0,
+                0,
+                1,
+                0,
+                0,
+                0
+              ],
+              [
+                0,
+                0,
+                0,
+                1,
+                0,
+                0,
+                0,
+                0,
+                0,
+                1,
+                0,
+                0
+              ],
+              [
+                1,
+                0,
+                0,
+                0,
+                0,
+                0,
+                0,
+                0,
+                0,
+                0,
+                1,
+                0
+              ],
+              [
+                0,
+                1,
+                0,
+                0,
+                0,
+                0,
+                0,
+                0,
+                0,
+                0,
+                0,
+                1
+              ]
+            ]
+          }
+        }
+      ],
+      "test_modulo": [
+        {
+          "result": {
+            "type": "array",
+            "shape": [
+              4,
+              4
+            ],
+            "values": [
+              [
+                0,
+                1,
+                0,
+                0
+              ],
+              [
+                0,
+                0,
+                1,
+                0
+              ],
+              [
+                0,
+                0,
+                0,
+                1
+              ],
+              [
+                1,
+                0,
+                0,
+                0
+              ]
+            ]
+          }
+        }
+      ],
+      "test_complete_matrix": [
+        {
+          "result": {
+            "type": "array",
+            "shape": [
+              8,
+              12
+            ],
+            "values": [
+              [
+                1,
+                0,
+                0,
+                0,
+                0,
+                1,
+                0,
+                0,
+                0,
+                0,
+                0,
+                0
+              ],
+              [
+                0,
+                1,
+                0,
+                0,
+                0,
+                0,
+                1,
+                0,
+                0,
+                0,
+                0,
+                0
+              ],
+              [
+                0,
+                0,
+                1,
+                0,
+                0,
+                0,
+                0,
+                1,
+                0,
+                0,
+                0,
+                0
+              ],
+              [
+                0,
+                0,
+                0,
+                1,
+                1,
+                0,
+                0,
+                0,
+                0,
+                0,
+                0,
+                0
+              ],
+              [
+                0,
+                0,
+                1,
+                0,
+                0,
+                0,
+                0,
+                0,
+                1,
+                0,
+                0,
+                0
+              ],
+              [
+                0,
+                0,
+                0,
+                1,
+                0,
+                0,
+                0,
+                0,
+                0,
+                1,
+                0,
+                0
+              ],
+              [
+                1,
+                0,
+                0,
+                0,
+                0,
+                0,
+                0,
+                0,
+                0,
+                0,
+                1,
+                0
+              ],
+              [
+                0,
+                1,
+                0,
+                0,
+                0,
+                0,
+                0,
+                0,
+                0,
+                0,
+                0,
+                1
+              ]
+            ]
+          }
+        }
+      ]
+    }
+  },
+  "LDPC-13": {
+    "function": "lifting_set_index",
+    "cases": {
+      "test_sets": [
+        {
+          "result": 0
+        },
+        {
+          "result": 1
+        },
+        {
+          "result": 1
+        }
+      ],
+      "test_invalid": [
+        {
+          "raises": "ValueError"
+        }
+      ],
+      "test_all": [
+        {
+          "result": 0
+        },
+        {
+          "result": 0
+        },
+        {
+          "result": 0
+        },
+        {
+          "result": 0
+        },
+        {
+          "result": 0
+        },
+        {
+          "result": 0
+        },
+        {
+          "result": 0
+        },
+        {
+          "result": 0
+        },
+        {
+          "result": 1
+        },
+        {
+          "result": 1
+        },
+        {
+          "result": 1
+        },
+        {
+          "result": 1
+        },
+        {
+          "result": 1
+        },
+        {
+          "result": 1
+        },
+        {
+          "result": 1
+        },
+        {
+          "result": 1
+        },
+        {
+          "result": 2
+        },
+        {
+          "result": 2
+        },
+        {
+          "result": 2
+        },
+        {
+          "result": 2
+        },
+        {
+          "result": 2
+        },
+        {
+          "result": 2
+        },
+        {
+          "result": 2
+        },
+        {
+          "result": 3
+        },
+        {
+          "result": 3
+        },
+        {
+          "result": 3
+        },
+        {
+          "result": 3
+        },
+        {
+          "result": 3
+        },
+        {
+          "result": 3
+        },
+        {
+          "result": 4
+        },
+        {
+          "result": 4
+        },
+        {
+          "result": 4
+        },
+        {
+          "result": 4
+        },
+        {
+          "result": 4
+        },
+        {
+          "result": 4
+        },
+        {
+          "result": 5
+        },
+        {
+          "result": 5
+        },
+        {
+          "result": 5
+        },
+        {
+          "result": 5
+        },
+        {
+          "result": 5
+        },
+        {
+          "result": 5
+        },
+        {
+          "result": 6
+        },
+        {
+          "result": 6
+        },
+        {
+          "result": 6
+        },
+        {
+          "result": 6
+        },
+        {
+          "result": 6
+        },
+        {
+          "result": 7
+        },
+        {
+          "result": 7
+        },
+        {
+          "result": 7
+        },
+        {
+          "result": 7
+        },
+        {
+          "result": 7
+        }
+      ]
+    }
+  },
+  "LDPC-14": {
+    "function": "saturate_signed",
+    "cases": {
+      "test_limits": [
+        {
+          "result": {
+            "type": "array",
+            "shape": [
+              6
+            ],
+            "values": [
+              -8,
+              -8,
+              -1,
+              0,
+              7,
+              7
+            ]
+          }
+        }
+      ],
+      "test_six": [
+        {
+          "result": {
+            "type": "array",
+            "shape": [
+              2
+            ],
+            "values": [
+              -32,
+              31
+            ]
+          }
+        }
+      ]
+    }
+  },
+  "LDPC-15": {
+    "function": "quantize_signed",
+    "cases": {
+      "test_codes": [
+        {
+          "result": {
+            "type": "array",
+            "shape": [
+              4
+            ],
+            "values": [
+              2,
+              4,
+              -2,
+              7
+            ]
+          }
+        }
+      ],
+      "test_integral": [
+        {
+          "result": {
+            "type": "array",
+            "shape": [
+              3
+            ],
+            "values": [
+              0,
+              -1,
+              31
+            ]
+          }
+        }
+      ],
+      "test_decision_changes_at_zero": [
+        {
+          "result": {
+            "type": "array",
+            "shape": [
+              2
+            ],
+            "values": [
+              0,
+              2
+            ]
+          }
+        }
+      ]
+    }
+  },
+  "LDPC-16": {
+    "function": "lane_plan",
+    "cases": {
+      "test_full": [
+        {
+          "result": {
+            "groups": 12,
+            "valid": [
+              32,
+              32,
+              32,
+              32,
+              32,
+              32,
+              32,
+              32,
+              32,
+              32,
+              32,
+              32
+            ],
+            "utilization": 1.0
+          }
+        }
+      ],
+      "test_partial": [
+        {
+          "result": {
+            "groups": 4,
+            "valid": [
+              32,
+              32,
+              32,
+              8
+            ],
+            "utilization": 0.8125
+          }
+        }
+      ],
+      "test_one": [
+        {
+          "result": {
+            "groups": 1,
+            "valid": [
+              2
+            ],
+            "utilization": 0.0625
+          }
+        }
+      ]
+    }
+  },
+  "LDPC-17": {
+    "function": "bank_conflicts",
+    "cases": {
+      "test_unique": [
+        {
+          "result": {
+            "bank_ids": {
+              "type": "array",
+              "shape": [
+                4
+              ],
+              "values": [
+                0,
+                1,
+                2,
+                3
+              ]
+            },
+            "counts": {
+              "type": "array",
+              "shape": [
+                4
+              ],
+              "values": [
+                1,
+                1,
+                1,
+                1
+              ]
+            },
+            "conflict": false
+          }
+        }
+      ],
+      "test_collision": [
+        {
+          "result": {
+            "bank_ids": {
+              "type": "array",
+              "shape": [
+                3
+              ],
+              "values": [
+                0,
+                0,
+                1
+              ]
+            },
+            "counts": {
+              "type": "array",
+              "shape": [
+                4
+              ],
+              "values": [
+                2,
+                1,
+                0,
+                0
+              ]
+            },
+            "conflict": true
+          }
+        }
+      ],
+      "test_empty": [
+        {
+          "result": {
+            "bank_ids": {
+              "type": "array",
+              "shape": [
+                0
+              ],
+              "values": []
+            },
+            "counts": {
+              "type": "array",
+              "shape": [
+                4
+              ],
+              "values": [
+                0,
+                0,
+                0,
+                0
+              ]
+            },
+            "conflict": false
+          }
+        }
+      ]
+    }
+  },
+  "LDPC-18": {
+    "function": "check_messages_fast",
+    "cases": {
+      "test_unique_minimum": [
+        {
+          "result": {
+            "min1": 3.0,
+            "min2": 5.0,
+            "argmin": 1,
+            "negative_parity": 0,
+            "outgoing": {
+              "type": "array",
+              "shape": [
+                4
+              ],
+              "values": [
+                3.0,
+                -5.0,
+                3.0,
+                -3.0
+              ]
+            }
+          }
+        }
+      ],
+      "test_repeated_minimum": [
+        {
+          "result": {
+            "min1": 3.0,
+            "min2": 3.0,
+            "argmin": 0,
+            "negative_parity": 0,
+            "outgoing": {
+              "type": "array",
+              "shape": [
+                4
+              ],
+              "values": [
+                3.0,
+                3.0,
+                3.0,
+                3.0
+              ]
+            }
+          }
+        }
+      ],
+      "test_zero_minimum": [
+        {
+          "result": {
+            "min1": 0.0,
+            "min2": 4.0,
+            "argmin": 0,
+            "negative_parity": 0,
+            "outgoing": {
+              "type": "array",
+              "shape": [
+                3
+              ],
+              "values": [
+                4.0,
+                0.0,
+                0.0
+              ]
+            }
+          }
+        }
+      ],
+      "test_signed_tie": [
+        {
+          "result": {
+            "min1": 2.0,
+            "min2": 2.0,
+            "argmin": 0,
+            "negative_parity": 1,
+            "outgoing": {
+              "type": "array",
+              "shape": [
+                3
+              ],
+              "values": [
+                2.0,
+                -2.0,
+                -2.0
+              ]
+            }
+          }
+        }
+      ],
+      "test_degree_two": [
+        {
+          "result": {
+            "min1": 4.0,
+            "min2": 7.0,
+            "argmin": 1,
+            "negative_parity": 1,
+            "outgoing": {
+              "type": "array",
+              "shape": [
+                2
+              ],
+              "values": [
+                4.0,
+                -7.0
+              ]
+            }
+          }
+        }
+      ],
+      "test_two_zeros": [
+        {
+          "result": {
+            "min1": 0.0,
+            "min2": 0.0,
+            "argmin": 0,
+            "negative_parity": 1,
+            "outgoing": {
+              "type": "array",
+              "shape": [
+                3
+              ],
+              "values": [
+                -0.0,
+                -0.0,
+                0.0
+              ]
+            }
+          }
+        }
+      ]
+    }
+  }
+}

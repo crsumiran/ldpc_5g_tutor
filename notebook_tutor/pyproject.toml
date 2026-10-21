@@ -1,0 +1,17 @@
+[build-system]
+requires = ["setuptools>=69"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "qwen36-numpy-assignment"
+version = "0.1.0"
+description = "CPU NumPy notebook assignment for Qwen3.6-27B text inference"
+requires-python = ">=3.10"
+dependencies = ["numpy>=1.26,<3", "safetensors>=0.4,<1"]
+
+[project.optional-dependencies]
+notebook = ["jupyterlab>=4,<5", "ipykernel>=6,<8", "matplotlib>=3.8,<4", "nbformat>=5,<6", "transformers>=5.12,<6", "tokenizers>=0.22,<1"]
+original = ["torch>=2.5,<3", "accelerate>=1,<2", "transformers>=5.12,<6"]
+
+[tool.setuptools.packages.find]
+include = ["qwen_numpy*"]

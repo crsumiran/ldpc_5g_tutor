@@ -1,0 +1,200 @@
+{
+  "schema_version": 1,
+  "id": "cache-lab",
+  "title": "Build a Direct-Mapped Cache",
+  "subtitle": "A guided hardware lab in six checkpoints",
+  "toolchain": "iverilog",
+  "overview_file": "overview.md",
+  "architecture_file": "architecture.md",
+  "provided_files": ["provided/rtl/backing_memory.v"],
+  "checkpoints": [
+    {
+      "id": "CACHE-01",
+      "title": "Decode the Address",
+      "goal": "Split an 8-bit byte address into tag, index, and byte offset fields.",
+      "description": "Implement a purely combinational address decoder for this cache geometry. The CPU supplies an 8-bit byte address; your outputs identify the memory region, one of four cache lines, and the byte position within a 32-bit word.",
+      "requirements": [
+        "Drive tag from address bits [7:4].",
+        "Drive index from address bits [3:2]; four lines require a 2-bit index.",
+        "Drive byte_offset from address bits [1:0].",
+        "Use continuous combinational assignments. No clock, state, or arithmetic is needed."
+      ],
+      "module": "cache_address_decode",
+      "source_files": ["rtl/cache_address_decode.v"],
+      "editable_files": ["rtl/cache_address_decode.v"],
+      "public_testbench": "tests/public/tb_address_decode.v",
+      "hidden_testbench": "tests/hidden/tb_address_decode_hidden.v",
+      "top": "tb_address_decode",
+      "hidden_top": "tb_address_decode_hidden",
+      "estimated_minutes": 20,
+      "difficulty": "easy",
+      "concepts": ["direct mapping", "address partitioning", "bit slicing"],
+      "hints": [
+        "Determine how many bits four cache lines require.",
+        "The bottom two bits select a byte inside a 32-bit word.",
+        "After removing offset and index bits, the remaining upper bits form the tag."
+      ],
+      "trace_signals": ["addr", "tag", "index", "byte_offset"]
+    },
+    {
+      "id": "CACHE-02",
+      "title": "Build the Tag Array",
+      "goal": "Store four valid bits and tags, with reset invalidating every line.",
+      "description": "Complete the sequential write behavior of a four-entry tag array. Each line stores a 4-bit tag and a valid bit. Reads remain combinational, while reset and writes happen on the rising clock edge.",
+      "requirements": [
+        "On a rising edge with reset asserted, clear all four valid bits. Clearing tags too is acceptable and keeps simulation deterministic.",
+        "Otherwise, when write_enable is asserted, update only tags[write_index] and set only valid[write_index].",
+        "When write_enable is low, preserve every tag and valid bit.",
+        "Keep read_tag and read_valid as combinational views of the entry selected by read_index.",
+        "Use nonblocking assignments written as the two characters <= for clocked state updates."
+      ],
+      "module": "cache_tag_array",
+      "prerequisites": ["CACHE-01"],
+      "source_files": ["rtl/cache_tag_array.v"],
+      "editable_files": ["rtl/cache_tag_array.v"],
+      "public_testbench": "tests/public/tb_tag_array.v",
+      "hidden_testbench": "tests/hidden/tb_tag_array_hidden.v",
+      "top": "tb_tag_array",
+      "hidden_top": "tb_tag_array_hidden",
+      "estimated_minutes": 35,
+      "difficulty": "easy",
+      "concepts": ["valid bits", "synchronous state", "reset"],
+      "hints": [
+        "There is one tag and one valid bit for each of the four indexes.",
+        "Reset should clear validity, not merely overwrite the tag value.",
+        "Use the write index to update exactly one entry and read the selected entry combinationally."
+      ],
+      "trace_signals": ["clk", "reset", "read_index", "read_valid", "read_tag"]
+    },
+    {
+      "id": "CACHE-03",
+      "title": "Build the Data Array",
+      "goal": "Store one 32-bit word per cache line while preserving untouched lines.",
+      "description": "Complete a four-entry data array that stores one 32-bit word per cache line. Its timing mirrors the tag array: synchronous reset and writes, with a combinational selected-line read.",
+      "requirements": [
+        "On a rising edge with reset asserted, clear all four data entries.",
+        "Otherwise, when write_enable is asserted, write write_data only to data[write_index].",
+        "Preserve all entries when write_enable is low and preserve the three unselected entries during a write.",
+        "Drive read_data combinationally from data[read_index].",
+        "Use nonblocking assignments written as <= for all clocked data-array updates."
+      ],
+      "module": "cache_data_array",
+      "prerequisites": ["CACHE-02"],
+      "source_files": ["rtl/cache_data_array.v"],
+      "editable_files": ["rtl/cache_data_array.v"],
+      "public_testbench": "tests/public/tb_data_array.v",
+      "hidden_testbench": "tests/hidden/tb_data_array_hidden.v",
+      "top": "tb_data_array",
+      "hidden_top": "tb_data_array_hidden",
+      "estimated_minutes": 35,
+      "difficulty": "medium",
+      "concepts": ["register arrays", "read-after-write", "word data"],
+      "hints": [
+        "The data array has four entries, and each entry is 32 bits wide.",
+        "A write should happen on the active clock edge; a read can expose the selected entry.",
+        "Only the selected write index should change when write_enable is asserted."
+      ],
+      "trace_signals": ["clk", "write_enable", "write_index", "write_data", "read_index", "read_data"]
+    },
+    {
+      "id": "CACHE-04",
+      "title": "Detect Cache Hits",
+      "goal": "Declare a hit only when the selected line is valid and its tag matches.",
+      "description": "Implement the cache's combinational hit decision. The address decoder and tag array have already selected a candidate line; this block decides whether that line contains the requested memory region.",
+      "requirements": [
+        "Assert hit only when line_valid is 1 and line_tag equals req_tag.",
+        "A matching tag in an invalid line must still produce a miss.",
+        "A valid line with a different tag must produce a miss.",
+        "Implement the result as combinational logic with no stored state."
+      ],
+      "module": "cache_hit_logic",
+      "prerequisites": ["CACHE-03"],
+      "source_files": ["rtl/cache_hit_logic.v"],
+      "editable_files": ["rtl/cache_hit_logic.v"],
+      "public_testbench": "tests/public/tb_hit_logic.v",
+      "hidden_testbench": "tests/hidden/tb_hit_logic_hidden.v",
+      "top": "tb_hit_logic",
+      "hidden_top": "tb_hit_logic_hidden",
+      "estimated_minutes": 25,
+      "difficulty": "easy",
+      "concepts": ["tag comparison", "validity", "combinational logic"],
+      "hints": [
+        "A matching tag is not enough when a line has never been filled.",
+        "The hit equation combines validity with tag equality.",
+        "Write the condition as two boolean requirements joined together."
+      ],
+      "trace_signals": ["req_tag", "line_tag", "line_valid", "hit"]
+    },
+    {
+      "id": "CACHE-05",
+      "title": "Control Misses and Writes",
+      "goal": "Implement the blocking cache controller and its memory handshakes.",
+      "description": "Build a single-request blocking controller. It accepts one CPU operation, remembers that operation while memory stalls, performs the required cache-array and memory actions, emits one response, and only then accepts another CPU request.",
+      "requirements": [
+        "Use an IDLE state in which cpu_req_ready is asserted. Capture cpu_req_write, cpu_req_addr, and cpu_req_wdata only when cpu_req_valid and cpu_req_ready are both 1.",
+        "For a read hit, return line_data with cpu_resp_hit asserted and do not issue a memory request.",
+        "For a read miss, issue a memory read using the saved address. Hold mem_req_valid, mem_req_addr, and mem_req_write stable until mem_req_ready is observed, then wait for mem_resp_valid.",
+        "When the read-miss response arrives, write its data into the selected data entry, write the saved tag, mark the line valid through tag_write_enable, and return that data with cpu_resp_hit deasserted.",
+        "For a write hit, update the selected cache data entry and also issue a write-through memory request. For a write miss, issue the memory write but do not update or allocate a cache line.",
+        "For every memory write, hold the saved address and write data stable until the request handshake, then wait for mem_resp_valid before completing the CPU operation.",
+        "Use a response state that asserts cpu_resp_valid for one cycle, then return to IDLE. Do not accept a second CPU request while a transaction is active.",
+        "Reset is active-high (reset=1 asserted, reset=0 released). On reset, return to IDLE and clear all saved request and response registers. Use nonblocking assignments written as <= in the clocked FSM."
+      ],
+      "module": "cache_controller",
+      "prerequisites": ["CACHE-04"],
+      "source_files": ["rtl/cache_controller.v"],
+      "editable_files": ["rtl/cache_controller.v"],
+      "public_testbench": "tests/public/tb_controller.v",
+      "hidden_testbench": "tests/hidden/tb_controller_hidden.v",
+      "top": "tb_controller",
+      "hidden_top": "tb_controller_hidden",
+      "estimated_minutes": 75,
+      "difficulty": "hard",
+      "concepts": ["finite-state machines", "valid-ready handshakes", "read allocate", "write through"],
+      "hints": [
+        "Separate accepting a CPU request, issuing a memory request, waiting for memory, and responding.",
+        "A valid request must remain asserted with stable fields until ready is observed.",
+        "Read misses fill the selected line; write hits update the line and still perform a memory write."
+      ],
+      "trace_signals": ["state", "cpu_req_valid", "cpu_req_ready", "mem_req_valid", "mem_req_ready", "mem_resp_valid", "cpu_resp_valid"]
+    },
+    {
+      "id": "CACHE-06",
+      "title": "Integrate the Cache",
+      "goal": "Connect the arrays, hit logic, controller, and memory into a working cache.",
+      "description": "Assemble the completed blocks into simple_cache. This checkpoint is primarily about preserving interfaces and connecting each datapath and control signal to the block that produces or consumes it.",
+      "requirements": [
+        "Instantiate the address decoder, tag array, data array, hit logic, and cache controller exactly once.",
+        "Use the decoded index to read the tag and data arrays, and compare the decoded request tag against the selected stored tag.",
+        "Connect the controller's tag and data write ports to the corresponding arrays.",
+        "Connect every CPU response and memory request signal to the controller without adding a second driver.",
+        "Preserve the required policies: read allocate, write through, and no write allocation on a miss.",
+        "A conflicting address with the same index but a different tag must miss and replace that line only after its read data returns."
+      ],
+      "module": "simple_cache",
+      "prerequisites": ["CACHE-05"],
+      "source_files": [
+        "rtl/cache_address_decode.v",
+        "rtl/cache_tag_array.v",
+        "rtl/cache_data_array.v",
+        "rtl/cache_hit_logic.v",
+        "rtl/cache_controller.v",
+        "rtl/simple_cache.v"
+      ],
+      "editable_files": ["rtl/simple_cache.v"],
+      "public_testbench": "tests/public/tb_simple_cache.v",
+      "hidden_testbench": "tests/hidden/tb_simple_cache_hidden.v",
+      "top": "tb_simple_cache",
+      "hidden_top": "tb_simple_cache_hidden",
+      "estimated_minutes": 55,
+      "difficulty": "hard",
+      "concepts": ["module integration", "conflict misses", "write policies", "verification"],
+      "hints": [
+        "Start by matching every child port to the top-level contract before debugging behavior.",
+        "Addresses 0x00 and 0x10 share an index but have different tags, so they conflict.",
+        "A write miss goes to memory without allocating a cache line, while a read miss allocates one."
+      ],
+      "trace_signals": ["cpu_req_addr", "cpu_resp_hit", "mem_req_addr", "mem_req_write", "cpu_resp_valid"]
+    }
+  ]
+}
