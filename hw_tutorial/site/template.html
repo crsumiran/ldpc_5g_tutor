@@ -1,0 +1,266 @@
+<title>LDPC Rotation Networks</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Archivo:wdth,wght@75..100,500..800&family=IBM+Plex+Mono:wght@400;500&family=Source+Serif+4:ital,opsz,wght@0,8..60,400;0,8..60,600;1,8..60,400&display=swap">
+<style>
+/* Layout: sticky chapter rail on the left (a datasheet's index), one 70ch reading column on the right; rail folds into a top menu on phones. */
+:root {
+  --bg: #f4f6f4;
+  --surface: #ffffff;
+  --ink: #15211d;
+  --muted: #56645f;
+  --rule: #d3dcd8;
+  --accent: #0b6b57;          /* solder-mask green */
+  --accent-soft: #e1eee9;
+  --hi: #b86e00;              /* signal amber: swapped / wrapped lanes */
+  --code-bg: #ecf1ee;
+  --syn-kw: #0b5f86;
+  --syn-com: #6b7a74;
+  --syn-str: #8a4b08;
+  --syn-num: #7a3e9d;
+  --syn-fn: #0b6b57;
+  --font-display: "Archivo", "Arial Narrow", "Helvetica Neue", Arial, sans-serif;
+  --font-body: "Source Serif 4", Georgia, "Times New Roman", serif;
+  --font-mono: "IBM Plex Mono", ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+  --step--1: 0.84rem;
+  --step-0: 1.04rem;
+  --step-1: 1.25rem;
+  --step-2: 1.6rem;
+  --step-3: 2.25rem;
+  --step-4: 3rem;
+}
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) {
+    color-scheme: dark;
+    --bg: #0d1412;
+    --surface: #131c19;
+    --ink: #e2ebe7;
+    --muted: #9aaaa3;
+    --rule: #26332e;
+    --accent: #52c4a6;
+    --accent-soft: #173029;
+    --hi: #f0b04a;
+    --code-bg: #16211d;
+    --syn-kw: #74b9e6;
+    --syn-com: #7f918a;
+    --syn-str: #e6b37a;
+    --syn-num: #c9a2ea;
+    --syn-fn: #6fd3b8;
+  }
+}
+:root[data-theme="dark"] {
+  color-scheme: dark;
+  --bg: #0d1412;
+  --surface: #131c19;
+  --ink: #e2ebe7;
+  --muted: #9aaaa3;
+  --rule: #26332e;
+  --accent: #52c4a6;
+  --accent-soft: #173029;
+  --hi: #f0b04a;
+  --code-bg: #16211d;
+  --syn-kw: #74b9e6;
+  --syn-com: #7f918a;
+  --syn-str: #e6b37a;
+  --syn-num: #c9a2ea;
+  --syn-fn: #6fd3b8;
+}
+
+* { box-sizing: border-box; }
+html { scroll-behavior: smooth; scroll-padding-top: calc(env(safe-area-inset-top, 0px) + 16px); }
+@media (prefers-reduced-motion: reduce) { html { scroll-behavior: auto; } }
+body {
+  background: var(--bg);
+  color: var(--ink);
+  font-family: var(--font-body);
+  font-size: var(--step-0);
+  line-height: 1.62;
+  padding-left: max(16px, env(safe-area-inset-left, 0px));
+  padding-right: max(16px, env(safe-area-inset-right, 0px));
+}
+a { color: var(--accent); text-underline-offset: 2px; }
+a:focus-visible, summary:focus-visible, button:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; border-radius: 2px; }
+
+/* ---------- masthead */
+.masthead {
+  max-width: 1180px;
+  margin: 0 auto;
+  padding-block: 48px 28px;
+  border-bottom: 1px solid var(--rule);
+  display: grid;
+  gap: 14px;
+}
+.eyebrow {
+  font-family: var(--font-mono);
+  font-size: var(--step--1);
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: var(--muted);
+}
+.masthead h1 {
+  font-family: var(--font-display);
+  font-stretch: 78%;
+  font-weight: 800;
+  font-size: clamp(2.3rem, 6vw, var(--step-4));
+  line-height: 1.02;
+  margin: 0;
+  text-wrap: balance;
+  letter-spacing: -0.01em;
+}
+.masthead p { margin: 0; max-width: 62ch; color: var(--muted); font-size: var(--step-1); line-height: 1.45; }
+.formula {
+  font-family: var(--font-mono);
+  font-size: var(--step--1);
+  color: var(--ink);
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px 18px;
+}
+.formula b { color: var(--accent); font-weight: 500; }
+
+/* ---------- frame */
+.frame {
+  max-width: 1180px;
+  margin: 0 auto;
+  display: grid;
+  grid-template-columns: 236px minmax(0, 1fr);
+  gap: 48px;
+  padding-block: 32px 96px;
+}
+.rail { position: sticky; top: calc(env(safe-area-inset-top, 0px) + 20px); align-self: start; max-height: calc(100vh - 40px); overflow-y: auto; }
+.rail-label { font-family: var(--font-mono); font-size: 0.75rem; letter-spacing: 0.08em; text-transform: uppercase; color: var(--muted); margin: 0 0 10px; }
+.rail ol { list-style: none; margin: 0; padding: 0; display: grid; gap: 1px; }
+.rail a {
+  display: grid;
+  grid-template-columns: 2.2em 1fr;
+  align-items: baseline;
+  padding: 5px 8px;
+  border-radius: 4px;
+  color: var(--ink);
+  text-decoration: none;
+  font-family: var(--font-display);
+  font-size: 0.95rem;
+  font-weight: 500;
+}
+.rail a:hover { background: var(--accent-soft); }
+.rail a.on { background: var(--accent-soft); color: var(--accent); }
+.rail .n { font-family: var(--font-mono); font-size: 0.78rem; color: var(--muted); }
+.rail a.on .n { color: var(--accent); }
+.mobile-nav { display: none; }
+
+main { min-width: 0; }
+.chapter { max-width: 72ch; padding-bottom: 56px; margin-bottom: 56px; border-bottom: 1px solid var(--rule); }
+.chapter:last-child { border-bottom: 0; }
+
+/* ---------- prose */
+main h1, main h2, main h3 { font-family: var(--font-display); text-wrap: balance; line-height: 1.15; }
+main h1 { font-size: var(--step-3); font-weight: 800; font-stretch: 82%; margin: 0 0 18px; letter-spacing: -0.01em; }
+main h2 { font-size: var(--step-2); font-weight: 700; font-stretch: 88%; margin: 44px 0 12px; }
+main h3 { font-size: var(--step-1); font-weight: 700; margin: 30px 0 8px; }
+main p, main li { max-width: 68ch; }
+main ul, main ol { padding-left: 1.3em; }
+main li + li { margin-top: 4px; }
+main hr { border: 0; border-top: 1px solid var(--rule); margin: 36px 0; }
+main blockquote {
+  margin: 0 0 24px;
+  padding: 0;
+  font-size: var(--step-1);
+  line-height: 1.45;
+  color: var(--muted);
+  font-style: italic;
+}
+main blockquote p { margin: 0 0 6px; }
+main blockquote strong { color: var(--ink); font-style: normal; }
+main code {
+  font-family: var(--font-mono);
+  font-size: 0.86em;
+  background: var(--code-bg);
+  padding: 1px 4px;
+  border-radius: 3px;
+}
+
+.code { overflow-x: auto; background: var(--code-bg); border-radius: 6px; margin: 16px 0 20px; border: 1px solid var(--rule); }
+.code pre { margin: 0; padding: 14px 16px; font-family: var(--font-mono); font-size: 0.82rem; line-height: 1.55; }
+.code code { background: none; padding: 0; font-size: inherit; }
+.code .k, .code .kd, .code .kt, .code .kn, .code .kr, .code .kc, .code .ow { color: var(--syn-kw); }
+.code .c, .code .c1, .code .cm, .code .cs, .code .ch, .code .cp, .code .cpf { color: var(--syn-com); font-style: italic; }
+.code .s, .code .s1, .code .s2, .code .sd, .code .se, .code .si, .code .sb, .code .ss, .code .sc, .code .sa { color: var(--syn-str); }
+.code .m, .code .mi, .code .mh, .code .mb, .code .mf, .code .mo, .code .il { color: var(--syn-num); }
+.code .nf, .code .nc, .code .nb, .code .bp, .code .fm { color: var(--syn-fn); }
+
+.table { overflow-x: auto; margin: 16px 0 22px; }
+main table { border-collapse: collapse; font-size: 0.92rem; line-height: 1.45; min-width: 100%; }
+main th, main td { text-align: left; vertical-align: top; padding: 7px 12px 7px 0; border-bottom: 1px solid var(--rule); }
+main th { font-family: var(--font-display); font-weight: 700; font-size: 0.84rem; letter-spacing: 0.02em; color: var(--muted); border-bottom: 2px solid var(--ink); }
+main td { font-variant-numeric: tabular-nums; }
+
+main details {
+  border: 1px solid var(--rule);
+  border-radius: 6px;
+  padding: 10px 14px;
+  margin: 12px 0;
+  background: var(--surface);
+}
+main details > summary { cursor: pointer; font-family: var(--font-display); font-weight: 600; font-size: 0.98rem; }
+main details[open] > summary { margin-bottom: 8px; }
+main details p:last-child { margin-bottom: 2px; }
+.listing summary { display: flex; flex-wrap: wrap; gap: 10px; align-items: baseline; }
+.listing .lines { font-family: var(--font-mono); font-size: 0.78rem; color: var(--muted); font-weight: 400; }
+
+pre.mermaid { background: var(--surface); border: 1px solid var(--rule); border-radius: 6px; padding: 16px; overflow-x: auto; font-family: var(--font-mono); font-size: 0.8rem; }
+
+input[type="checkbox"] { accent-color: var(--accent); }
+
+@media (max-width: 900px) {
+  .frame { grid-template-columns: minmax(0, 1fr); gap: 20px; padding-top: 20px; }
+  .rail { display: none; }
+  .mobile-nav { display: block; border: 1px solid var(--rule); border-radius: 6px; background: var(--surface); padding: 10px 14px; }
+  .mobile-nav summary { font-family: var(--font-display); font-weight: 600; cursor: pointer; }
+  .mobile-nav ol { list-style: none; padding: 8px 0 0; margin: 0; display: grid; gap: 4px; }
+  .mobile-nav a { color: var(--ink); text-decoration: none; font-family: var(--font-display); }
+  .mobile-nav .n { font-family: var(--font-mono); font-size: 0.78rem; color: var(--muted); display: inline-block; width: 2.2em; }
+  .masthead { padding-block: 28px 20px; }
+  main h1 { font-size: var(--step-2); }
+}
+</style>
+
+<header class="masthead">
+  <div class="eyebrow">5G NR LDPC · hardware companion · Z ≤ 384 lanes</div>
+  <h1>LDPC Rotation Networks</h1>
+  <p>How to build the interconnect at the heart of a 5G LDPC decoder: from a 2:1 mux to the Improved Banyan Network, with tested RTL. Written for RTL engineers who are new to switching circuits.</p>
+  <div class="formula"><span><b>rotl</b>(x, s)[i] = x[(i + s) mod Z]</span><span>51 lifting sizes</span><span>BG1 46 × 68, 316 blocks</span><span>9,861 RTL checks, 0 errors</span></div>
+</header>
+
+<div class="frame">
+  <nav class="rail" aria-label="Chapters">
+    <p class="rail-label">Contents</p>
+    <ol id="rail-list">
+<!--NAV-->
+    </ol>
+  </nav>
+  <main>
+    <details class="mobile-nav"><summary>Contents</summary><ol>
+<!--NAV-->
+    </ol></details>
+<!--CONTENT-->
+  </main>
+</div>
+
+<script>
+(function () {
+  var links = Array.prototype.slice.call(document.querySelectorAll('#rail-list a'));
+  var byId = {};
+  links.forEach(function (a) { byId[a.getAttribute('href').slice(1)] = a; });
+  if (!('IntersectionObserver' in window)) return;
+  var io = new IntersectionObserver(function (entries) {
+    entries.forEach(function (e) {
+      if (e.isIntersecting && byId[e.target.id]) {
+        links.forEach(function (a) { a.classList.remove('on'); });
+        byId[e.target.id].classList.add('on');
+      }
+    });
+  }, { rootMargin: '-15% 0px -75% 0px' });
+  document.querySelectorAll('section.chapter').forEach(function (s) { io.observe(s); });
+})();
+</script>

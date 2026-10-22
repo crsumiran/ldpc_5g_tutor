@@ -1,0 +1,154 @@
+<section class="chapter rotlab" id="lab" aria-labelledby="lab-title">
+<style>
+.rotlab h1 { margin-bottom: 8px; }
+.rotlab .lede { color: var(--muted); margin: 0 0 18px; }
+.rl-tabs { display: flex; flex-wrap: wrap; gap: 6px; margin-bottom: 14px; }
+.rl-tabs button, .rl-seg button {
+  font-family: var(--font-mono); font-size: 0.82rem; cursor: pointer;
+  border: 1px solid var(--rule); background: var(--surface); color: var(--ink);
+  padding: 6px 12px; border-radius: 4px;
+}
+.rl-tabs button[aria-selected="true"], .rl-seg button[aria-pressed="true"] {
+  background: var(--accent); border-color: var(--accent); color: var(--bg);
+}
+.rl-controls { display: grid; gap: 10px; margin-bottom: 18px; }
+.rl-row-ctl { display: flex; flex-wrap: wrap; align-items: center; gap: 10px; }
+.rl-row-ctl .lab { font-family: var(--font-mono); font-size: 0.8rem; color: var(--muted); min-width: 4.5em; }
+.rl-seg { display: flex; flex-wrap: wrap; gap: 4px; }
+.rl-seg button { padding: 4px 9px; min-width: 2.2em; }
+.rl-board { background: var(--surface); border: 1px solid var(--rule); border-radius: 6px; padding: 14px; overflow-x: auto; }
+.rl-line { display: grid; grid-template-columns: minmax(150px, 15em) auto; gap: 12px; align-items: center; padding: 5px 0; }
+.rl-line + .rl-line { border-top: 1px dashed var(--rule); }
+.rl-name { font-family: var(--font-mono); font-size: 0.76rem; color: var(--muted); line-height: 1.35; }
+.rl-name b { color: var(--ink); font-weight: 500; }
+.rl-lanes { display: flex; gap: 4px; }
+.chip {
+  width: 2.1em; height: 2.1em; border-radius: 4px; display: grid; place-items: center;
+  font-family: var(--font-mono); font-weight: 500; font-size: 0.85rem; color: #15211d;
+  border: 2px solid transparent; transition: background-color .2s;
+}
+.chip.moved { border-color: var(--hi); }
+.chip.empty { background: transparent; color: var(--muted); border: 1px dashed var(--rule); }
+.chip.off { opacity: 0.28; }
+.sw { display: flex; gap: 4px; flex-wrap: wrap; }
+.sw span { font-family: var(--font-mono); font-size: 0.72rem; padding: 2px 5px; border-radius: 3px; border: 1px solid var(--rule); color: var(--muted); }
+.sw span.x { border-color: var(--hi); color: var(--hi); }
+.rl-verdict { margin-top: 12px; font-family: var(--font-mono); font-size: 0.82rem; }
+.rl-verdict .ok { color: var(--accent); }
+.rl-note { font-size: 0.92rem; color: var(--muted); margin-top: 12px; max-width: 68ch; }
+@media (prefers-reduced-motion: reduce) { .chip { transition: none; } }
+</style>
+
+<h1 id="lab-title">Rotator lab</h1>
+<p class="lede">Eight lanes, A to H. Pick a network and a shift, and follow every value through each stage. Amber outlines mark lanes whose value changed in that stage. The logic is the same as <code>model/rotators.py</code>.</p>
+
+<div class="rl-tabs" role="tablist" aria-label="Network">
+  <button type="button" role="tab" id="rl-tab-barrel" data-net="barrel" aria-selected="true">Barrel (ch. 04)</button>
+  <button type="button" role="tab" id="rl-tab-qsn" data-net="qsn" aria-selected="false">QSN, Z ≤ 8 (ch. 05)</button>
+  <button type="button" role="tab" id="rl-tab-banyan" data-net="banyan" aria-selected="false">Banyan (ch. 06)</button>
+</div>
+
+<div class="rl-controls">
+  <div class="rl-row-ctl" id="rl-zrow" hidden><span class="lab">size Z</span><div class="rl-seg" id="rl-z"></div></div>
+  <div class="rl-row-ctl"><span class="lab">shift s</span><div class="rl-seg" id="rl-s"></div></div>
+</div>
+
+<div class="rl-board" id="rl-board" aria-live="polite"></div>
+<p class="rl-note" id="rl-note"></p>
+
+<script>
+(function () {
+  var N = 8, L = 'ABCDEFGH'.split('');
+  var state = { net: 'barrel', s: 5, z: 5 };
+  var hue = function (c) { return 'hsl(' + (L.indexOf(c) * 45 + 150) % 360 + ', 62%, 80%)'; };
+
+  function rotl(x, s, z) { var o = x.slice(); for (var i = 0; i < z; i++) o[i] = x[(i + s) % z]; return o; }
+
+  function chips(v, prev, opts) {
+    opts = opts || {};
+    return '<div class="rl-lanes">' + v.map(function (c, i) {
+      if (c === null) return '<div class="chip empty">·</div>';
+      var cls = 'chip' + (prev && prev[i] !== c ? ' moved' : '') + (opts.off && opts.off(i) ? ' off' : '');
+      return '<div class="' + cls + '" style="background:' + hue(c) + '">' + c + '</div>';
+    }).join('') + '</div>';
+  }
+  function line(name, body) { return '<div class="rl-line"><div class="rl-name">' + name + '</div><div>' + body + '</div></div>'; }
+  function verdict(got, want) {
+    var ok = got.join('') === want.join('');
+    return '<div class="rl-verdict">expected rotl = ' + want.join(' ') + ' &nbsp; <span class="' + (ok ? 'ok' : '') + '">' + (ok ? '✓ match' : '✗ mismatch') + '</span></div>';
+  }
+
+  function barrel(s) {
+    var x = L.slice(), out = line('<b>input</b>', chips(x));
+    for (var k = 0; k < 3; k++) {
+      var bit = (s >> k) & 1, prev = x;
+      if (bit) x = rotl(x, 1 << k, N);
+      out += line('<b>stage ' + k + '</b> rotate by ' + (1 << k) + '<br>shift[' + k + '] = ' + bit, chips(x, prev));
+    }
+    return { html: out + verdict(x, rotl(L, s, N)),
+      note: 'The select of stage k is just bit k of the shift: s = ' + s + ' = ' + s.toString(2).padStart(3, '0') + 'b. No control logic at all.' };
+  }
+
+  function qsn(s, z) {
+    var din = L.map(function (c, i) { return i < z ? c : null; });
+    var left = din.map(function (c, i) { return i + s < N ? din[i + s] : null; });
+    var right = din.map(function (c, i) { return i - (z - s) >= 0 ? din[i - (z - s)] : null; });
+    var out = din.map(function (c, i) { return i >= z ? null : (i < z - s ? left[i] : right[i]); });
+    var bar = rotl(din, s, N);
+    var want = rotl(din, s, z).slice(0, z);
+    var html = line('<b>input</b> Z = ' + z, chips(din)) +
+      line('plain barrel, ' + N + ' lanes<br><b>wrong for Z &lt; 8</b>', chips(bar, null)) +
+      line('<b>left</b> = din &lt;&lt; ' + s, chips(left, null, { off: function (i) { return i >= z - s; } })) +
+      line('<b>right</b> = din &gt;&gt; ' + (z - s), chips(right, null, { off: function (i) { return i < z - s || i >= z; } })) +
+      line('<b>merge</b> lane i &lt; ' + (z - s) + ' ? left : right', chips(out));
+    return { html: html + verdict(out.slice(0, z), want),
+      note: 'Faded lanes are the ones the merge ignores. The thermometer mask (i < Z − s) picks the non-wrapping part from the left shifter and the wrapped part from the right shifter.' };
+  }
+
+  function banyan(s) {
+    var x = L.slice(), out = line('<b>input</b>', chips(x));
+    for (var d = 0; d < 3; d++) {
+      var B = N >> d, H = B >> 1, a = (s >> (2 - d)) & 1, b = s & (H - 1), prev = x, y = x.slice(), sw = [];
+      for (var k = 0; k < H; k++) sw.push(a ^ (k < b ? 1 : 0));
+      for (var j = 0; j < N / B; j++) for (k = 0; k < H; k++) {
+        var u = j * B + k, l = u + H;
+        if (sw[k]) { y[u] = x[l]; y[l] = x[u]; }
+      }
+      x = y;
+      var swHtml = '<div class="sw">' + sw.map(function (v, k) { return '<span class="' + (v ? 'x' : '') + '">k' + k + ' ' + (v ? 'swap' : 'bar') + '</span>'; }).join('') + '</div>';
+      out += line('<b>stage ' + d + '</b> span ' + H + '<br>a = ' + a + ', b = ' + b + '<br>swap = a ⊕ (k &lt; b)', chips(x, prev) + '<div style="height:6px"></div>' + swHtml);
+    }
+    return { html: out + verdict(x, rotl(L, s, N)),
+      note: 'Each stage only sorts values into the correct block; the blocks below rotate by b. The same swap vector is shared by every block in a stage, so control is one thermometer decoder per stage.' };
+  }
+
+  function seg(el, n, cur, key) {
+    el.innerHTML = '';
+    for (var i = (key === 'z' ? 2 : 0); i < n; i++) {
+      var bt = document.createElement('button');
+      bt.type = 'button'; bt.textContent = i; bt.id = 'rl-' + key + '-' + i;
+      bt.setAttribute('aria-pressed', String(i === cur));
+      bt.addEventListener('click', (function (v) { return function () { state[key] = v; if (key === 'z' && state.s >= v) state.s = v - 1; draw(); }; })(i));
+      el.appendChild(bt);
+    }
+  }
+
+  function draw() {
+    document.querySelectorAll('.rl-tabs button').forEach(function (b) { b.setAttribute('aria-selected', String(b.dataset.net === state.net)); });
+    document.getElementById('rl-zrow').hidden = state.net !== 'qsn';
+    var smax = state.net === 'qsn' ? state.z : N;
+    if (state.s >= smax) state.s = smax - 1;
+    seg(document.getElementById('rl-z'), N + 1, state.z, 'z');
+    seg(document.getElementById('rl-s'), smax, state.s, 's');
+    var r = state.net === 'barrel' ? barrel(state.s) : state.net === 'qsn' ? qsn(state.s, state.z) : banyan(state.s);
+    document.getElementById('rl-board').innerHTML = r.html;
+    document.getElementById('rl-note').textContent = r.note;
+  }
+
+  document.querySelectorAll('.rl-tabs button').forEach(function (b) {
+    b.addEventListener('click', function () { state.net = b.dataset.net; if (state.net === 'qsn') state.s = Math.min(state.s, 2); draw(); });
+  });
+  draw();
+})();
+</script>
+</section>

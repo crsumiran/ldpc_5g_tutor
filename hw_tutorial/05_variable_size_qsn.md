@@ -1,0 +1,138 @@
+# 05 · Variable Z: the QSN trick
+
+> Goal: one 384-lane network that correctly rotates a vector of **any** length
+> Z ≤ 384. This is the minimum requirement for a 5G decoder.
+> RTL: `rtl/rot_qsn.v`. Model: `model/rotators.py::rotl_qsn`.
+
+---
+
+## 1. The problem, concretely
+
+N = 8 lanes, Z = 5, s = 2, data `[A B C D E . . .]`:
+
+```
+want                       C D E A B . . .
+N-lane barrel rotator      C D E . . . A B     ✗  wraps at lane 8, not lane 5
+```
+
+Lanes 0–2 are correct. They only needed elements that did not wrap. Lanes 3–4
+are wrong, because the values that should have wrapped to them went to lanes
+6–7 instead.
+
+5G has 51 lifting sizes. Building 51 rotators and muxing between them is
+clearly not an option.
+
+## 2. Ideas that do not scale
+
+| Idea | Why not |
+|---|---|
+| One rotator per Z, select the right output | 51 × the area |
+| Per-lane Z:1 mux driven by `(i + s) mod Z` | That is a crossbar again (N² cost), plus a modulo per lane |
+| Pad Z up to N and fill unused lanes | Changes the code; the circulant is Z×Z, not N×N |
+
+## 3. The QSN idea: two shifters and a merge
+
+Split the output lanes into the ones that **do not wrap** and the ones that **do**:
+
+* Lane `i < Z − s` takes `x[i + s]`, a plain **left shift** by s.
+* Lane `i ≥ Z − s` takes `x[i + s − Z]`, a plain **right shift** by `Z − s`.
+
+So:
+
+```
+left  = din << s           (non-circular, zero fill)
+right = din >> (Z − s)     (non-circular, zero fill)
+dout[i] = (i < Z − s) ? left[i] : right[i]          for i < Z
+```
+
+Worked example (N = 8, Z = 5, s = 2, so Z − s = 3):
+
+```
+din                 A B C D E 0 0 0
+left  = din << 2    C D E 0 0 0 0 0
+right = din >> 3    0 0 0 A B C D E
+mask  (i < 3)       1 1 1 0 0 0 0 0
+dout                C D E A B . . .   ✓
+```
+
+The final mux column is called the **merge network**. Its select is a
+**thermometer code** of `Z − s`: ones in the lanes below the threshold, zeros above.
+
+## 4. The RTL
+
+`rtl/rot_qsn.v` has three parts:
+
+```verilog
+wire [ZW-1:0] lshift = shift;          // left shifter amount
+wire [ZW-1:0] rshift = z - shift;      // right shifter amount: one subtractor
+
+// two log-depth NON-circular shifters, same structure as rot_barrel but zero-filling
+//   ls[k+1][i] = lshift[k] ? ls[k][i + 2^k] (or 0) : ls[k][i]
+//   rs[k+1][i] = rshift[k] ? rs[k][i - 2^k] (or 0) : rs[k][i]
+
+// merge: one 2:1 mux per lane, select = (i < rshift)
+assign dout[i*W +: W] = !valid   ? 0 :
+                        use_left ? ls[ZW][i*W +: W] : rs[ZW][i*W +: W];
+```
+
+The testbench runs every one of the 51 lifting sizes with every legal shift:
+4,479 cases, all lanes compared.
+
+## 5. Cost and the control path
+
+| Part | 2:1 muxes per bit (N = 384) | Control |
+|---|---|---|
+| Left shifter | ≈ 384 × 9 | shift bits directly |
+| Right shifter | ≈ 384 × 9 | `Z − s`: one 9-bit subtractor |
+| Merge | 384 | 384 compare-with-constant (thermometer) |
+| **Total** | ≈ 7,300 | small |
+
+A non-circular shifter is slightly cheaper than a rotator: lanes near the
+edge get a constant 0 instead of a mux. The QSN paper counts this exactly.
+
+Compared with a fixed-size barrel rotator, QSN **roughly doubles the datapath**
+to gain full Z flexibility. Control stays cheap.
+
+**Timing tip.** The subtractor `Z − s` sits in front of the right shifter's
+selects and the merge thermometer, so it lengthens the critical path. Shift
+values come from a table anyway, so **precompute `Z − s` and store it next to
+`s`**. That takes the subtractor out of the datapath cycle.
+
+## 6. A third idea: replicate the data
+
+If lanes `Z … 2Z−1` held a **copy** of the vector, a single left *shift* by s
+would already give `x[(i + s) mod Z]` in lanes 0…Z−1, with no wrap to handle.
+This works directly only while `2Z − 1 ≤ N`. Above that you need extra lanes
+or an extra layer. Boutillon & Harb's *Extended Barrel Shifter* (EBS, 2020)
+builds on an "extra layer + specific initial data positioning" approach in this
+spirit and reports 42% fewer muxes than the prior best at n = 384. See chapter 09.
+Treat this paragraph as intuition only and read the paper for their exact scheme.
+
+## 7. What QSN still cannot do
+
+It handles one vector per cycle. At Z = 24 on a 384-lane QSN, 360 lanes carry
+nothing. Chapter 06 fixes that with Banyan-based networks that split into
+independent sub-rotators.
+
+---
+
+### Exercises
+
+1. N = 8, Z = 6, s = 5. Write out `left`, `right`, mask and `dout` by hand.
+   Check with `rotl_qsn(list('ABCDEF00'), 5, 6)` in the model.
+2. Why must the merge use `i < Z − s` and not `i ≤ Z − s`? Find the lane that
+   would break.
+3. Rewrite `rot_qsn.v` so it takes a precomputed `rshift` input (section 5 tip)
+   and check that it still passes.
+
+<details><summary>Answer to 1</summary>
+
+Z − s = 1. left = din << 5 = `F 0 0 0 0 0 0 0`. right = din >> 1 =
+`0 A B C D E F 0`. Mask = lane 0 only. dout = `F A B C D E` ✓ (x[(i+5) mod 6]).
+</details>
+
+<details><summary>Answer to 2</summary>
+
+Lane i = Z − s should take x[Z] → wraps → x[0], which is `right[i]`. The left
+shifter at that lane holds x[Z], which is outside the vector (a lane ≥ Z: zero or garbage).
+</details>
