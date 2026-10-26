@@ -44,29 +44,29 @@
 <text class="bn-head" x="171.0" y="46">stage 0 · span 4</text>
 <text class="bn-sub" x="171.0" y="64">input column</text>
 <path class="bn-wire" d="M108 96 C126.0 96 126.0 96 144.0 96"/>
-<path class="bn-wire" d="M108 280 C126.0 280 126.0 142 144.0 142"/>
 <path class="bn-wire" d="M198.0 96 C216.0 96 216.0 96 234 96"/>
+<path class="bn-wire" d="M108 280 C126.0 280 126.0 142 144.0 142"/>
 <path class="bn-wire" d="M198.0 142 C216.0 142 216.0 280 234 280"/>
 <rect class="bn-box" x="144.0" y="81" width="54" height="76" rx="5"/>
 <path class="bn-in" d="M144.0 96 H198.0 M144.0 142 H198.0"/>
 <text class="bn-sw" x="171.0" y="77">0↔4</text>
 <path class="bn-wire" d="M108 142 C126.0 142 126.0 188 144.0 188"/>
-<path class="bn-wire" d="M108 326 C126.0 326 126.0 234 144.0 234"/>
 <path class="bn-wire" d="M198.0 188 C216.0 188 216.0 142 234 142"/>
+<path class="bn-wire" d="M108 326 C126.0 326 126.0 234 144.0 234"/>
 <path class="bn-wire" d="M198.0 234 C216.0 234 216.0 326 234 326"/>
 <rect class="bn-box x" x="144.0" y="173" width="54" height="76" rx="5"/>
 <path class="bn-in x" d="M144.0 188 L198.0 234 M144.0 234 L198.0 188"/>
 <text class="bn-sw" x="171.0" y="169">1↔5</text>
 <path class="bn-wire" d="M108 188 C126.0 188 126.0 280 144.0 280"/>
-<path class="bn-wire" d="M108 372 C126.0 372 126.0 326 144.0 326"/>
 <path class="bn-wire" d="M198.0 280 C216.0 280 216.0 188 234 188"/>
+<path class="bn-wire" d="M108 372 C126.0 372 126.0 326 144.0 326"/>
 <path class="bn-wire" d="M198.0 326 C216.0 326 216.0 372 234 372"/>
 <rect class="bn-box" x="144.0" y="265" width="54" height="76" rx="5"/>
 <path class="bn-in" d="M144.0 280 H198.0 M144.0 326 H198.0"/>
 <text class="bn-sw" x="171.0" y="261">2↔6</text>
 <path class="bn-wire" d="M108 234 C126.0 234 126.0 372 144.0 372"/>
-<path class="bn-wire" d="M108 418 C126.0 418 126.0 418 144.0 418"/>
 <path class="bn-wire" d="M198.0 372 C216.0 372 216.0 234 234 234"/>
+<path class="bn-wire" d="M108 418 C126.0 418 126.0 418 144.0 418"/>
 <path class="bn-wire" d="M198.0 418 C216.0 418 216.0 418 234 418"/>
 <rect class="bn-box x" x="144.0" y="357" width="54" height="76" rx="5"/>
 <path class="bn-in x" d="M144.0 372 L198.0 418 M144.0 418 L198.0 372"/>
@@ -74,29 +74,29 @@
 <text class="bn-head" x="321.0" y="46">stage 1 · span 2</text>
 <text class="bn-sub" x="321.0" y="64"></text>
 <path class="bn-wire" d="M258 96 C276.0 96 276.0 96 294.0 96"/>
-<path class="bn-wire" d="M258 188 C276.0 188 276.0 142 294.0 142"/>
 <path class="bn-wire" d="M348.0 96 C366.0 96 366.0 96 384 96"/>
+<path class="bn-wire" d="M258 188 C276.0 188 276.0 142 294.0 142"/>
 <path class="bn-wire" d="M348.0 142 C366.0 142 366.0 188 384 188"/>
 <rect class="bn-box" x="294.0" y="81" width="54" height="76" rx="5"/>
 <path class="bn-in" d="M294.0 96 H348.0 M294.0 142 H348.0"/>
 <text class="bn-sw" x="321.0" y="77">0↔2</text>
 <path class="bn-wire" d="M258 142 C276.0 142 276.0 188 294.0 188"/>
-<path class="bn-wire" d="M258 234 C276.0 234 276.0 234 294.0 234"/>
 <path class="bn-wire" d="M348.0 188 C366.0 188 366.0 142 384 142"/>
+<path class="bn-wire" d="M258 234 C276.0 234 276.0 234 294.0 234"/>
 <path class="bn-wire" d="M348.0 234 C366.0 234 366.0 234 384 234"/>
 <rect class="bn-box" x="294.0" y="173" width="54" height="76" rx="5"/>
 <path class="bn-in" d="M294.0 188 H348.0 M294.0 234 H348.0"/>
 <text class="bn-sw" x="321.0" y="169">1↔3</text>
 <path class="bn-wire" d="M258 280 C276.0 280 276.0 280 294.0 280"/>
-<path class="bn-wire" d="M258 372 C276.0 372 276.0 326 294.0 326"/>
 <path class="bn-wire" d="M348.0 280 C366.0 280 366.0 280 384 280"/>
+<path class="bn-wire" d="M258 372 C276.0 372 276.0 326 294.0 326"/>
 <path class="bn-wire" d="M348.0 326 C366.0 326 366.0 372 384 372"/>
 <rect class="bn-box" x="294.0" y="265" width="54" height="76" rx="5"/>
 <path class="bn-in" d="M294.0 280 H348.0 M294.0 326 H348.0"/>
 <text class="bn-sw" x="321.0" y="261">4↔6</text>
 <path class="bn-wire" d="M258 326 C276.0 326 276.0 372 294.0 372"/>
-<path class="bn-wire" d="M258 418 C276.0 418 276.0 418 294.0 418"/>
 <path class="bn-wire" d="M348.0 372 C366.0 372 366.0 326 384 326"/>
+<path class="bn-wire" d="M258 418 C276.0 418 276.0 418 294.0 418"/>
 <path class="bn-wire" d="M348.0 418 C366.0 418 366.0 418 384 418"/>
 <rect class="bn-box" x="294.0" y="357" width="54" height="76" rx="5"/>
 <path class="bn-in" d="M294.0 372 H348.0 M294.0 418 H348.0"/>
@@ -104,29 +104,29 @@
 <text class="bn-head" x="471.0" y="46">stage 2 · span 1</text>
 <text class="bn-sub" x="471.0" y="64"></text>
 <path class="bn-wire" d="M408 96 C426.0 96 426.0 96 444.0 96"/>
-<path class="bn-wire" d="M408 142 C426.0 142 426.0 142 444.0 142"/>
 <path class="bn-wire" d="M498.0 96 C516.0 96 516.0 96 534 96"/>
+<path class="bn-wire" d="M408 142 C426.0 142 426.0 142 444.0 142"/>
 <path class="bn-wire" d="M498.0 142 C516.0 142 516.0 142 534 142"/>
 <rect class="bn-box" x="444.0" y="81" width="54" height="76" rx="5"/>
 <path class="bn-in" d="M444.0 96 H498.0 M444.0 142 H498.0"/>
 <text class="bn-sw" x="471.0" y="77">0↔1</text>
 <path class="bn-wire" d="M408 188 C426.0 188 426.0 188 444.0 188"/>
-<path class="bn-wire" d="M408 234 C426.0 234 426.0 234 444.0 234"/>
 <path class="bn-wire" d="M498.0 188 C516.0 188 516.0 188 534 188"/>
+<path class="bn-wire" d="M408 234 C426.0 234 426.0 234 444.0 234"/>
 <path class="bn-wire" d="M498.0 234 C516.0 234 516.0 234 534 234"/>
 <rect class="bn-box" x="444.0" y="173" width="54" height="76" rx="5"/>
 <path class="bn-in" d="M444.0 188 H498.0 M444.0 234 H498.0"/>
 <text class="bn-sw" x="471.0" y="169">2↔3</text>
 <path class="bn-wire" d="M408 280 C426.0 280 426.0 280 444.0 280"/>
-<path class="bn-wire" d="M408 326 C426.0 326 426.0 326 444.0 326"/>
 <path class="bn-wire" d="M498.0 280 C516.0 280 516.0 280 534 280"/>
+<path class="bn-wire" d="M408 326 C426.0 326 426.0 326 444.0 326"/>
 <path class="bn-wire" d="M498.0 326 C516.0 326 516.0 326 534 326"/>
 <rect class="bn-box x" x="444.0" y="265" width="54" height="76" rx="5"/>
 <path class="bn-in x" d="M444.0 280 L498.0 326 M444.0 326 L498.0 280"/>
 <text class="bn-sw" x="471.0" y="261">4↔5</text>
 <path class="bn-wire" d="M408 372 C426.0 372 426.0 372 444.0 372"/>
-<path class="bn-wire" d="M408 418 C426.0 418 426.0 418 444.0 418"/>
 <path class="bn-wire" d="M498.0 372 C516.0 372 516.0 372 534 372"/>
+<path class="bn-wire" d="M408 418 C426.0 418 426.0 418 444.0 418"/>
 <path class="bn-wire" d="M498.0 418 C516.0 418 516.0 418 534 418"/>
 <rect class="bn-box x" x="444.0" y="357" width="54" height="76" rx="5"/>
 <path class="bn-in x" d="M444.0 372 L498.0 418 M444.0 418 L498.0 372"/>
@@ -134,29 +134,29 @@
 <text class="bn-head" x="621.0" y="46">stage 3 · span 2</text>
 <text class="bn-sub" x="621.0" y="64"></text>
 <path class="bn-wire" d="M558 96 C576.0 96 576.0 96 594.0 96"/>
-<path class="bn-wire" d="M558 188 C576.0 188 576.0 142 594.0 142"/>
 <path class="bn-wire" d="M648.0 96 C666.0 96 666.0 96 684 96"/>
+<path class="bn-wire" d="M558 188 C576.0 188 576.0 142 594.0 142"/>
 <path class="bn-wire" d="M648.0 142 C666.0 142 666.0 188 684 188"/>
 <rect class="bn-box" x="594.0" y="81" width="54" height="76" rx="5"/>
 <path class="bn-in" d="M594.0 96 H648.0 M594.0 142 H648.0"/>
 <text class="bn-sw" x="621.0" y="77">0↔2</text>
 <path class="bn-wire" d="M558 142 C576.0 142 576.0 188 594.0 188"/>
-<path class="bn-wire" d="M558 234 C576.0 234 576.0 234 594.0 234"/>
 <path class="bn-wire" d="M648.0 188 C666.0 188 666.0 142 684 142"/>
+<path class="bn-wire" d="M558 234 C576.0 234 576.0 234 594.0 234"/>
 <path class="bn-wire" d="M648.0 234 C666.0 234 666.0 234 684 234"/>
 <rect class="bn-box" x="594.0" y="173" width="54" height="76" rx="5"/>
 <path class="bn-in" d="M594.0 188 H648.0 M594.0 234 H648.0"/>
 <text class="bn-sw" x="621.0" y="169">1↔3</text>
 <path class="bn-wire" d="M558 280 C576.0 280 576.0 280 594.0 280"/>
-<path class="bn-wire" d="M558 372 C576.0 372 576.0 326 594.0 326"/>
 <path class="bn-wire" d="M648.0 280 C666.0 280 666.0 280 684 280"/>
+<path class="bn-wire" d="M558 372 C576.0 372 576.0 326 594.0 326"/>
 <path class="bn-wire" d="M648.0 326 C666.0 326 666.0 372 684 372"/>
 <rect class="bn-box" x="594.0" y="265" width="54" height="76" rx="5"/>
 <path class="bn-in" d="M594.0 280 H648.0 M594.0 326 H648.0"/>
 <text class="bn-sw" x="621.0" y="261">4↔6</text>
 <path class="bn-wire" d="M558 326 C576.0 326 576.0 372 594.0 372"/>
-<path class="bn-wire" d="M558 418 C576.0 418 576.0 418 594.0 418"/>
 <path class="bn-wire" d="M648.0 372 C666.0 372 666.0 326 684 326"/>
+<path class="bn-wire" d="M558 418 C576.0 418 576.0 418 594.0 418"/>
 <path class="bn-wire" d="M648.0 418 C666.0 418 666.0 418 684 418"/>
 <rect class="bn-box" x="594.0" y="357" width="54" height="76" rx="5"/>
 <path class="bn-in" d="M594.0 372 H648.0 M594.0 418 H648.0"/>
@@ -164,29 +164,29 @@
 <text class="bn-head" x="771.0" y="46">stage 4 · span 4</text>
 <text class="bn-sub" x="771.0" y="64">output column</text>
 <path class="bn-wire" d="M708 96 C726.0 96 726.0 96 744.0 96"/>
-<path class="bn-wire" d="M708 280 C726.0 280 726.0 142 744.0 142"/>
 <path class="bn-wire" d="M798.0 96 C816.0 96 816.0 96 834 96"/>
+<path class="bn-wire" d="M708 280 C726.0 280 726.0 142 744.0 142"/>
 <path class="bn-wire" d="M798.0 142 C816.0 142 816.0 280 834 280"/>
 <rect class="bn-box" x="744.0" y="81" width="54" height="76" rx="5"/>
 <path class="bn-in" d="M744.0 96 H798.0 M744.0 142 H798.0"/>
 <text class="bn-sw" x="771.0" y="77">0↔4</text>
 <path class="bn-wire" d="M708 142 C726.0 142 726.0 188 744.0 188"/>
-<path class="bn-wire" d="M708 326 C726.0 326 726.0 234 744.0 234"/>
 <path class="bn-wire" d="M798.0 188 C816.0 188 816.0 142 834 142"/>
+<path class="bn-wire" d="M708 326 C726.0 326 726.0 234 744.0 234"/>
 <path class="bn-wire" d="M798.0 234 C816.0 234 816.0 326 834 326"/>
 <rect class="bn-box x" x="744.0" y="173" width="54" height="76" rx="5"/>
 <path class="bn-in x" d="M744.0 188 L798.0 234 M744.0 234 L798.0 188"/>
 <text class="bn-sw" x="771.0" y="169">1↔5</text>
 <path class="bn-wire" d="M708 188 C726.0 188 726.0 280 744.0 280"/>
-<path class="bn-wire" d="M708 372 C726.0 372 726.0 326 744.0 326"/>
 <path class="bn-wire" d="M798.0 280 C816.0 280 816.0 188 834 188"/>
+<path class="bn-wire" d="M708 372 C726.0 372 726.0 326 744.0 326"/>
 <path class="bn-wire" d="M798.0 326 C816.0 326 816.0 372 834 372"/>
 <rect class="bn-box" x="744.0" y="265" width="54" height="76" rx="5"/>
 <path class="bn-in" d="M744.0 280 H798.0 M744.0 326 H798.0"/>
 <text class="bn-sw" x="771.0" y="261">2↔6</text>
 <path class="bn-wire" d="M708 234 C726.0 234 726.0 372 744.0 372"/>
-<path class="bn-wire" d="M708 418 C726.0 418 726.0 418 744.0 418"/>
 <path class="bn-wire" d="M798.0 372 C816.0 372 816.0 234 834 234"/>
+<path class="bn-wire" d="M708 418 C726.0 418 726.0 418 744.0 418"/>
 <path class="bn-wire" d="M798.0 418 C816.0 418 816.0 418 834 418"/>
 <rect class="bn-box x" x="744.0" y="357" width="54" height="76" rx="5"/>
 <path class="bn-in x" d="M744.0 372 L798.0 418 M744.0 418 L798.0 372"/>

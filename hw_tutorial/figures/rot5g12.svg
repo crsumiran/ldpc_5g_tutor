@@ -1,0 +1,227 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 748 1094" class="bn" role="img" aria-label="5G rotator structure at N = 12: two 12-lane IBN rotators and a merge column rotate a 10-element vector left by 7">
+<style>
+.bn .bn-bg { fill: var(--surface, #ffffff); }
+.bn text { font-family: var(--font-mono, ui-monospace, Menlo, Consolas, monospace); fill: var(--ink, #15211d); }
+.bn .bn-wire { fill: none; stroke: var(--muted, #56645f); stroke-width: 1.4; }
+.bn .bn-box { fill: var(--surface, #ffffff); stroke: var(--ink, #15211d); stroke-width: 1.4; }
+.bn .bn-box.x { fill: var(--accent-soft, #e1eee9); stroke: var(--hi, #b86e00); stroke-width: 2.2; }
+.bn .bn-in { fill: none; stroke: var(--ink, #15211d); stroke-width: 1.6; }
+.bn .bn-in.x { stroke: var(--hi, #b86e00); stroke-width: 2.2; }
+.bn .bn-pill { fill: var(--surface, #ffffff); stroke: var(--accent, #0b6b57); stroke-width: 1.6; }
+.bn .bn-val { font-size: 13px; font-weight: 600; text-anchor: middle; dominant-baseline: central; }
+.bn .bn-lane { font-size: 12px; fill: var(--muted, #56645f); dominant-baseline: central; }
+.bn .bn-head { font-size: 13px; font-weight: 600; text-anchor: middle; }
+.bn .bn-sub { font-size: 11.5px; fill: var(--muted, #56645f); text-anchor: middle; }
+.bn .bn-sw { font-size: 10.5px; fill: var(--muted, #56645f); text-anchor: middle; }
+.bn .bn-key { font-size: 11.5px; fill: var(--muted, #56645f); }
+.bn .bn-grp { fill: var(--accent-soft, #e1eee9); fill-opacity: 0.7; stroke: none; }
+.bn .bn-grp-t { font-size: 11.5px; fill: var(--accent, #0b6b57); font-weight: 600; }
+</style>
+<style>
+.bn .bn-mux { fill: var(--surface, #ffffff); stroke: var(--ink, #15211d); stroke-width: 1.4; }
+.bn .bn-mux.x { fill: var(--accent-soft, #e1eee9); stroke: var(--hi, #b86e00); stroke-width: 2; }
+.bn .bn-sel { font-size: 10.5px; font-weight: 600; text-anchor: middle; dominant-baseline: central; }
+.bn .bn-on { fill: none; stroke: var(--accent, #0b6b57); stroke-width: 2.2; }
+.bn .bn-off { fill: none; stroke: var(--muted, #56645f); stroke-width: 1.1; opacity: 0.35; }
+.bn .bn-dash { stroke-dasharray: 6 4; }
+.bn .bn-pill.z { stroke: var(--rule, #d3dcd8); }
+.bn .bn-val.z { fill: var(--muted, #56645f); font-weight: 400; }
+.bn .bn-zero { font-size: 10.5px; fill: var(--muted, #56645f); text-anchor: end; dominant-baseline: central; }
+.bn .bn-panel { font-size: 12.5px; font-weight: 600; fill: var(--accent, #0b6b57); }
+</style>
+<rect class="bn-bg" x="0" y="0" width="748" height="1094" rx="8"/>
+<style>.bn .bn-rot { fill: var(--surface, #ffffff); stroke: var(--ink, #15211d); stroke-width: 1.4; }</style>
+<text class="bn-head" x="96" y="58">din</text>
+<text class="bn-head" x="241.0" y="58">full-size rotators</text>
+<text class="bn-head" x="386" y="58">A / B</text>
+<text class="bn-head" x="599.0" y="58">merge</text>
+<text class="bn-head" x="656" y="58">dout</text>
+<text class="bn-panel" x="44" y="90">IBN-12 #1 · rotl by s = 7 → A</text>
+<text class="bn-panel" x="44" y="582">IBN-12 #2 · rotl by s2 = (N − Z + s) mod N = (12 − 10 + 7) mod 12 = 9 → B</text>
+<rect class="bn-rot" x="136" y="106" width="210" height="410" rx="8"/>
+<text class="bn-lane" x="44" y="124">lane 0</text>
+<text class="bn-lane" x="44" y="158">lane 1</text>
+<text class="bn-lane" x="44" y="192">lane 2</text>
+<text class="bn-lane" x="44" y="226">lane 3</text>
+<text class="bn-lane" x="44" y="260">lane 4</text>
+<text class="bn-lane" x="44" y="294">lane 5</text>
+<text class="bn-lane" x="44" y="328">lane 6</text>
+<text class="bn-lane" x="44" y="362">lane 7</text>
+<text class="bn-lane" x="44" y="396">lane 8</text>
+<text class="bn-lane" x="44" y="430">lane 9</text>
+<text class="bn-lane" x="44" y="464">lane 10</text>
+<text class="bn-lane" x="44" y="498">lane 11</text>
+<path class="bn-off" d="M108 124 H136"/><path class="bn-off" d="M346 124 H374"/>
+<path class="bn-off" d="M108 158 H136"/><path class="bn-off" d="M346 158 H374"/>
+<path class="bn-off" d="M108 192 H136"/><path class="bn-off" d="M346 192 H374"/>
+<path class="bn-off" d="M142 464 C241.0 464 241.0 226 340 226"/>
+<path class="bn-off" d="M108 226 H136"/><path class="bn-off" d="M346 226 H374"/>
+<path class="bn-off" d="M142 498 C241.0 498 241.0 260 340 260"/>
+<path class="bn-off" d="M108 260 H136"/><path class="bn-off" d="M346 260 H374"/>
+<path class="bn-off bn-dash" d="M142 124 C241.0 124 241.0 294 340 294"/>
+<path class="bn-off" d="M108 294 H136"/><path class="bn-off" d="M346 294 H374"/>
+<path class="bn-off bn-dash" d="M142 158 C241.0 158 241.0 328 340 328"/>
+<path class="bn-off" d="M108 328 H136"/><path class="bn-off" d="M346 328 H374"/>
+<path class="bn-off bn-dash" d="M142 192 C241.0 192 241.0 362 340 362"/>
+<path class="bn-off" d="M108 362 H136"/><path class="bn-off" d="M346 362 H374"/>
+<path class="bn-off bn-dash" d="M142 226 C241.0 226 241.0 396 340 396"/>
+<path class="bn-off" d="M108 396 H136"/><path class="bn-off" d="M346 396 H374"/>
+<path class="bn-off bn-dash" d="M142 260 C241.0 260 241.0 430 340 430"/>
+<path class="bn-off" d="M108 430 H136"/><path class="bn-off" d="M346 430 H374"/>
+<path class="bn-off bn-dash" d="M142 294 C241.0 294 241.0 464 340 464"/>
+<path class="bn-off" d="M108 464 H136"/><path class="bn-off" d="M346 464 H374"/>
+<path class="bn-off bn-dash" d="M142 328 C241.0 328 241.0 498 340 498"/>
+<path class="bn-off" d="M108 498 H136"/><path class="bn-off" d="M346 498 H374"/>
+<path class="bn-on" d="M142 362 C241.0 362 241.0 124 340 124"/>
+<path class="bn-on" d="M142 396 C241.0 396 241.0 158 340 158"/>
+<path class="bn-on" d="M142 430 C241.0 430 241.0 192 340 192"/>
+<circle class="bn-pill" cx="96" cy="124" r="12"/><text class="bn-val" x="96" y="124">A</text>
+<circle class="bn-pill" cx="386" cy="124" r="12"/><text class="bn-val" x="386" y="124">H</text>
+<circle class="bn-pill" cx="96" cy="158" r="12"/><text class="bn-val" x="96" y="158">B</text>
+<circle class="bn-pill" cx="386" cy="158" r="12"/><text class="bn-val" x="386" y="158">I</text>
+<circle class="bn-pill" cx="96" cy="192" r="12"/><text class="bn-val" x="96" y="192">C</text>
+<circle class="bn-pill" cx="386" cy="192" r="12"/><text class="bn-val" x="386" y="192">J</text>
+<circle class="bn-pill" cx="96" cy="226" r="12"/><text class="bn-val" x="96" y="226">D</text>
+<circle class="bn-pill z" cx="386" cy="226" r="12"/><text class="bn-val z" x="386" y="226">0</text>
+<circle class="bn-pill" cx="96" cy="260" r="12"/><text class="bn-val" x="96" y="260">E</text>
+<circle class="bn-pill z" cx="386" cy="260" r="12"/><text class="bn-val z" x="386" y="260">0</text>
+<circle class="bn-pill" cx="96" cy="294" r="12"/><text class="bn-val" x="96" y="294">F</text>
+<circle class="bn-pill" cx="386" cy="294" r="12"/><text class="bn-val" x="386" y="294">A</text>
+<circle class="bn-pill" cx="96" cy="328" r="12"/><text class="bn-val" x="96" y="328">G</text>
+<circle class="bn-pill" cx="386" cy="328" r="12"/><text class="bn-val" x="386" y="328">B</text>
+<circle class="bn-pill" cx="96" cy="362" r="12"/><text class="bn-val" x="96" y="362">H</text>
+<circle class="bn-pill" cx="386" cy="362" r="12"/><text class="bn-val" x="386" y="362">C</text>
+<circle class="bn-pill" cx="96" cy="396" r="12"/><text class="bn-val" x="96" y="396">I</text>
+<circle class="bn-pill" cx="386" cy="396" r="12"/><text class="bn-val" x="386" y="396">D</text>
+<circle class="bn-pill" cx="96" cy="430" r="12"/><text class="bn-val" x="96" y="430">J</text>
+<circle class="bn-pill" cx="386" cy="430" r="12"/><text class="bn-val" x="386" y="430">E</text>
+<circle class="bn-pill z" cx="96" cy="464" r="12"/><text class="bn-val z" x="96" y="464">0</text>
+<circle class="bn-pill" cx="386" cy="464" r="12"/><text class="bn-val" x="386" y="464">F</text>
+<circle class="bn-pill z" cx="96" cy="498" r="12"/><text class="bn-val z" x="96" y="498">0</text>
+<circle class="bn-pill" cx="386" cy="498" r="12"/><text class="bn-val" x="386" y="498">G</text>
+<rect class="bn-rot" x="136" y="598" width="210" height="410" rx="8"/>
+<text class="bn-lane" x="44" y="616">lane 0</text>
+<text class="bn-lane" x="44" y="650">lane 1</text>
+<text class="bn-lane" x="44" y="684">lane 2</text>
+<text class="bn-lane" x="44" y="718">lane 3</text>
+<text class="bn-lane" x="44" y="752">lane 4</text>
+<text class="bn-lane" x="44" y="786">lane 5</text>
+<text class="bn-lane" x="44" y="820">lane 6</text>
+<text class="bn-lane" x="44" y="854">lane 7</text>
+<text class="bn-lane" x="44" y="888">lane 8</text>
+<text class="bn-lane" x="44" y="922">lane 9</text>
+<text class="bn-lane" x="44" y="956">lane 10</text>
+<text class="bn-lane" x="44" y="990">lane 11</text>
+<path class="bn-off" d="M142 922 C241.0 922 241.0 616 340 616"/>
+<path class="bn-off" d="M108 616 H136"/><path class="bn-off" d="M346 616 H374"/>
+<path class="bn-off" d="M142 956 C241.0 956 241.0 650 340 650"/>
+<path class="bn-off" d="M108 650 H136"/><path class="bn-off" d="M346 650 H374"/>
+<path class="bn-off" d="M142 990 C241.0 990 241.0 684 340 684"/>
+<path class="bn-off" d="M108 684 H136"/><path class="bn-off" d="M346 684 H374"/>
+<path class="bn-off" d="M108 718 H136"/><path class="bn-off" d="M346 718 H374"/>
+<path class="bn-off" d="M108 752 H136"/><path class="bn-off" d="M346 752 H374"/>
+<path class="bn-off" d="M108 786 H136"/><path class="bn-off" d="M346 786 H374"/>
+<path class="bn-off" d="M108 820 H136"/><path class="bn-off" d="M346 820 H374"/>
+<path class="bn-off" d="M108 854 H136"/><path class="bn-off" d="M346 854 H374"/>
+<path class="bn-off" d="M108 888 H136"/><path class="bn-off" d="M346 888 H374"/>
+<path class="bn-off" d="M108 922 H136"/><path class="bn-off" d="M346 922 H374"/>
+<path class="bn-off bn-dash" d="M142 854 C241.0 854 241.0 956 340 956"/>
+<path class="bn-off" d="M108 956 H136"/><path class="bn-off" d="M346 956 H374"/>
+<path class="bn-off bn-dash" d="M142 888 C241.0 888 241.0 990 340 990"/>
+<path class="bn-off" d="M108 990 H136"/><path class="bn-off" d="M346 990 H374"/>
+<path class="bn-on bn-dash" d="M142 616 C241.0 616 241.0 718 340 718"/>
+<path class="bn-on bn-dash" d="M142 650 C241.0 650 241.0 752 340 752"/>
+<path class="bn-on bn-dash" d="M142 684 C241.0 684 241.0 786 340 786"/>
+<path class="bn-on bn-dash" d="M142 718 C241.0 718 241.0 820 340 820"/>
+<path class="bn-on bn-dash" d="M142 752 C241.0 752 241.0 854 340 854"/>
+<path class="bn-on bn-dash" d="M142 786 C241.0 786 241.0 888 340 888"/>
+<path class="bn-on bn-dash" d="M142 820 C241.0 820 241.0 922 340 922"/>
+<circle class="bn-pill" cx="96" cy="616" r="12"/><text class="bn-val" x="96" y="616">A</text>
+<circle class="bn-pill" cx="386" cy="616" r="12"/><text class="bn-val" x="386" y="616">J</text>
+<circle class="bn-pill" cx="96" cy="650" r="12"/><text class="bn-val" x="96" y="650">B</text>
+<circle class="bn-pill z" cx="386" cy="650" r="12"/><text class="bn-val z" x="386" y="650">0</text>
+<circle class="bn-pill" cx="96" cy="684" r="12"/><text class="bn-val" x="96" y="684">C</text>
+<circle class="bn-pill z" cx="386" cy="684" r="12"/><text class="bn-val z" x="386" y="684">0</text>
+<circle class="bn-pill" cx="96" cy="718" r="12"/><text class="bn-val" x="96" y="718">D</text>
+<circle class="bn-pill" cx="386" cy="718" r="12"/><text class="bn-val" x="386" y="718">A</text>
+<circle class="bn-pill" cx="96" cy="752" r="12"/><text class="bn-val" x="96" y="752">E</text>
+<circle class="bn-pill" cx="386" cy="752" r="12"/><text class="bn-val" x="386" y="752">B</text>
+<circle class="bn-pill" cx="96" cy="786" r="12"/><text class="bn-val" x="96" y="786">F</text>
+<circle class="bn-pill" cx="386" cy="786" r="12"/><text class="bn-val" x="386" y="786">C</text>
+<circle class="bn-pill" cx="96" cy="820" r="12"/><text class="bn-val" x="96" y="820">G</text>
+<circle class="bn-pill" cx="386" cy="820" r="12"/><text class="bn-val" x="386" y="820">D</text>
+<circle class="bn-pill" cx="96" cy="854" r="12"/><text class="bn-val" x="96" y="854">H</text>
+<circle class="bn-pill" cx="386" cy="854" r="12"/><text class="bn-val" x="386" y="854">E</text>
+<circle class="bn-pill" cx="96" cy="888" r="12"/><text class="bn-val" x="96" y="888">I</text>
+<circle class="bn-pill" cx="386" cy="888" r="12"/><text class="bn-val" x="386" y="888">F</text>
+<circle class="bn-pill" cx="96" cy="922" r="12"/><text class="bn-val" x="96" y="922">J</text>
+<circle class="bn-pill" cx="386" cy="922" r="12"/><text class="bn-val" x="386" y="922">G</text>
+<circle class="bn-pill z" cx="96" cy="956" r="12"/><text class="bn-val z" x="96" y="956">0</text>
+<circle class="bn-pill" cx="386" cy="956" r="12"/><text class="bn-val" x="386" y="956">H</text>
+<circle class="bn-pill z" cx="96" cy="990" r="12"/><text class="bn-val z" x="96" y="990">0</text>
+<circle class="bn-pill" cx="386" cy="990" r="12"/><text class="bn-val" x="386" y="990">I</text>
+<path class="bn-off" d="M398 616 C492.0 616 492.0 378.0 586 378.0"/>
+<path class="bn-off" d="M398 650 C492.0 650 492.0 412.0 586 412.0"/>
+<path class="bn-off" d="M398 684 C492.0 684 492.0 446.0 586 446.0"/>
+<path class="bn-off" d="M398 226 C492.0 226 492.0 464.0 586 464.0"/>
+<path class="bn-off" d="M398 260 C492.0 260 492.0 498.0 586 498.0"/>
+<path class="bn-off" d="M398 294 C492.0 294 492.0 532.0 586 532.0"/>
+<path class="bn-off" d="M398 328 C492.0 328 492.0 566.0 586 566.0"/>
+<path class="bn-off" d="M398 362 C492.0 362 492.0 600.0 586 600.0"/>
+<path class="bn-off" d="M398 396 C492.0 396 492.0 634.0 586 634.0"/>
+<path class="bn-off" d="M398 430 C492.0 430 492.0 668.0 586 668.0"/>
+<path class="bn-off" d="M398 464 C492.0 464 492.0 702.0 586 702.0"/>
+<path class="bn-off" d="M398 956 C492.0 956 492.0 718.0 586 718.0"/>
+<path class="bn-off" d="M398 498 C492.0 498 492.0 736.0 586 736.0"/>
+<path class="bn-off" d="M398 990 C492.0 990 492.0 752.0 586 752.0"/>
+<path class="bn-on" d="M398 124 C492.0 124 492.0 362.0 586 362.0"/>
+<path class="bn-on" d="M398 158 C492.0 158 492.0 396.0 586 396.0"/>
+<path class="bn-on" d="M398 192 C492.0 192 492.0 430.0 586 430.0"/>
+<path class="bn-on" d="M398 718 C492.0 718 492.0 480.0 586 480.0"/>
+<path class="bn-on" d="M398 752 C492.0 752 492.0 514.0 586 514.0"/>
+<path class="bn-on" d="M398 786 C492.0 786 492.0 548.0 586 548.0"/>
+<path class="bn-on" d="M398 820 C492.0 820 492.0 582.0 586 582.0"/>
+<path class="bn-on" d="M398 854 C492.0 854 492.0 616.0 586 616.0"/>
+<path class="bn-on" d="M398 888 C492.0 888 492.0 650.0 586 650.0"/>
+<path class="bn-on" d="M398 922 C492.0 922 492.0 684.0 586 684.0"/>
+<path class="bn-on" d="M612 370.0 H644"/><path class="bn-mux" d="M586 355.0 L612 361.0 L612 379.0 L586 385.0 Z"/><text class="bn-sel" x="599.0" y="370.0">0</text>
+<circle class="bn-pill" cx="656" cy="370.0" r="12"/><text class="bn-val" x="656" y="370.0">H</text>
+<text class="bn-lane" x="676" y="370.0">lane 0</text>
+<path class="bn-on" d="M612 404.0 H644"/><path class="bn-mux" d="M586 389.0 L612 395.0 L612 413.0 L586 419.0 Z"/><text class="bn-sel" x="599.0" y="404.0">0</text>
+<circle class="bn-pill" cx="656" cy="404.0" r="12"/><text class="bn-val" x="656" y="404.0">I</text>
+<text class="bn-lane" x="676" y="404.0">lane 1</text>
+<path class="bn-on" d="M612 438.0 H644"/><path class="bn-mux" d="M586 423.0 L612 429.0 L612 447.0 L586 453.0 Z"/><text class="bn-sel" x="599.0" y="438.0">0</text>
+<circle class="bn-pill" cx="656" cy="438.0" r="12"/><text class="bn-val" x="656" y="438.0">J</text>
+<text class="bn-lane" x="676" y="438.0">lane 2</text>
+<path class="bn-on" d="M612 472.0 H644"/><path class="bn-mux x" d="M586 457.0 L612 463.0 L612 481.0 L586 487.0 Z"/><text class="bn-sel" x="599.0" y="472.0">1</text>
+<circle class="bn-pill" cx="656" cy="472.0" r="12"/><text class="bn-val" x="656" y="472.0">A</text>
+<text class="bn-lane" x="676" y="472.0">lane 3</text>
+<path class="bn-on" d="M612 506.0 H644"/><path class="bn-mux x" d="M586 491.0 L612 497.0 L612 515.0 L586 521.0 Z"/><text class="bn-sel" x="599.0" y="506.0">1</text>
+<circle class="bn-pill" cx="656" cy="506.0" r="12"/><text class="bn-val" x="656" y="506.0">B</text>
+<text class="bn-lane" x="676" y="506.0">lane 4</text>
+<path class="bn-on" d="M612 540.0 H644"/><path class="bn-mux x" d="M586 525.0 L612 531.0 L612 549.0 L586 555.0 Z"/><text class="bn-sel" x="599.0" y="540.0">1</text>
+<circle class="bn-pill" cx="656" cy="540.0" r="12"/><text class="bn-val" x="656" y="540.0">C</text>
+<text class="bn-lane" x="676" y="540.0">lane 5</text>
+<path class="bn-on" d="M612 574.0 H644"/><path class="bn-mux x" d="M586 559.0 L612 565.0 L612 583.0 L586 589.0 Z"/><text class="bn-sel" x="599.0" y="574.0">1</text>
+<circle class="bn-pill" cx="656" cy="574.0" r="12"/><text class="bn-val" x="656" y="574.0">D</text>
+<text class="bn-lane" x="676" y="574.0">lane 6</text>
+<path class="bn-on" d="M612 608.0 H644"/><path class="bn-mux x" d="M586 593.0 L612 599.0 L612 617.0 L586 623.0 Z"/><text class="bn-sel" x="599.0" y="608.0">1</text>
+<circle class="bn-pill" cx="656" cy="608.0" r="12"/><text class="bn-val" x="656" y="608.0">E</text>
+<text class="bn-lane" x="676" y="608.0">lane 7</text>
+<path class="bn-on" d="M612 642.0 H644"/><path class="bn-mux x" d="M586 627.0 L612 633.0 L612 651.0 L586 657.0 Z"/><text class="bn-sel" x="599.0" y="642.0">1</text>
+<circle class="bn-pill" cx="656" cy="642.0" r="12"/><text class="bn-val" x="656" y="642.0">F</text>
+<text class="bn-lane" x="676" y="642.0">lane 8</text>
+<path class="bn-on" d="M612 676.0 H644"/><path class="bn-mux x" d="M586 661.0 L612 667.0 L612 685.0 L586 691.0 Z"/><text class="bn-sel" x="599.0" y="676.0">1</text>
+<circle class="bn-pill" cx="656" cy="676.0" r="12"/><text class="bn-val" x="656" y="676.0">G</text>
+<text class="bn-lane" x="676" y="676.0">lane 9</text>
+<path class="bn-off" d="M612 710.0 H644"/><path class="bn-mux" d="M586 695.0 L612 701.0 L612 719.0 L586 725.0 Z"/><text class="bn-sel" x="599.0" y="710.0">–</text>
+<circle class="bn-pill z" cx="656" cy="710.0" r="12"/><text class="bn-val z" x="656" y="710.0">·</text>
+<text class="bn-lane" x="676" y="710.0">lane 10</text>
+<path class="bn-off" d="M612 744.0 H644"/><path class="bn-mux" d="M586 729.0 L612 735.0 L612 753.0 L586 759.0 Z"/><text class="bn-sel" x="599.0" y="744.0">–</text>
+<circle class="bn-pill z" cx="656" cy="744.0" r="12"/><text class="bn-val z" x="656" y="744.0">·</text>
+<text class="bn-lane" x="676" y="744.0">lane 11</text>
+<text class="bn-sub" x="599.0" y="304.0">select = (i ≥ Z − s), Z − s = 3</text>
+<text class="bn-sub" x="599.0" y="320.0">lanes 0–2: A · 3–9: B</text>
+<text class="bn-sub" x="599.0" y="782.0">lanes 10–11: unused (i ≥ Z)</text>
+<path class="bn-mux" d="M44 1027 L70 1033 L70 1051 L44 1057 Z"/><text class="bn-sel" x="57.0" y="1042">0</text><text class="bn-key" x="78" y="1046">select 0: upper input</text><path class="bn-mux x" d="M234 1027 L260 1033 L260 1051 L234 1057 Z"/><text class="bn-sel" x="247.0" y="1042">1</text><text class="bn-key" x="268" y="1046">select 1: lower input</text><path class="bn-on" d="M434 1042 h26"/><text class="bn-key" x="466" y="1046">selected wire</text><text class="bn-key" x="44" y="1076">dashed: wraps at lane N · N = 12, Z = 10, s = 7</text>
+</svg>

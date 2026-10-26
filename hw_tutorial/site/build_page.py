@@ -92,9 +92,7 @@ def render(md_text, prefix):
 def inline_svg(m):
     # Inline the SVG (instead of <img>) so it follows the page's light/dark tokens.
     svg = (SRC / m.group(2)).read_text()
-    width = float(re.search(r'viewBox="[\d.]+ [\d.]+ ([\d.]+)', svg).group(1))
-    cls = "fig wide" if width > 900 else "fig"
-    return (f'<figure class="{cls}"><div class="fig-scroll">{svg}</div>'
+    return (f'<figure class="fig"><div class="fig-scroll">{svg}</div>'
             f'<figcaption>{m.group(1)}</figcaption></figure>')
 
 

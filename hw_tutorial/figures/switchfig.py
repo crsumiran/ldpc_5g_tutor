@@ -34,12 +34,22 @@ def simulate(start, stages):
     """Run values through the stages; returns the lane values before stage 0 and after each stage."""
     values = [list(start)]
     for st in stages:
-        nxt = list(values[-1])
-        for U, L, swap in st["sws"]:
-            if swap:
-                nxt[U], nxt[L] = nxt[L], nxt[U]
+        cur, nxt = values[-1], list(values[-1])
+        for lanes, r in map(_norm, st["sws"]):
+            m = len(lanes)
+            for q in range(m):
+                nxt[lanes[q]] = cur[lanes[(q + r) % m]]
         values.append(nxt)
     return values
+
+
+def _norm(sw):
+    """A switch is (U, L, swap) for a 2x2, or (lanes, r) for an m x m rotating
+    switch whose output port q takes input port (q + r) mod m. Returns (lanes, r)."""
+    if isinstance(sw[0], tuple):
+        return sw
+    U, L, swap = sw
+    return (U, L), int(swap)
 
 
 def y(lane):
@@ -52,7 +62,7 @@ def _curve(x1, y1, x2, y2):
 
 
 def draw(stages, values, *, stage_w, out_sub, note, aria, groups=()):
-    """stages: [{"title", "sub", "sws": [(U, L, swap), ...]}]; values from simulate().
+    """stages: [{"title", "sub", "sws": [switch, ...]}] (see _norm); values from simulate().
     groups: [(first_stage, last_stage, first_lane, last_lane, label)] drawn as tinted panels;
     a group starting at lane 0 is labelled above, any other below."""
     N, S = len(values[0]), len(stages)
@@ -71,7 +81,8 @@ def draw(stages, values, *, stage_w, out_sub, note, aria, groups=()):
         out.append(f'<rect class="bn-grp" x="{gx0}" y="{top}" width="{gx1 - gx0}" '
                    f'height="{bot - top}" rx="10"/>')
         ty = top - 6 if l0 == 0 else bot + 15
-        out.append(f'<text class="bn-grp-t" x="{gx0 + 6}" y="{ty}">{label}</text>')
+        if label:
+            out.append(f'<text class="bn-grp-t" x="{gx0 + 6}" y="{ty}">{label}</text>')
 
     for i in range(N):
         out.append(f'<text class="bn-lane" x="{X0 - 52}" y="{y(i)}">lane {i}</text>')
@@ -86,19 +97,25 @@ def draw(stages, values, *, stage_w, out_sub, note, aria, groups=()):
         cx = bx + BOX_W / 2
         out.append(f'<text class="bn-head" x="{cx}" y="{LANE_Y0 - 50}">{st["title"]}</text>')
         out.append(f'<text class="bn-sub" x="{cx}" y="{LANE_Y0 - 32}">{st["sub"]}</text>')
-        for slot, (U, L, swap) in enumerate(st["sws"]):
-            top, bot = y(2 * slot), y(2 * slot + 1)
-            # lane U uses the top port, lane L the bottom one, on both sides
-            out += [_curve(x0 + 12, y(U), bx, top), _curve(x0 + 12, y(L), bx, bot),
-                    _curve(bx + BOX_W, top, x1 - 12, y(U)), _curve(bx + BOX_W, bot, x1 - 12, y(L))]
-            cls = " x" if swap else ""
-            out.append(f'<rect class="bn-box{cls}" x="{bx}" y="{top - PAD}" width="{BOX_W}" '
-                       f'height="{bot - top + 2 * PAD}" rx="5"/>')
-            if swap:
-                out.append(f'<path class="bn-in x" d="M{bx} {top} L{bx + BOX_W} {bot} M{bx} {bot} L{bx + BOX_W} {top}"/>')
-            else:
-                out.append(f'<path class="bn-in" d="M{bx} {top} H{bx + BOX_W} M{bx} {bot} H{bx + BOX_W}"/>')
-            out.append(f'<text class="bn-sw" x="{cx}" y="{top - PAD - 4}">{U}↔{L}</text>')
+        for slot, (lanes, r) in enumerate(map(_norm, st["sws"])):
+            m = len(lanes)
+            ports = [y(m * slot + q) for q in range(m)]
+            # lane lanes[q] uses port q, on both sides
+            for q, lane in enumerate(lanes):
+                out += [_curve(x0 + 12, y(lane), bx, ports[q]), _curve(bx + BOX_W, ports[q], x1 - 12, y(lane))]
+            cls = " x" if r else ""
+            out.append(f'<rect class="bn-box{cls}" x="{bx}" y="{ports[0] - PAD}" width="{BOX_W}" '
+                       f'height="{ports[-1] - ports[0] + 2 * PAD}" rx="5"/>')
+            if m == 2 and r:
+                out.append(f'<path class="bn-in x" d="M{bx} {ports[0]} L{bx + BOX_W} {ports[1]} '
+                           f'M{bx} {ports[1]} L{bx + BOX_W} {ports[0]}"/>')
+            elif m == 2:
+                out.append(f'<path class="bn-in" d="M{bx} {ports[0]} H{bx + BOX_W} M{bx} {ports[1]} H{bx + BOX_W}"/>')
+            else:                               # output port q <- input port (q + r) mod m
+                out.append(f'<path class="bn-in{cls}" d="' + " ".join(
+                    f"M{bx} {ports[(q + r) % m]} L{bx + BOX_W} {ports[q]}" for q in range(m)) + '"/>')
+            label = f"{lanes[0]}↔{lanes[1]}" if m == 2 else "·".join(map(str, lanes)) + f" r={r}"
+            out.append(f'<text class="bn-sw" x="{cx}" y="{ports[0] - PAD - 4}">{label}</text>')
 
     # values on every stage boundary, drawn last so they sit on top of the wires
     for x, vals in zip(xs, values):
