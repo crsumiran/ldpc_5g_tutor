@@ -1,0 +1,163 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 824 506" class="bn" role="img" aria-label="8-lane Banyan network, 3 stages of four 2x2 switches, rotating A to H left by 3">
+<style>
+.bn .bn-bg { fill: var(--surface, #ffffff); }
+.bn text { font-family: var(--font-mono, ui-monospace, Menlo, Consolas, monospace); fill: var(--ink, #15211d); }
+.bn .bn-wire { fill: none; stroke: var(--muted, #56645f); stroke-width: 1.4; }
+.bn .bn-box { fill: var(--surface, #ffffff); stroke: var(--ink, #15211d); stroke-width: 1.4; }
+.bn .bn-box.x { fill: var(--accent-soft, #e1eee9); stroke: var(--hi, #b86e00); stroke-width: 2.2; }
+.bn .bn-in { fill: none; stroke: var(--ink, #15211d); stroke-width: 1.6; }
+.bn .bn-in.x { stroke: var(--hi, #b86e00); stroke-width: 2.2; }
+.bn .bn-pill { fill: var(--surface, #ffffff); stroke: var(--accent, #0b6b57); stroke-width: 1.6; }
+.bn .bn-val { font-size: 13px; font-weight: 600; text-anchor: middle; dominant-baseline: central; }
+.bn .bn-lane { font-size: 12px; fill: var(--muted, #56645f); dominant-baseline: central; }
+.bn .bn-head { font-size: 13px; font-weight: 600; text-anchor: middle; }
+.bn .bn-sub { font-size: 11.5px; fill: var(--muted, #56645f); text-anchor: middle; }
+.bn .bn-sw { font-size: 10.5px; fill: var(--muted, #56645f); text-anchor: middle; }
+.bn .bn-key { font-size: 11.5px; fill: var(--muted, #56645f); }
+</style>
+<rect class="bn-bg" x="0" y="0" width="824" height="506" rx="8"/>
+<text class="bn-lane" x="44" y="96">lane 0</text>
+<text class="bn-lane" x="718" y="96">lane 0</text>
+<text class="bn-lane" x="44" y="142">lane 1</text>
+<text class="bn-lane" x="718" y="142">lane 1</text>
+<text class="bn-lane" x="44" y="188">lane 2</text>
+<text class="bn-lane" x="718" y="188">lane 2</text>
+<text class="bn-lane" x="44" y="234">lane 3</text>
+<text class="bn-lane" x="718" y="234">lane 3</text>
+<text class="bn-lane" x="44" y="280">lane 4</text>
+<text class="bn-lane" x="718" y="280">lane 4</text>
+<text class="bn-lane" x="44" y="326">lane 5</text>
+<text class="bn-lane" x="718" y="326">lane 5</text>
+<text class="bn-lane" x="44" y="372">lane 6</text>
+<text class="bn-lane" x="718" y="372">lane 6</text>
+<text class="bn-lane" x="44" y="418">lane 7</text>
+<text class="bn-lane" x="718" y="418">lane 7</text>
+<text class="bn-head" x="96" y="46">in</text>
+<text class="bn-head" x="696" y="46">out</text>
+<text class="bn-sub" x="696" y="64">in[(i+3) mod 8]</text>
+<text class="bn-head" x="196.0" y="46">stage 0 · span 4</text>
+<text class="bn-sub" x="196.0" y="64">a=0 b=3 → k&lt;3 cross, rest bar</text>
+<path class="bn-wire" d="M108 96 C138.5 96 138.5 96 169.0 96"/>
+<path class="bn-wire" d="M108 280 C138.5 280 138.5 142 169.0 142"/>
+<path class="bn-wire" d="M223.0 96 C253.5 96 253.5 96 284 96"/>
+<path class="bn-wire" d="M223.0 142 C253.5 142 253.5 280 284 280"/>
+<rect class="bn-box x" x="169.0" y="81" width="54" height="76" rx="5"/>
+<path class="bn-in x" d="M169.0 96 L223.0 142 M169.0 142 L223.0 96"/>
+<text class="bn-sw" x="196.0" y="77">0↔4</text>
+<path class="bn-wire" d="M108 142 C138.5 142 138.5 188 169.0 188"/>
+<path class="bn-wire" d="M108 326 C138.5 326 138.5 234 169.0 234"/>
+<path class="bn-wire" d="M223.0 188 C253.5 188 253.5 142 284 142"/>
+<path class="bn-wire" d="M223.0 234 C253.5 234 253.5 326 284 326"/>
+<rect class="bn-box x" x="169.0" y="173" width="54" height="76" rx="5"/>
+<path class="bn-in x" d="M169.0 188 L223.0 234 M169.0 234 L223.0 188"/>
+<text class="bn-sw" x="196.0" y="169">1↔5</text>
+<path class="bn-wire" d="M108 188 C138.5 188 138.5 280 169.0 280"/>
+<path class="bn-wire" d="M108 372 C138.5 372 138.5 326 169.0 326"/>
+<path class="bn-wire" d="M223.0 280 C253.5 280 253.5 188 284 188"/>
+<path class="bn-wire" d="M223.0 326 C253.5 326 253.5 372 284 372"/>
+<rect class="bn-box x" x="169.0" y="265" width="54" height="76" rx="5"/>
+<path class="bn-in x" d="M169.0 280 L223.0 326 M169.0 326 L223.0 280"/>
+<text class="bn-sw" x="196.0" y="261">2↔6</text>
+<path class="bn-wire" d="M108 234 C138.5 234 138.5 372 169.0 372"/>
+<path class="bn-wire" d="M108 418 C138.5 418 138.5 418 169.0 418"/>
+<path class="bn-wire" d="M223.0 372 C253.5 372 253.5 234 284 234"/>
+<path class="bn-wire" d="M223.0 418 C253.5 418 253.5 418 284 418"/>
+<rect class="bn-box" x="169.0" y="357" width="54" height="76" rx="5"/>
+<path class="bn-in" d="M169.0 372 H223.0 M169.0 418 H223.0"/>
+<text class="bn-sw" x="196.0" y="353">3↔7</text>
+<text class="bn-head" x="396.0" y="46">stage 1 · span 2</text>
+<text class="bn-sub" x="396.0" y="64">a=1 b=1 → k&lt;1 bar, rest cross</text>
+<path class="bn-wire" d="M308 96 C338.5 96 338.5 96 369.0 96"/>
+<path class="bn-wire" d="M308 188 C338.5 188 338.5 142 369.0 142"/>
+<path class="bn-wire" d="M423.0 96 C453.5 96 453.5 96 484 96"/>
+<path class="bn-wire" d="M423.0 142 C453.5 142 453.5 188 484 188"/>
+<rect class="bn-box" x="369.0" y="81" width="54" height="76" rx="5"/>
+<path class="bn-in" d="M369.0 96 H423.0 M369.0 142 H423.0"/>
+<text class="bn-sw" x="396.0" y="77">0↔2</text>
+<path class="bn-wire" d="M308 142 C338.5 142 338.5 188 369.0 188"/>
+<path class="bn-wire" d="M308 234 C338.5 234 338.5 234 369.0 234"/>
+<path class="bn-wire" d="M423.0 188 C453.5 188 453.5 142 484 142"/>
+<path class="bn-wire" d="M423.0 234 C453.5 234 453.5 234 484 234"/>
+<rect class="bn-box x" x="369.0" y="173" width="54" height="76" rx="5"/>
+<path class="bn-in x" d="M369.0 188 L423.0 234 M369.0 234 L423.0 188"/>
+<text class="bn-sw" x="396.0" y="169">1↔3</text>
+<path class="bn-wire" d="M308 280 C338.5 280 338.5 280 369.0 280"/>
+<path class="bn-wire" d="M308 372 C338.5 372 338.5 326 369.0 326"/>
+<path class="bn-wire" d="M423.0 280 C453.5 280 453.5 280 484 280"/>
+<path class="bn-wire" d="M423.0 326 C453.5 326 453.5 372 484 372"/>
+<rect class="bn-box" x="369.0" y="265" width="54" height="76" rx="5"/>
+<path class="bn-in" d="M369.0 280 H423.0 M369.0 326 H423.0"/>
+<text class="bn-sw" x="396.0" y="261">4↔6</text>
+<path class="bn-wire" d="M308 326 C338.5 326 338.5 372 369.0 372"/>
+<path class="bn-wire" d="M308 418 C338.5 418 338.5 418 369.0 418"/>
+<path class="bn-wire" d="M423.0 372 C453.5 372 453.5 326 484 326"/>
+<path class="bn-wire" d="M423.0 418 C453.5 418 453.5 418 484 418"/>
+<rect class="bn-box x" x="369.0" y="357" width="54" height="76" rx="5"/>
+<path class="bn-in x" d="M369.0 372 L423.0 418 M369.0 418 L423.0 372"/>
+<text class="bn-sw" x="396.0" y="353">5↔7</text>
+<text class="bn-head" x="596.0" y="46">stage 2 · span 1</text>
+<text class="bn-sub" x="596.0" y="64">a=1 b=0 → all cross</text>
+<path class="bn-wire" d="M508 96 C538.5 96 538.5 96 569.0 96"/>
+<path class="bn-wire" d="M508 142 C538.5 142 538.5 142 569.0 142"/>
+<path class="bn-wire" d="M623.0 96 C653.5 96 653.5 96 684 96"/>
+<path class="bn-wire" d="M623.0 142 C653.5 142 653.5 142 684 142"/>
+<rect class="bn-box x" x="569.0" y="81" width="54" height="76" rx="5"/>
+<path class="bn-in x" d="M569.0 96 L623.0 142 M569.0 142 L623.0 96"/>
+<text class="bn-sw" x="596.0" y="77">0↔1</text>
+<path class="bn-wire" d="M508 188 C538.5 188 538.5 188 569.0 188"/>
+<path class="bn-wire" d="M508 234 C538.5 234 538.5 234 569.0 234"/>
+<path class="bn-wire" d="M623.0 188 C653.5 188 653.5 188 684 188"/>
+<path class="bn-wire" d="M623.0 234 C653.5 234 653.5 234 684 234"/>
+<rect class="bn-box x" x="569.0" y="173" width="54" height="76" rx="5"/>
+<path class="bn-in x" d="M569.0 188 L623.0 234 M569.0 234 L623.0 188"/>
+<text class="bn-sw" x="596.0" y="169">2↔3</text>
+<path class="bn-wire" d="M508 280 C538.5 280 538.5 280 569.0 280"/>
+<path class="bn-wire" d="M508 326 C538.5 326 538.5 326 569.0 326"/>
+<path class="bn-wire" d="M623.0 280 C653.5 280 653.5 280 684 280"/>
+<path class="bn-wire" d="M623.0 326 C653.5 326 653.5 326 684 326"/>
+<rect class="bn-box x" x="569.0" y="265" width="54" height="76" rx="5"/>
+<path class="bn-in x" d="M569.0 280 L623.0 326 M569.0 326 L623.0 280"/>
+<text class="bn-sw" x="596.0" y="261">4↔5</text>
+<path class="bn-wire" d="M508 372 C538.5 372 538.5 372 569.0 372"/>
+<path class="bn-wire" d="M508 418 C538.5 418 538.5 418 569.0 418"/>
+<path class="bn-wire" d="M623.0 372 C653.5 372 653.5 372 684 372"/>
+<path class="bn-wire" d="M623.0 418 C653.5 418 653.5 418 684 418"/>
+<rect class="bn-box x" x="569.0" y="357" width="54" height="76" rx="5"/>
+<path class="bn-in x" d="M569.0 372 L623.0 418 M569.0 418 L623.0 372"/>
+<text class="bn-sw" x="596.0" y="353">6↔7</text>
+<circle class="bn-pill" cx="96" cy="96" r="12"/><text class="bn-val" x="96" y="96">A</text>
+<circle class="bn-pill" cx="96" cy="142" r="12"/><text class="bn-val" x="96" y="142">B</text>
+<circle class="bn-pill" cx="96" cy="188" r="12"/><text class="bn-val" x="96" y="188">C</text>
+<circle class="bn-pill" cx="96" cy="234" r="12"/><text class="bn-val" x="96" y="234">D</text>
+<circle class="bn-pill" cx="96" cy="280" r="12"/><text class="bn-val" x="96" y="280">E</text>
+<circle class="bn-pill" cx="96" cy="326" r="12"/><text class="bn-val" x="96" y="326">F</text>
+<circle class="bn-pill" cx="96" cy="372" r="12"/><text class="bn-val" x="96" y="372">G</text>
+<circle class="bn-pill" cx="96" cy="418" r="12"/><text class="bn-val" x="96" y="418">H</text>
+<circle class="bn-pill" cx="296" cy="96" r="12"/><text class="bn-val" x="296" y="96">E</text>
+<circle class="bn-pill" cx="296" cy="142" r="12"/><text class="bn-val" x="296" y="142">F</text>
+<circle class="bn-pill" cx="296" cy="188" r="12"/><text class="bn-val" x="296" y="188">G</text>
+<circle class="bn-pill" cx="296" cy="234" r="12"/><text class="bn-val" x="296" y="234">D</text>
+<circle class="bn-pill" cx="296" cy="280" r="12"/><text class="bn-val" x="296" y="280">A</text>
+<circle class="bn-pill" cx="296" cy="326" r="12"/><text class="bn-val" x="296" y="326">B</text>
+<circle class="bn-pill" cx="296" cy="372" r="12"/><text class="bn-val" x="296" y="372">C</text>
+<circle class="bn-pill" cx="296" cy="418" r="12"/><text class="bn-val" x="296" y="418">H</text>
+<circle class="bn-pill" cx="496" cy="96" r="12"/><text class="bn-val" x="496" y="96">E</text>
+<circle class="bn-pill" cx="496" cy="142" r="12"/><text class="bn-val" x="496" y="142">D</text>
+<circle class="bn-pill" cx="496" cy="188" r="12"/><text class="bn-val" x="496" y="188">G</text>
+<circle class="bn-pill" cx="496" cy="234" r="12"/><text class="bn-val" x="496" y="234">F</text>
+<circle class="bn-pill" cx="496" cy="280" r="12"/><text class="bn-val" x="496" y="280">A</text>
+<circle class="bn-pill" cx="496" cy="326" r="12"/><text class="bn-val" x="496" y="326">H</text>
+<circle class="bn-pill" cx="496" cy="372" r="12"/><text class="bn-val" x="496" y="372">C</text>
+<circle class="bn-pill" cx="496" cy="418" r="12"/><text class="bn-val" x="496" y="418">B</text>
+<circle class="bn-pill" cx="696" cy="96" r="12"/><text class="bn-val" x="696" y="96">D</text>
+<circle class="bn-pill" cx="696" cy="142" r="12"/><text class="bn-val" x="696" y="142">E</text>
+<circle class="bn-pill" cx="696" cy="188" r="12"/><text class="bn-val" x="696" y="188">F</text>
+<circle class="bn-pill" cx="696" cy="234" r="12"/><text class="bn-val" x="696" y="234">G</text>
+<circle class="bn-pill" cx="696" cy="280" r="12"/><text class="bn-val" x="696" y="280">H</text>
+<circle class="bn-pill" cx="696" cy="326" r="12"/><text class="bn-val" x="696" y="326">A</text>
+<circle class="bn-pill" cx="696" cy="372" r="12"/><text class="bn-val" x="696" y="372">B</text>
+<circle class="bn-pill" cx="696" cy="418" r="12"/><text class="bn-val" x="696" y="418">C</text>
+<rect class="bn-box" x="44" y="467" width="22" height="18" rx="3"/><path class="bn-in" d="M44 472 h22 M44 480 h22"/><text class="bn-key" x="74" y="480">bar (swap=0)</text>
+<rect class="bn-box x" x="188" y="467" width="22" height="18" rx="3"/><path class="bn-in x" d="M188 467 l22 18 M188 485 l22 -18"/><text class="bn-key" x="218" y="480">cross (swap=1)</text>
+<text class="bn-key" x="344" y="480">shift = 3 = 011b · a = one shift bit, b = shift mod span · swap[k] = a XOR (k &lt; b)</text>
+</svg>

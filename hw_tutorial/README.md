@@ -56,6 +56,7 @@ hw_tutorial/
 │   ├── rot_ibn3.v       Improved Banyan Network, N = 3*2^n (Song et al. 2022)
 │   └── rot_5g.v         5G rotator: any of the 51 lifting sizes, Z <= 384
 ├── tb/tb_rotators.v     self-checking testbench for all of the above
+├── figures/            SVG figures, each generated (and checked) by a script next to it
 ├── site/                builds all chapters into one web page with an interactive rotator lab
 └── run_tests.sh         runs everything
 ```

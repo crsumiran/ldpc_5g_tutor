@@ -157,7 +157,7 @@ columns rotated right by P. Each empty entry becomes a Z×Z zero block.
 |---|---|---|
 | Base matrix size | 46 × 68 | 42 × 52 |
 | Non-empty blocks (edges per lane) | 316 | 197 |
-| Information columns | 22 | up to 10 |
+| Information columns | 22 | 10 |
 | Max row weight | 19 (row 0) | smaller |
 | Max information bits K | 22 × 384 = 8448 | 10 × 384 = 3840 |
 | Lifting sizes Z | 51 values, 2…384 | same |
@@ -165,6 +165,12 @@ columns rotated right by P. Each empty entry becomes a Z×Z zero block.
 The 51 lifting sizes are `Z = a × 2^j` with `a ∈ {2,3,5,7,9,11,13,15}`
 (Table 5.3.2-1). The standard stores one value V per block per set `a`, and
 the shift actually used is **P = V mod Z**.
+
+BG2 always has 10 information columns, so K = 10Z. TS 38.212 also defines
+K_b = 6, 8 or 9 for short BG2 payloads. That value only selects Z; the matrix
+does not shrink. Information positions the payload doesn't fill are *filler
+bits*: known zeros that are not transmitted, which the decoder treats as
+certain.
 
 The first 2Z information bits are never transmitted (*punctured*). Their LLRs
 start at 0 and the decoder fills them in. High-rate transmissions use only

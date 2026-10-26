@@ -190,6 +190,11 @@ main code {
 .code .nf, .code .nc, .code .nb, .code .bp, .code .fm { color: var(--syn-fn); }
 
 .table { overflow-x: auto; margin: 16px 0 22px; }
+/* Figures are inline SVG so they pick up the theme tokens; on a phone they scroll inside their own box. */
+.fig { margin: 18px 0 24px; }
+.fig .fig-scroll { overflow-x: auto; border: 1px solid var(--rule); border-radius: 8px; }
+.fig svg { display: block; width: 100%; min-width: 600px; height: auto; }
+.fig figcaption { font-size: var(--step--1); color: var(--muted); margin-top: 8px; line-height: 1.5; }
 main table { border-collapse: collapse; font-size: 0.92rem; line-height: 1.45; min-width: 100%; }
 main th, main td { text-align: left; vertical-align: top; padding: 7px 12px 7px 0; border-bottom: 1px solid var(--rule); }
 main th { font-family: var(--font-display); font-weight: 700; font-size: 0.84rem; letter-spacing: 0.02em; color: var(--muted); border-bottom: 2px solid var(--ink); }

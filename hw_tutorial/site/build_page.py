@@ -85,7 +85,15 @@ def render(md_text, prefix):
     h = re.sub(r"<table>", '<div class="table"><table>', h)
     h = h.replace("</table>", "</table></div>")
     h = h.replace('<input type="checkbox"', '<input type="checkbox" disabled')
+    h = re.sub(r'<p><img alt="([^"]*)" src="(figures/[^"]+\.svg)" /></p>', inline_svg, h)
     return fix_links(h)
+
+
+def inline_svg(m):
+    # Inline the SVG (instead of <img>) so it follows the page's light/dark tokens.
+    svg = (SRC / m.group(2)).read_text()
+    return (f'<figure class="fig"><div class="fig-scroll">{svg}</div>'
+            f'<figcaption>{m.group(1)}</figcaption></figure>')
 
 
 sections, nav = [], []
