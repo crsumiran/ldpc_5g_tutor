@@ -103,6 +103,7 @@ The barrel rotator's fixed wiring is what makes its control free, and it is also
 
 > **Solution to Exercise 1:**
 > s = 6 = 110₂.
+>
 > * **Stage 0 (rotate by 1):** s[0] = 0, so it does nothing.
 > * **Stage 1 (rotate by 2):** s[1] = 1, giving `C D E F G A B`.
 > * **Stage 2 (rotate by 4):** s[2] = 1, giving `G A B C D E F`.

@@ -130,6 +130,7 @@ QSN handles one vector per cycle. At Z = 24 on a 384-lane QSN, 360 lanes carry n
 
 > **Solution to Exercise 1:**
 > Z − s = 1.
+>
 > * **left** = din << 5 = `F 0 0 0 0 0 0 0`
 > * **right** = din >> 1 = `0 A B C D E F 0`
 > * **mask** = lane 0 only

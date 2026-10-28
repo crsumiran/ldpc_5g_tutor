@@ -62,13 +62,14 @@ def _curve(x1, y1, x2, y2):
     return f'<path class="bn-wire" d="M{x1} {y1} C{mx} {y1} {mx} {y2} {x2} {y2}"/>'
 
 
-def draw(stages, values, *, stage_w, out_sub, note, aria, groups=()):
+def draw(stages, values, *, stage_w, out_sub, note, aria, groups=(), key=True):
     """stages: [{"title", "sub", "sws": [switch, ...], "labels"?: {slot: text},
     "inner"?: {slot: [text lines]}, "box_w"?}] (see _norm); a stage with "inner" draws each switch
     as a dashed sub-network outline holding those lines instead of its wiring;
     values from simulate().
     groups: [(first_stage, last_stage, first_lane, last_lane, label)] drawn as tinted panels;
-    a group starting at lane 0 is labelled above, any other below."""
+    a group starting at lane 0 is labelled above, any other below.
+    key=False leaves out the bar/cross legend (for figures without 2x2 switches)."""
     N, S = len(values[0]), len(stages)
     W = X0 + S * stage_w + 128
     extra = 22 if groups else 0                 # room for a group label under the last lane
@@ -138,6 +139,10 @@ def draw(stages, values, *, stage_w, out_sub, note, aria, groups=()):
                        f'<text class="bn-val" x="{x}" y="{y(i)}">{v}</text>')
 
     ky = y(N - 1) + 58 + extra
+    if not key:
+        out.append(f'<text class="bn-key" x="{X0 - 52}" y="{ky + 4}">{note}</text>')
+        out.append("</svg>")
+        return "\n".join(out) + "\n"
     out.append(f'<rect class="bn-box" x="{X0 - 52}" y="{ky - 9}" width="22" height="18" rx="3"/>'
                f'<path class="bn-in" d="M{X0 - 52} {ky - 4} h22 M{X0 - 52} {ky + 4} h22"/>'
                f'<text class="bn-key" x="{X0 - 22}" y="{ky + 4}">bar (swap=0)</text>')
