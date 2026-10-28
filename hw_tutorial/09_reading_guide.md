@@ -1,15 +1,15 @@
-# 09 · Reading guide
+# 09 · Reading Guide
 
-> Which paper to read, in what order, and how to translate each one's notation
-> into this tutorial's.
+> **Goal:** Know which paper to read, in what order, and how to translate each one's notation into this tutorial's.
+>
+> * **Papers next to this repo:** Song/Cui/Wang 2022 and Huang/Walrand 2012 (§1)
+> * **Downloaded papers:** `../../references/` (§2)
 
----
-
-## 1. The two papers next to this repo
+## 1. The Two Papers Next to This Repo
 
 ### Song, Cui, Wang: "A Universal Efficient Circular-Shift Network for Reconfigurable QC-LDPC Decoders", IEEE TVLSI 30(10), 2022
 
-Read it **after chapter 06**. Section by section:
+This is the paper the IBN design in chapter 06 comes from. Read it **after chapter 06**, section by section, using the table below to find the matching tutorial material:
 
 | Paper section | What it is | Tutorial chapter |
 |---|---|---|
@@ -23,7 +23,7 @@ Read it **after chapter 06**. Section by section:
 | III-C, Fig. 6, Table II | 5G: two 3·2^7 IBNs + merge; 8 parallelism options | 06 §7, `rtl/rot_5g.v` |
 | IV, Tables III–IV | 90 nm synthesis results, area breakdown | 06 §7 |
 
-Notation map:
+**Notation map.** The paper's symbols translate to this tutorial's as follows:
 
 | Paper | This tutorial |
 |---|---|
@@ -38,29 +38,20 @@ Notation map:
 | Merge Network | the per-lane `i < Z − s` mux (ch. 05) |
 | p | smallest Z the network must support |
 
-Their figures draw shifts in the opposite direction in places. Use the
-Z = 4, P = 1 check from chapter 02 §3 before mapping a formula.
+**Watch the shift direction.** Their figures draw shifts in the opposite direction in places. Use the Z = 4, P = 1 check from chapter 02 §3 before mapping a formula.
 
-**One citation error to know about:** reference [7] (QSN) gives the volume
-and pages of reference [6]. The QSN paper is X. Chen, S. Lin, V. Akella,
-*IEEE TCAS-II*, vol. 57, no. 10, pp. 782–786, Oct. 2010.
+**One citation error to know about:** reference [7] (QSN) gives the volume and pages of reference [6]. The QSN paper is X. Chen, S. Lin, V. Akella, *IEEE TCAS-II*, vol. 57, no. 10, pp. 782–786, Oct. 2010.
 
 ### Huang, Walrand: "A Benes Packet Network", arXiv 1208.0561, 2012
 
-**This is not an LDPC paper.** It proposes building a data-center network out
-of a Benes topology, with queues in every switch and a backpressure
-scheduling algorithm. What to take from it:
+**This is not an LDPC paper.** It proposes building a data-center network out of a Benes topology, with queues in every switch and a backpressure scheduling algorithm. Only a small part of it is relevant here:
 
-* **Read:** Section III-A and Fig. 2, which show how a 2^n × 2^n Benes network is
-  built recursively from an input switch column, two half-size Benes networks
-  and an output switch column. That is a good picture of chapter 03 §6.
-* **Skip:** Sections II and IV–VII (utility maximization, Lyapunov drift,
-  queue stability). These are packet-scheduling theory and have no counterpart
-  in a decoder's combinational rotator.
+* **Read:** Section III-A and Fig. 2, which show how a 2^n × 2^n Benes network is built recursively from an input switch column, two half-size Benes networks and an output switch column. That is a good picture of chapter 03 §6.
+* **Skip:** Sections II and IV–VII (utility maximization, Lyapunov drift, queue stability). These are packet-scheduling theory and have no counterpart in a decoder's combinational rotator.
 
-## 2. Downloaded open-access papers (`../../references/`)
+## 2. Downloaded Open-Access Papers (`../../references/`)
 
-In the suggested reading order:
+These are listed in the suggested reading order:
 
 | File | What it is | Why read it |
 |---|---|---|
@@ -72,7 +63,9 @@ In the suggested reading order:
 | `Polito_thesis_5G_LDPC_DSE.pdf` | Barrera, "A Design Space Exploration Tool for LDPC Decoder Architectures in 5G NR", MSc thesis, Politecnico di Torino, 2023 (77 pp.) | Survey-style background chapters and an area/frequency/throughput model for BG1 decoders. Good when choosing your architecture |
 | `ETSI_TS_138212_v17.9.0.pdf` | 3GPP TS 38.212 v17.9.0 | §5.3.2: base graphs (Tables 5.3.2-2/3), lifting sets (5.3.2-1), P = V mod Z |
 
-## 3. Open access, but needs a manual download (sites block scripts)
+## 3. Open Access, but Needs a Manual Download (Sites Block Scripts)
+
+These papers are free to read, but the hosting sites block scripted downloads, so fetch them by hand:
 
 | Paper | Link |
 |---|---|
@@ -81,10 +74,9 @@ In the suggested reading order:
 | "Low-Complexity Multi-Size Circular-Shift Network for 5G New Radio LDPC Decoders", *Sensors* 22(5):1792, 2022 | <https://www.mdpi.com/1424-8220/22/5/1792> |
 | Nguyen, Tan, Lee, pipelined layered QC-LDPC decoder for 5G NR, *Electronics* 10(4):516, 2021 | <https://www.mdpi.com/2079-9292/10/4/516> |
 
-## 4. Paywalled classics (IEEE Xplore)
+## 4. Paywalled Classics (IEEE Xplore)
 
-Your organization's IEEE access (the Song paper's download stamp suggests you
-have it) should cover these:
+Your organization's IEEE access (the Song paper's download stamp suggests you have it) should cover these:
 
 | Paper | Why |
 |---|---|
@@ -97,11 +89,13 @@ have it) should cover these:
 | M. Mansour, N. Shanbhag, "High-throughput LDPC decoders", TVLSI 11(6), 2003 | Turbo-decoding message passing; memory-efficient architecture |
 | V. E. Beneš, "Optimal rearrangeable multistage connecting networks", Bell Syst. Tech. J. 43(4), 1964 | The original Benes network |
 
-## 5. Suggested path
+## 5. Suggested Path
 
-1. Chapters 00–06 here, running the models as you go.
-2. Song et al. with the notation map above.
-3. Studer 2008, then chapter 07.
-4. Pourjabar 2021 (multi-frame in a real 5G design).
-5. Ren 2023 (what a complete modern 5G decoder looks like).
-6. EBS and QSN for alternative shifter designs.
+Putting it all together, a reading order that alternates between this tutorial and the papers:
+
+1. **Chapters 00–06 here:** running the models as you go.
+2. **Song et al.:** with the notation map above.
+3. **Studer 2008, then chapter 07.**
+4. **Pourjabar 2021:** multi-frame in a real 5G design.
+5. **Ren 2023:** what a complete modern 5G decoder looks like.
+6. **EBS and QSN:** alternative shifter designs.

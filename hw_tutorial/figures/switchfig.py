@@ -15,6 +15,7 @@ STYLE = """<style>
 .bn text { font-family: var(--font-mono, ui-monospace, Menlo, Consolas, monospace); fill: var(--ink, #15211d); }
 .bn .bn-wire { fill: none; stroke: var(--muted, #56645f); stroke-width: 1.4; }
 .bn .bn-box { fill: var(--surface, #ffffff); stroke: var(--ink, #15211d); stroke-width: 1.4; }
+.bn .bn-box.bn-opq { stroke-dasharray: 7 5; stroke: var(--muted, #56645f); }
 .bn .bn-box.x { fill: var(--accent-soft, #e1eee9); stroke: var(--hi, #b86e00); stroke-width: 2.2; }
 .bn .bn-in { fill: none; stroke: var(--ink, #15211d); stroke-width: 1.6; }
 .bn .bn-in.x { stroke: var(--hi, #b86e00); stroke-width: 2.2; }
@@ -62,7 +63,10 @@ def _curve(x1, y1, x2, y2):
 
 
 def draw(stages, values, *, stage_w, out_sub, note, aria, groups=()):
-    """stages: [{"title", "sub", "sws": [switch, ...]}] (see _norm); values from simulate().
+    """stages: [{"title", "sub", "sws": [switch, ...], "labels"?: {slot: text},
+    "inner"?: {slot: [text lines]}, "box_w"?}] (see _norm); a stage with "inner" draws each switch
+    as a dashed sub-network outline holding those lines instead of its wiring;
+    values from simulate().
     groups: [(first_stage, last_stage, first_lane, last_lane, label)] drawn as tinted panels;
     a group starting at lane 0 is labelled above, any other below."""
     N, S = len(values[0]), len(stages)
@@ -93,8 +97,9 @@ def draw(stages, values, *, stage_w, out_sub, note, aria, groups=()):
 
     for d, st in enumerate(stages):
         x0, x1 = xs[d], xs[d + 1]
-        bx = x0 + (stage_w - BOX_W) / 2
-        cx = bx + BOX_W / 2
+        bw = st.get("box_w", BOX_W)
+        bx = x0 + (stage_w - bw) / 2
+        cx = bx + bw / 2
         out.append(f'<text class="bn-head" x="{cx}" y="{LANE_Y0 - 50}">{st["title"]}</text>')
         out.append(f'<text class="bn-sub" x="{cx}" y="{LANE_Y0 - 32}">{st["sub"]}</text>')
         for slot, (lanes, r) in enumerate(map(_norm, st["sws"])):
@@ -102,7 +107,15 @@ def draw(stages, values, *, stage_w, out_sub, note, aria, groups=()):
             ports = [y(m * slot + q) for q in range(m)]
             # lane lanes[q] uses port q, on both sides
             for q, lane in enumerate(lanes):
-                out += [_curve(x0 + 12, y(lane), bx, ports[q]), _curve(bx + BOX_W, ports[q], x1 - 12, y(lane))]
+                out += [_curve(x0 + 12, y(lane), bx, ports[q]), _curve(bx + bw, ports[q], x1 - 12, y(lane))]
+            if "inner" in st:                   # a sub-network, drawn as a dashed outline with text
+                out.append(f'<rect class="bn-box bn-opq" x="{bx}" y="{ports[0] - PAD}" width="{bw}" '
+                           f'height="{ports[-1] - ports[0] + 2 * PAD}" rx="8"/>')
+                lines = st["inner"][slot]
+                ymid = (ports[0] + ports[-1]) / 2 - (len(lines) - 1) * 9
+                out += [f'<text class="bn-sub" x="{cx}" y="{ymid + 18 * i + 4}">{t}</text>'
+                        for i, t in enumerate(lines)]
+                continue
             cls = " x" if r else ""
             out.append(f'<rect class="bn-box{cls}" x="{bx}" y="{ports[0] - PAD}" width="{BOX_W}" '
                        f'height="{ports[-1] - ports[0] + 2 * PAD}" rx="5"/>')
@@ -115,6 +128,7 @@ def draw(stages, values, *, stage_w, out_sub, note, aria, groups=()):
                 out.append(f'<path class="bn-in{cls}" d="' + " ".join(
                     f"M{bx} {ports[(q + r) % m]} L{bx + BOX_W} {ports[q]}" for q in range(m)) + '"/>')
             label = f"{lanes[0]}↔{lanes[1]}" if m == 2 else "·".join(map(str, lanes)) + f" r={r}"
+            label = st.get("labels", {}).get(slot, label)
             out.append(f'<text class="bn-sw" x="{cx}" y="{ports[0] - PAD - 4}">{label}</text>')
 
     # values on every stage boundary, drawn last so they sit on top of the wires

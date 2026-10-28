@@ -1,0 +1,138 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 970 504" class="bn" role="img" aria-label="Control generator of an 8-lane Banyan for shift 5: per stage one shift bit a, the low bits b, a thermometer decoder and an XOR per switch position">
+<style>
+.bn .bn-bg { fill: var(--surface, #ffffff); }
+.bn text { font-family: var(--font-mono, ui-monospace, Menlo, Consolas, monospace); fill: var(--ink, #15211d); }
+.bn .bn-wire { fill: none; stroke: var(--muted, #56645f); stroke-width: 1.4; }
+.bn .bn-box { fill: var(--surface, #ffffff); stroke: var(--ink, #15211d); stroke-width: 1.4; }
+.bn .bn-box.bn-opq { stroke-dasharray: 7 5; stroke: var(--muted, #56645f); }
+.bn .bn-box.x { fill: var(--accent-soft, #e1eee9); stroke: var(--hi, #b86e00); stroke-width: 2.2; }
+.bn .bn-in { fill: none; stroke: var(--ink, #15211d); stroke-width: 1.6; }
+.bn .bn-in.x { stroke: var(--hi, #b86e00); stroke-width: 2.2; }
+.bn .bn-pill { fill: var(--surface, #ffffff); stroke: var(--accent, #0b6b57); stroke-width: 1.6; }
+.bn .bn-val { font-size: 13px; font-weight: 600; text-anchor: middle; dominant-baseline: central; }
+.bn .bn-lane { font-size: 12px; fill: var(--muted, #56645f); dominant-baseline: central; }
+.bn .bn-head { font-size: 13px; font-weight: 600; text-anchor: middle; }
+.bn .bn-sub { font-size: 11.5px; fill: var(--muted, #56645f); text-anchor: middle; }
+.bn .bn-sw { font-size: 10.5px; fill: var(--muted, #56645f); text-anchor: middle; }
+.bn .bn-key { font-size: 11.5px; fill: var(--muted, #56645f); }
+.bn .bn-grp { fill: var(--accent-soft, #e1eee9); fill-opacity: 0.7; stroke: none; }
+.bn .bn-grp-t { font-size: 11.5px; fill: var(--accent, #0b6b57); font-weight: 600; }
+</style>
+<style>
+.bn .bn-mux { fill: var(--surface, #ffffff); stroke: var(--ink, #15211d); stroke-width: 1.4; }
+.bn .bn-mux.x { fill: var(--accent-soft, #e1eee9); stroke: var(--hi, #b86e00); stroke-width: 2; }
+.bn .bn-sel { font-size: 10.5px; font-weight: 600; text-anchor: middle; dominant-baseline: central; }
+.bn .bn-on { fill: none; stroke: var(--accent, #0b6b57); stroke-width: 2.2; }
+.bn .bn-off { fill: none; stroke: var(--muted, #56645f); stroke-width: 1.1; opacity: 0.35; }
+.bn .bn-dash { stroke-dasharray: 6 4; }
+.bn .bn-pill.z { stroke: var(--rule, #d3dcd8); }
+.bn .bn-val.z { fill: var(--muted, #56645f); font-weight: 400; }
+.bn .bn-zero { font-size: 10.5px; fill: var(--muted, #56645f); text-anchor: end; dominant-baseline: central; }
+.bn .bn-panel { font-size: 12.5px; font-weight: 600; fill: var(--accent, #0b6b57); }
+</style>
+<rect class="bn-bg" x="0" y="0" width="970" height="504" rx="8"/>
+<style>
+.bn .bn-cell { fill: var(--surface, #ffffff); stroke: var(--rule, #d3dcd8); stroke-width: 1.2; }
+.bn .bn-cell.a { stroke: var(--hi, #b86e00); stroke-width: 2.2; }
+.bn .bn-cell.b { fill: var(--accent-soft, #e1eee9); stroke: var(--accent, #0b6b57); stroke-width: 1.6; }
+.bn .bn-cv { font-size: 13px; font-weight: 600; text-anchor: middle; dominant-baseline: central; }
+.bn .bn-cv.z { fill: var(--muted, #56645f); font-weight: 400; }
+.bn .bn-ctl { fill: none; stroke: var(--muted, #56645f); stroke-width: 1.4; }
+.bn .bn-ctl.a { stroke: var(--hi, #b86e00); stroke-width: 1.8; }
+.bn .bn-dot { fill: var(--hi, #b86e00); }
+.bn .bn-drv { font-size: 11.5px; text-anchor: middle; fill: var(--muted, #56645f); }
+.bn .bn-drv.x { fill: var(--hi, #b86e00); font-weight: 700; }
+.bn .bn-row { font-size: 11.5px; fill: var(--muted, #56645f); dominant-baseline: central; }
+</style>
+<text class="bn-row" x="14" y="104">shift</text>
+<text class="bn-row" x="14" y="170">thermometer</text>
+<text class="bn-row" x="14" y="222">t[k] = k &lt; b</text>
+<text class="bn-row" x="14" y="282">a XOR t[k]</text>
+<text class="bn-row" x="14" y="326">swap[k]</text>
+<text class="bn-row" x="14" y="366">drives</text>
+<text class="bn-head" x="240.0" y="34">stage 0 · span 4</text>
+<text class="bn-sub" x="240.0" y="54">1 block of 8: one switch per swap[k]</text>
+<rect class="bn-cell a" x="150" y="90" width="34" height="28" rx="4"/><text class="bn-cv" x="167" y="104">1</text><text class="bn-sw" x="167" y="84">s[2] a</text>
+<rect class="bn-cell b" x="190" y="90" width="34" height="28" rx="4"/><text class="bn-cv" x="207" y="104">0</text><text class="bn-sw" x="207" y="84">s[1]</text>
+<rect class="bn-cell b" x="230" y="90" width="34" height="28" rx="4"/><text class="bn-cv" x="247" y="104">1</text><text class="bn-sw" x="247" y="84">s[0]</text>
+<text class="bn-key" x="278" y="108">a = 1, b = 1</text>
+<path class="bn-ctl" d="M207 118 V150"/>
+<path class="bn-ctl" d="M247 118 V150"/>
+<rect class="bn-box" x="134" y="150" width="220" height="40" rx="5"/>
+<text class="bn-sw" x="244.0" y="174">k &lt; b, b = 1</text>
+<path class="bn-ctl a" d="M167 118 V132 H132 V252 H348"/>
+<path class="bn-ctl" d="M160 190 V272"/>
+<path class="bn-ctl a" d="M180 252 V282 H170"/><circle class="bn-dot" cx="180" cy="252" r="3"/>
+<circle class="bn-box" cx="160" cy="282" r="10"/><path class="bn-in" d="M150 282 h20 M160 272 v20"/>
+<path class="bn-ctl" d="M160 292 V348"/>
+<circle class="bn-pill" cx="160" cy="222" r="12"/><text class="bn-val" x="160" y="222">1</text>
+<circle class="bn-pill z" cx="160" cy="326" r="12"/><text class="bn-val z" x="160" y="326">0</text>
+<text class="bn-drv" x="160" y="366">0↔4</text>
+<path class="bn-ctl" d="M216 190 V272"/>
+<path class="bn-ctl a" d="M236 252 V282 H226"/><circle class="bn-dot" cx="236" cy="252" r="3"/>
+<circle class="bn-box" cx="216" cy="282" r="10"/><path class="bn-in" d="M206 282 h20 M216 272 v20"/>
+<path class="bn-ctl" d="M216 292 V348"/>
+<circle class="bn-pill z" cx="216" cy="222" r="12"/><text class="bn-val z" x="216" y="222">0</text>
+<circle class="bn-pill" cx="216" cy="326" r="12"/><text class="bn-val" x="216" y="326">1</text>
+<text class="bn-drv x" x="216" y="366">1↔5</text>
+<path class="bn-ctl" d="M272 190 V272"/>
+<path class="bn-ctl a" d="M292 252 V282 H282"/><circle class="bn-dot" cx="292" cy="252" r="3"/>
+<circle class="bn-box" cx="272" cy="282" r="10"/><path class="bn-in" d="M262 282 h20 M272 272 v20"/>
+<path class="bn-ctl" d="M272 292 V348"/>
+<circle class="bn-pill z" cx="272" cy="222" r="12"/><text class="bn-val z" x="272" y="222">0</text>
+<circle class="bn-pill" cx="272" cy="326" r="12"/><text class="bn-val" x="272" y="326">1</text>
+<text class="bn-drv x" x="272" y="366">2↔6</text>
+<path class="bn-ctl" d="M328 190 V272"/>
+<path class="bn-ctl a" d="M348 252 V282 H338"/><circle class="bn-dot" cx="348" cy="252" r="3"/>
+<circle class="bn-box" cx="328" cy="282" r="10"/><path class="bn-in" d="M318 282 h20 M328 272 v20"/>
+<path class="bn-ctl" d="M328 292 V348"/>
+<circle class="bn-pill z" cx="328" cy="222" r="12"/><text class="bn-val z" x="328" y="222">0</text>
+<circle class="bn-pill" cx="328" cy="326" r="12"/><text class="bn-val" x="328" y="326">1</text>
+<text class="bn-drv x" x="328" y="366">3↔7</text>
+<text class="bn-head" x="520.0" y="34">stage 1 · span 2</text>
+<text class="bn-sub" x="520.0" y="54">2 blocks of 4: each swap[k] drives 2 switches</text>
+<rect class="bn-cell " x="430" y="90" width="34" height="28" rx="4"/><text class="bn-cv z" x="447" y="104">1</text><text class="bn-sw" x="447" y="84">s[2]</text>
+<rect class="bn-cell a" x="470" y="90" width="34" height="28" rx="4"/><text class="bn-cv" x="487" y="104">0</text><text class="bn-sw" x="487" y="84">s[1] a</text>
+<rect class="bn-cell b" x="510" y="90" width="34" height="28" rx="4"/><text class="bn-cv" x="527" y="104">1</text><text class="bn-sw" x="527" y="84">s[0]</text>
+<text class="bn-key" x="558" y="108">a = 0, b = 1</text>
+<path class="bn-ctl" d="M527 118 V150"/>
+<rect class="bn-box" x="414" y="150" width="110" height="40" rx="5"/>
+<text class="bn-sw" x="469.0" y="174">k &lt; b, b = 1</text>
+<path class="bn-ctl a" d="M487 118 V132 H412 V252 H516"/>
+<path class="bn-ctl" d="M440 190 V272"/>
+<path class="bn-ctl a" d="M460 252 V282 H450"/><circle class="bn-dot" cx="460" cy="252" r="3"/>
+<circle class="bn-box" cx="440" cy="282" r="10"/><path class="bn-in" d="M430 282 h20 M440 272 v20"/>
+<path class="bn-ctl" d="M440 292 V348"/>
+<circle class="bn-pill" cx="440" cy="222" r="12"/><text class="bn-val" x="440" y="222">1</text>
+<circle class="bn-pill" cx="440" cy="326" r="12"/><text class="bn-val" x="440" y="326">1</text>
+<text class="bn-drv x" x="440" y="366">0↔2</text>
+<text class="bn-drv x" x="440" y="385">4↔6</text>
+<path class="bn-ctl" d="M496 190 V272"/>
+<path class="bn-ctl a" d="M516 252 V282 H506"/><circle class="bn-dot" cx="516" cy="252" r="3"/>
+<circle class="bn-box" cx="496" cy="282" r="10"/><path class="bn-in" d="M486 282 h20 M496 272 v20"/>
+<path class="bn-ctl" d="M496 292 V348"/>
+<circle class="bn-pill z" cx="496" cy="222" r="12"/><text class="bn-val z" x="496" y="222">0</text>
+<circle class="bn-pill z" cx="496" cy="326" r="12"/><text class="bn-val z" x="496" y="326">0</text>
+<text class="bn-drv" x="496" y="366">1↔3</text>
+<text class="bn-drv" x="496" y="385">5↔7</text>
+<text class="bn-head" x="800.0" y="34">stage 2 · span 1</text>
+<text class="bn-sub" x="800.0" y="54">4 blocks of 2: each swap[k] drives 4 switches</text>
+<rect class="bn-cell " x="710" y="90" width="34" height="28" rx="4"/><text class="bn-cv z" x="727" y="104">1</text><text class="bn-sw" x="727" y="84">s[2]</text>
+<rect class="bn-cell " x="750" y="90" width="34" height="28" rx="4"/><text class="bn-cv z" x="767" y="104">0</text><text class="bn-sw" x="767" y="84">s[1]</text>
+<rect class="bn-cell a" x="790" y="90" width="34" height="28" rx="4"/><text class="bn-cv" x="807" y="104">1</text><text class="bn-sw" x="807" y="84">s[0] a</text>
+<text class="bn-key" x="838" y="108">a = 1, b = 0</text>
+<rect class="bn-box" x="694" y="150" width="110" height="40" rx="5"/>
+<text class="bn-sw" x="749.0" y="174">b has no bits: t = 0</text>
+<path class="bn-ctl a" d="M807 118 V132 H692 V252 H740"/>
+<path class="bn-ctl" d="M720 190 V272"/>
+<path class="bn-ctl a" d="M740 252 V282 H730"/><circle class="bn-dot" cx="740" cy="252" r="3"/>
+<circle class="bn-box" cx="720" cy="282" r="10"/><path class="bn-in" d="M710 282 h20 M720 272 v20"/>
+<path class="bn-ctl" d="M720 292 V348"/>
+<circle class="bn-pill z" cx="720" cy="222" r="12"/><text class="bn-val z" x="720" y="222">0</text>
+<circle class="bn-pill" cx="720" cy="326" r="12"/><text class="bn-val" x="720" y="326">1</text>
+<text class="bn-drv x" x="720" y="366">0↔1</text>
+<text class="bn-drv x" x="720" y="385">2↔3</text>
+<text class="bn-drv x" x="720" y="404">4↔5</text>
+<text class="bn-drv x" x="720" y="423">6↔7</text>
+<text class="bn-key" x="14" y="478">shift = 5 = 101b · orange cell: a = s[n−1−d] · tinted cells: b = shift &amp; (span − 1) · bold orange switch: cross (swap = 1)</text>
+</svg>

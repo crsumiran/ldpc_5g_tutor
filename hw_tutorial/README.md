@@ -32,7 +32,7 @@ all 51 5G lifting sizes and every shift value.
 | 05 | [Variable Z: the QSN trick](05_variable_size_qsn.md) | Why one barrel fails for 5G, and the two-shifter fix | 30 min |
 | 06 | [Banyan, IBN and the 5G network](06_banyan_ibn_5g.md) | Recursive networks, control generation, the paper's key idea | 60 min |
 | 07 | [Decoder architecture](07_decoder_architecture.md) | Where the rotator sits; memories; CNU; one-shifter trick; throughput | 50 min |
-| 08 | [Build and verify plan](08_build_plan.md) | Milestones, verification strategy, exercises | 20 min |
+| 08 | [Build and verify plan](08_build_plan.md) | Milestones, verification strategy, checklist | 20 min |
 | 09 | [Reading guide](09_reading_guide.md) | Which paper to read when, and how to decode its notation | 15 min |
 | — | [Glossary](glossary.md) | Every term in one place | — |
 

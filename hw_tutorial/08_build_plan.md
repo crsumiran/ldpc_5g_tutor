@@ -1,25 +1,22 @@
-# 08 · Build and verify plan
+# 08 · Build and Verify Plan
 
-> Goal: a milestone plan for taking this from "verified rotator" to "verified
-> 5G decoder", with the verification strategy for each step.
+> **Goal:** A milestone plan for taking this from "verified rotator" to "verified 5G decoder", with the verification strategy for each step.
+>
+> * **Python Model:** `model/` (the golden-model style every RTL block should follow)
+> * **Testbench:** `tb_rotators.v`, run by `./run_tests.sh`
 
----
+## 1. Guiding Principles
 
-## Guiding principles
+Four rules shape every milestone below. They all serve one aim: when RTL and model disagree, you should find out early and be pointed straight at the cause.
 
-1. **Golden model first, RTL second.** Every RTL block gets a Python model
-   that is bit-exact: same widths, same saturation, same rounding. The models
-   in `model/` show the style.
-2. **Compare state, not just outputs.** For the decoder, dump the L memory
-   after every layer from both model and RTL and diff them. The first
-   mismatching layer and column points straight at the bug. Comparing only
-   decoded bits at the end tells you almost nothing.
-3. **Exhaustive where it is cheap.** The rotator's input space (51 Z × all
-   shifts) is small enough to test completely, as `tb_rotators.v` does.
-4. **Keep "toy" and "standard" separate.** Small random QC codes are for
-   debugging. Real BG1/BG2 tables are for sign-off. Label which one each test uses.
+1. **Golden model first, RTL second.** Every RTL block gets a Python model that is bit-exact: same widths, same saturation, same rounding. The models in `model/` show the style.
+2. **Compare state, not just outputs.** For the decoder, dump the L memory after every layer from both model and RTL and diff them. The first mismatching layer and column points straight at the bug. Comparing only decoded bits at the end tells you almost nothing.
+3. **Exhaustive where it is cheap.** The rotator's input space (51 Z × all shifts) is small enough to test completely, as `tb_rotators.v` does.
+4. **Keep "toy" and "standard" separate.** Small random QC codes are for debugging. Real BG1/BG2 tables are for sign-off. Label which one each test uses.
 
-## Milestones
+## 2. Milestones
+
+Each milestone adds one layer of the design on top of a verified foundation, and each has a concrete pass criterion:
 
 | # | Milestone | Deliverable | How you know it works |
 |---|---|---|---|
@@ -34,29 +31,26 @@
 | M8 | Hazards and throughput | Overlapped phases, reordering or forwarding | Cycle count per iteration measured = model estimate |
 | M9 | Implementation | Synthesis of rotator alone, then whole decoder | Area/timing report; rotator post-route timing checked (wire-dominated, ch. 04 §5) |
 
-## Test vectors without writing an encoder
+## 3. Test Vectors Without Writing an Encoder
 
-The **all-zero codeword** is valid for every linear code. A Min-Sum decoder
-treats 0s and 1s symmetrically, so you can start by sending all zeros
-(LLR = +big), adding Gaussian noise, and checking that the decoder returns all
-zeros. This tests the whole datapath before an encoder exists. **Its blind
-spot:** sign-handling bugs that happen to favour 0 go unnoticed. Add an
-encoder, or random codewords from a reference implementation, before sign-off.
+You can exercise the whole datapath before an encoder exists. The **all-zero codeword** is valid for every linear code, and a Min-Sum decoder treats 0s and 1s symmetrically. So you can start by sending all zeros (LLR = +big), adding Gaussian noise, and checking that the decoder returns all zeros.
 
-## Independent references for golden data
+**Its blind spot:** sign-handling bugs that happen to favour 0 go unnoticed. Add an encoder, or random codewords from a reference implementation, before sign-off.
 
-Pick at least one so that your BG tables and decoder outputs are not checked
-only against your own understanding:
+## 4. Independent References for Golden Data
 
-* **MATLAB 5G Toolbox** (`nrLDPCEncode` / `nrLDPCDecode`), if you have a licence.
+Pick at least one so that your BG tables and decoder outputs are not checked only against your own understanding:
+
+* **MATLAB 5G Toolbox** (`nrLDPCEncode` / `nrLDPCDecode`): if you have a licence.
 * **NVIDIA Sionna** (open source, Python): includes 5G LDPC encoder/decoder.
 * **AFF3CT** (open source, C++): forward-error-correction toolbox with LDPC decoders.
 * **OpenAirInterface** (open source 5G stack): contains BG tables in C.
 
-Check the version and licence of whichever you use, and record it next to the
-test vectors.
+Check the version and licence of whichever you use, and record it next to the test vectors.
 
-## Corner cases checklist
+## 5. Corner Cases Checklist
+
+Make sure the test plan hits each of these at least once:
 
 - [ ] Z = 2 (smallest) and Z = 384 (largest); Z = 3·2^7 and Z = 15·2^4 (odd factors)
 - [ ] shift = 0 and shift = Z − 1

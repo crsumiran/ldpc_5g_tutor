@@ -4,6 +4,7 @@
 .bn text { font-family: var(--font-mono, ui-monospace, Menlo, Consolas, monospace); fill: var(--ink, #15211d); }
 .bn .bn-wire { fill: none; stroke: var(--muted, #56645f); stroke-width: 1.4; }
 .bn .bn-box { fill: var(--surface, #ffffff); stroke: var(--ink, #15211d); stroke-width: 1.4; }
+.bn .bn-box.bn-opq { stroke-dasharray: 7 5; stroke: var(--muted, #56645f); }
 .bn .bn-box.x { fill: var(--accent-soft, #e1eee9); stroke: var(--hi, #b86e00); stroke-width: 2.2; }
 .bn .bn-in { fill: none; stroke: var(--ink, #15211d); stroke-width: 1.6; }
 .bn .bn-in.x { stroke: var(--hi, #b86e00); stroke-width: 2.2; }

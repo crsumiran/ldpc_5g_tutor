@@ -1,0 +1,132 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 684 528" class="bn" role="img" aria-label="One level of the 8-lane Banyan recursion: stage 0 sorts A to H into halves, then two 4-lane rotators each rotate left by 1, giving a left rotation by 5">
+<style>
+.bn .bn-bg { fill: var(--surface, #ffffff); }
+.bn text { font-family: var(--font-mono, ui-monospace, Menlo, Consolas, monospace); fill: var(--ink, #15211d); }
+.bn .bn-wire { fill: none; stroke: var(--muted, #56645f); stroke-width: 1.4; }
+.bn .bn-box { fill: var(--surface, #ffffff); stroke: var(--ink, #15211d); stroke-width: 1.4; }
+.bn .bn-box.bn-opq { stroke-dasharray: 7 5; stroke: var(--muted, #56645f); }
+.bn .bn-box.x { fill: var(--accent-soft, #e1eee9); stroke: var(--hi, #b86e00); stroke-width: 2.2; }
+.bn .bn-in { fill: none; stroke: var(--ink, #15211d); stroke-width: 1.6; }
+.bn .bn-in.x { stroke: var(--hi, #b86e00); stroke-width: 2.2; }
+.bn .bn-pill { fill: var(--surface, #ffffff); stroke: var(--accent, #0b6b57); stroke-width: 1.6; }
+.bn .bn-val { font-size: 13px; font-weight: 600; text-anchor: middle; dominant-baseline: central; }
+.bn .bn-lane { font-size: 12px; fill: var(--muted, #56645f); dominant-baseline: central; }
+.bn .bn-head { font-size: 13px; font-weight: 600; text-anchor: middle; }
+.bn .bn-sub { font-size: 11.5px; fill: var(--muted, #56645f); text-anchor: middle; }
+.bn .bn-sw { font-size: 10.5px; fill: var(--muted, #56645f); text-anchor: middle; }
+.bn .bn-key { font-size: 11.5px; fill: var(--muted, #56645f); }
+.bn .bn-grp { fill: var(--accent-soft, #e1eee9); fill-opacity: 0.7; stroke: none; }
+.bn .bn-grp-t { font-size: 11.5px; fill: var(--accent, #0b6b57); font-weight: 600; }
+</style>
+<rect class="bn-bg" x="0" y="0" width="684" height="528" rx="8"/>
+<rect class="bn-grp" x="350" y="66" width="182" height="189.0" rx="10"/>
+<rect class="bn-grp" x="350" y="259.0" width="182" height="185.0" rx="10"/>
+<text class="bn-lane" x="44" y="96">lane 0</text>
+<text class="bn-lane" x="578" y="96">lane 0</text>
+<text class="bn-lane" x="44" y="142">lane 1</text>
+<text class="bn-lane" x="578" y="142">lane 1</text>
+<text class="bn-lane" x="44" y="188">lane 2</text>
+<text class="bn-lane" x="578" y="188">lane 2</text>
+<text class="bn-lane" x="44" y="234">lane 3</text>
+<text class="bn-lane" x="578" y="234">lane 3</text>
+<text class="bn-lane" x="44" y="280">lane 4</text>
+<text class="bn-lane" x="578" y="280">lane 4</text>
+<text class="bn-lane" x="44" y="326">lane 5</text>
+<text class="bn-lane" x="578" y="326">lane 5</text>
+<text class="bn-lane" x="44" y="372">lane 6</text>
+<text class="bn-lane" x="578" y="372">lane 6</text>
+<text class="bn-lane" x="44" y="418">lane 7</text>
+<text class="bn-lane" x="578" y="418">lane 7</text>
+<text class="bn-head" x="96" y="46">in</text>
+<text class="bn-head" x="556" y="46">out</text>
+<text class="bn-sub" x="556" y="64">in[(i+5) mod 8]</text>
+<text class="bn-head" x="211.0" y="46">stage 0 · span 4</text>
+<text class="bn-sub" x="211.0" y="64">a=1 b=1 → swap = [0,1,1,1]</text>
+<path class="bn-wire" d="M108 96 C146.0 96 146.0 96 184.0 96"/>
+<path class="bn-wire" d="M238.0 96 C276.0 96 276.0 96 314 96"/>
+<path class="bn-wire" d="M108 280 C146.0 280 146.0 142 184.0 142"/>
+<path class="bn-wire" d="M238.0 142 C276.0 142 276.0 280 314 280"/>
+<rect class="bn-box" x="184.0" y="81" width="54" height="76" rx="5"/>
+<path class="bn-in" d="M184.0 96 H238.0 M184.0 142 H238.0"/>
+<text class="bn-sw" x="211.0" y="77">0↔4</text>
+<path class="bn-wire" d="M108 142 C146.0 142 146.0 188 184.0 188"/>
+<path class="bn-wire" d="M238.0 188 C276.0 188 276.0 142 314 142"/>
+<path class="bn-wire" d="M108 326 C146.0 326 146.0 234 184.0 234"/>
+<path class="bn-wire" d="M238.0 234 C276.0 234 276.0 326 314 326"/>
+<rect class="bn-box x" x="184.0" y="173" width="54" height="76" rx="5"/>
+<path class="bn-in x" d="M184.0 188 L238.0 234 M184.0 234 L238.0 188"/>
+<text class="bn-sw" x="211.0" y="169">1↔5</text>
+<path class="bn-wire" d="M108 188 C146.0 188 146.0 280 184.0 280"/>
+<path class="bn-wire" d="M238.0 280 C276.0 280 276.0 188 314 188"/>
+<path class="bn-wire" d="M108 372 C146.0 372 146.0 326 184.0 326"/>
+<path class="bn-wire" d="M238.0 326 C276.0 326 276.0 372 314 372"/>
+<rect class="bn-box x" x="184.0" y="265" width="54" height="76" rx="5"/>
+<path class="bn-in x" d="M184.0 280 L238.0 326 M184.0 326 L238.0 280"/>
+<text class="bn-sw" x="211.0" y="261">2↔6</text>
+<path class="bn-wire" d="M108 234 C146.0 234 146.0 372 184.0 372"/>
+<path class="bn-wire" d="M238.0 372 C276.0 372 276.0 234 314 234"/>
+<path class="bn-wire" d="M108 418 C146.0 418 146.0 418 184.0 418"/>
+<path class="bn-wire" d="M238.0 418 C276.0 418 276.0 418 314 418"/>
+<rect class="bn-box x" x="184.0" y="357" width="54" height="76" rx="5"/>
+<path class="bn-in x" d="M184.0 372 L238.0 418 M184.0 418 L238.0 372"/>
+<text class="bn-sw" x="211.0" y="353">3↔7</text>
+<text class="bn-head" x="441.0" y="46">two 4-lane rotators</text>
+<text class="bn-sub" x="441.0" y="64">both rotl by b = 1</text>
+<path class="bn-wire" d="M338 96 C352.0 96 352.0 96 366.0 96"/>
+<path class="bn-wire" d="M516.0 96 C530.0 96 530.0 96 544 96"/>
+<path class="bn-wire" d="M338 142 C352.0 142 352.0 142 366.0 142"/>
+<path class="bn-wire" d="M516.0 142 C530.0 142 530.0 142 544 142"/>
+<path class="bn-wire" d="M338 188 C352.0 188 352.0 188 366.0 188"/>
+<path class="bn-wire" d="M516.0 188 C530.0 188 530.0 188 544 188"/>
+<path class="bn-wire" d="M338 234 C352.0 234 352.0 234 366.0 234"/>
+<path class="bn-wire" d="M516.0 234 C530.0 234 530.0 234 544 234"/>
+<rect class="bn-box bn-opq" x="366.0" y="81" width="150" height="168" rx="8"/>
+<text class="bn-sub" x="441.0" y="124.0">4-lane rotator</text>
+<text class="bn-sub" x="441.0" y="142.0">rotl by b = 1</text>
+<text class="bn-sub" x="441.0" y="160.0"></text>
+<text class="bn-sub" x="441.0" y="178.0">inside: 2 stages</text>
+<text class="bn-sub" x="441.0" y="196.0">of 2×2 switches</text>
+<text class="bn-sub" x="441.0" y="214.0">(opened up in §3)</text>
+<path class="bn-wire" d="M338 280 C352.0 280 352.0 280 366.0 280"/>
+<path class="bn-wire" d="M516.0 280 C530.0 280 530.0 280 544 280"/>
+<path class="bn-wire" d="M338 326 C352.0 326 352.0 326 366.0 326"/>
+<path class="bn-wire" d="M516.0 326 C530.0 326 530.0 326 544 326"/>
+<path class="bn-wire" d="M338 372 C352.0 372 352.0 372 366.0 372"/>
+<path class="bn-wire" d="M516.0 372 C530.0 372 530.0 372 544 372"/>
+<path class="bn-wire" d="M338 418 C352.0 418 352.0 418 366.0 418"/>
+<path class="bn-wire" d="M516.0 418 C530.0 418 530.0 418 544 418"/>
+<rect class="bn-box bn-opq" x="366.0" y="265" width="150" height="168" rx="8"/>
+<text class="bn-sub" x="441.0" y="308.0">4-lane rotator</text>
+<text class="bn-sub" x="441.0" y="326.0">rotl by b = 1</text>
+<text class="bn-sub" x="441.0" y="344.0"></text>
+<text class="bn-sub" x="441.0" y="362.0">inside: 2 stages</text>
+<text class="bn-sub" x="441.0" y="380.0">of 2×2 switches</text>
+<text class="bn-sub" x="441.0" y="398.0">(opened up in §3)</text>
+<circle class="bn-pill" cx="96" cy="96" r="12"/><text class="bn-val" x="96" y="96">A</text>
+<circle class="bn-pill" cx="96" cy="142" r="12"/><text class="bn-val" x="96" y="142">B</text>
+<circle class="bn-pill" cx="96" cy="188" r="12"/><text class="bn-val" x="96" y="188">C</text>
+<circle class="bn-pill" cx="96" cy="234" r="12"/><text class="bn-val" x="96" y="234">D</text>
+<circle class="bn-pill" cx="96" cy="280" r="12"/><text class="bn-val" x="96" y="280">E</text>
+<circle class="bn-pill" cx="96" cy="326" r="12"/><text class="bn-val" x="96" y="326">F</text>
+<circle class="bn-pill" cx="96" cy="372" r="12"/><text class="bn-val" x="96" y="372">G</text>
+<circle class="bn-pill" cx="96" cy="418" r="12"/><text class="bn-val" x="96" y="418">H</text>
+<circle class="bn-pill" cx="326" cy="96" r="12"/><text class="bn-val" x="326" y="96">A</text>
+<circle class="bn-pill" cx="326" cy="142" r="12"/><text class="bn-val" x="326" y="142">F</text>
+<circle class="bn-pill" cx="326" cy="188" r="12"/><text class="bn-val" x="326" y="188">G</text>
+<circle class="bn-pill" cx="326" cy="234" r="12"/><text class="bn-val" x="326" y="234">H</text>
+<circle class="bn-pill" cx="326" cy="280" r="12"/><text class="bn-val" x="326" y="280">E</text>
+<circle class="bn-pill" cx="326" cy="326" r="12"/><text class="bn-val" x="326" y="326">B</text>
+<circle class="bn-pill" cx="326" cy="372" r="12"/><text class="bn-val" x="326" y="372">C</text>
+<circle class="bn-pill" cx="326" cy="418" r="12"/><text class="bn-val" x="326" y="418">D</text>
+<circle class="bn-pill" cx="556" cy="96" r="12"/><text class="bn-val" x="556" y="96">F</text>
+<circle class="bn-pill" cx="556" cy="142" r="12"/><text class="bn-val" x="556" y="142">G</text>
+<circle class="bn-pill" cx="556" cy="188" r="12"/><text class="bn-val" x="556" y="188">H</text>
+<circle class="bn-pill" cx="556" cy="234" r="12"/><text class="bn-val" x="556" y="234">A</text>
+<circle class="bn-pill" cx="556" cy="280" r="12"/><text class="bn-val" x="556" y="280">B</text>
+<circle class="bn-pill" cx="556" cy="326" r="12"/><text class="bn-val" x="556" y="326">C</text>
+<circle class="bn-pill" cx="556" cy="372" r="12"/><text class="bn-val" x="556" y="372">D</text>
+<circle class="bn-pill" cx="556" cy="418" r="12"/><text class="bn-val" x="556" y="418">E</text>
+<rect class="bn-box" x="44" y="489" width="22" height="18" rx="3"/><path class="bn-in" d="M44 494 h22 M44 502 h22"/><text class="bn-key" x="74" y="502">bar (swap=0)</text>
+<rect class="bn-box x" x="188" y="489" width="22" height="18" rx="3"/><path class="bn-in x" d="M188 489 l22 18 M188 507 l22 -18"/><text class="bn-key" x="218" y="502">cross (swap=1)</text>
+<text class="bn-key" x="344" y="502">s = 5 = a·4 + b · a = 1, b = 1 · swap[k] = a XOR (k &lt; b)</text>
+</svg>
